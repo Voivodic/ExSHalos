@@ -1,8 +1,5 @@
-EXEC = ExSHalosLC
-EXEC2 = Stack_Snaps
-EXEC3 = ExSHalosLC2
-EXEC4 = ExSHalosLC3
-EXEC5 = Stack_Snaps_hdf5
+EXEC = ExSHalosLC4
+EXEC2 = Stack_Snaps_hdf5
 
 #Compiler
 CC = gcc
@@ -28,11 +25,9 @@ FFTLOG_INCL = -IFFTLog-master/include/
 
 FLAGS = $(FFTW_FLAGS) $(GSL_FLAGS) -lm -fopenmp #-ggdb -Wall -Wno-unknown-pragmas -O3 -g -mtune=native
 
-ExSHalos: ExSHalosLC.c Stack_Snaps.c ExSHalosLC2.c ExSHalosLC3.c
-	$(CC) ExSHalosLC.c -o $(EXEC) $(FFTW_LIBR) $(FFTW_INCL) $(GSL_LIBR) $(GSL_INCL) $(FFTLOG_LIBR) $(FFTLOG_INCL) $(FLAGS)
-	$(CC) Stack_Snaps.c -o $(EXEC2) $(FFTW_LIBR) $(FFTW_INCL) $(GSL_LIBR) $(GSL_INCL) $(FFTLOG_LIBR) $(FFTLOG_INCL) $(FLAGS)
-	$(CC) Stack_Snaps_hdf5.c -o $(EXEC5) -DH5_USE_16_API $(HDF5_LIBR) $(HDF5_INCL) $(HDF5_FLAGS)
-	$(CC) ExSHalosLC2.c -o $(EXEC3) $(FFTW_LIBR) $(FFTW_INCL) $(GSL_LIBR) $(GSL_INCL) $(FFTLOG_LIBR) $(FFTLOG_INCL) $(FLAGS)
-	$(CC) ExSHalosLC3.c -o $(EXEC4) $(FFTW_LIBR) $(FFTW_INCL) $(GSL_LIBR) $(GSL_INCL) $(FFTLOG_LIBR) $(FFTLOG_INCL) $(FLAGS)
+ExSHalos: ExSHalosLC4.c Stack_Snaps_hdf5.c
+	$(CC) ExSHalosLC4.c -o $(EXEC) $(FFTW_LIBR) $(FFTW_INCL) $(GSL_LIBR) $(GSL_INCL) $(FFTLOG_LIBR) $(FFTLOG_INCL) $(FLAGS)
+	$(CC) Stack_Snaps_hdf5.c -o $(EXEC2) -DH5_USE_16_API $(HDF5_LIBR) $(HDF5_INCL) $(HDF5_FLAGS)
+
 clean:
 	\rm -f $(EXEC)
