@@ -13,4 +13,8 @@ This folder has the following codes:
 
 The complete list of input options for each code is given by the code when started without any input.
 
+ExSHalos needs the external libraries: FFTW3, GSL, HDF5, and FFTLog. 
+
 If you use any of the codes present here, please cite the paper: https://arxiv.org/abs/1906.06630.
+
+Please, contact me if you have any question: rodrigo.voivodic@usp.br
