@@ -1,0 +1,1 @@
+rm -r ExSHalos.egg-info/ build/ exshalos/__pycache__ exshalos/spectrum/__pycache__ exshalos/spectrum/spectrum.cpython-38-x86_64-linux-gnu.so exshalos/exshalos/__pycache__ exshalos/exshalos/exshalos.cpython-38-x86_64-linux-gnu.so 

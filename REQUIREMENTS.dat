@@ -1,0 +1,11 @@
+--- python ---
+numpy
+scipy
+os
+setuptools
+
+--- C ---
+fftw3 (https://www.fftw.org/)
+GSL (https://www.gnu.org/software/gsl/)
+openmp
+HDF5 (https://www.hdfgroup.org/solutions/hdf5/)
