@@ -16,7 +16,7 @@ def get_include_dirs():
     from pkg_resources import get_build_platform
 
     include_dirs = [os.path.join(os.getcwd(), 'include'),
-                    numpy.get_include(), "/usr/","$HOME/lib/", "$HOME/local/include/"]
+                    numpy.get_include(), "/usr/","$HOME/lib/", "$HOME/local/include/", "/usr/lib/x86_64-linux-gnu/openmpi/include/"]
 
     return include_dirs
 
@@ -32,7 +32,7 @@ def append_from_env(envvar, array, subdir="include"):
 
 #Set the arrays with the directories of includes and libs 
 include_dirs = get_include_dirs()
-library_dirs = ["$HOME/local/lib"]
+library_dirs =["$HOME/lib/lib", "$HOME/local/lib"]
 libraries = ['m', 'gsl', 'gslcblas', 'dl']
 extra_compile_args = ['-g', '-ggdb3', '-Wall', '-fPIC', '-fopenmp']
                       
