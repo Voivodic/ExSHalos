@@ -7,6 +7,18 @@ except ImportError:
     from distutils.core import setup, Extension
     from distutils import sysconfig
     setup
+    
+def get_include_dirs():
+    try:
+        import numpy
+    except:
+        raise ValueError("You should install numpy -- pip install numpy")
+    from pkg_resources import get_build_platform
+
+    include_dirs = [os.path.join(os.getcwd(), 'include'),
+                    numpy.get_include(), "/usr/","$HOME/lib/", "$HOME/local/include/"]
+
+    return include_dirs
 
 #Append a include or library from the eviroment
 def append_from_env(envvar, array, subdir="include"):
@@ -19,7 +31,7 @@ def append_from_env(envvar, array, subdir="include"):
         print("env variable %s not found" % envvar)
 
 #Set the arrays with the directories of includes and libs 
-include_dirs = ["$HOME/local/include/"]
+include_dirs = get_include_dirs()
 library_dirs = ["$HOME/local/lib"]
 libraries = ['m', 'gsl', 'gslcblas', 'dl']
 extra_compile_args = ['-g', '-ggdb3', '-Wall', '-fPIC', '-fopenmp']
