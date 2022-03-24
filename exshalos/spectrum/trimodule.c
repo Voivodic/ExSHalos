@@ -223,7 +223,7 @@ int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_
 
                                     ind ++;
                                 }
-                    I[count_sq] += (long double) out_I1[tmp]*out_I1[tmp]*out_I1[tmp];
+                    I[count_sq] += (long double) out_I1[tmp]*out_I1[tmp]*out_I1[tmp]*out_I1[tmp];
 
                     ind = 0;
                     for(f1=0;f1<ntype;f1++)
