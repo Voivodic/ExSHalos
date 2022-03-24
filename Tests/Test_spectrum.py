@@ -31,7 +31,7 @@ print(g1.shape)
 #Compute the power spectra
 print("Computing the power spectrum")
 start = time.time()
-k, P, Nk = exshalos.simulation.Compute_Power_Spectrum(g1, ntype = 2, nd = Nd, L = L, window = "NGP", interlacing = True, Nk = 5, nthreads = 1, verbose = False)
+k, P, Nk = exshalos.simulation.Compute_Power_Spectrum(g1, L = L, window = "NGP", Nk = 5, nthreads = 1, verbose = False)
 end = time.time()
 
 print("Time took = %f" %(end - start))
@@ -39,7 +39,7 @@ print(k.shape, P.shape, Nk.shape)
 
 print("Computing the bispectrum")
 start = time.time()
-kP2, P2, Nk2, kB, B, Ntri = exshalos.simulation.Compute_BiSpectrum(g1, ntype = 2, nd = Nd, L = L, window = "NGP", interlacing = True, Nk = 5, nthreads = 4, verbose = False)
+kP2, P2, Nk2, kB, B, Ntri = exshalos.simulation.Compute_BiSpectrum(g1, L = L, window = "NGP", Nk = 5, nthreads = 4, verbose = False)
 end = time.time()
 
 print("Time took = %f" %(end - start))
@@ -47,7 +47,7 @@ print(kB.shape, B.shape, Ntri.shape, kP2.shape, P2.shape, Nk2.shape)
 
 print("Computing the trispectrum")
 start = time.time()
-kP3, P3, Nk3, kT, T, Tu, Nsq = exshalos.simulation.Compute_TriSpectrum(g1, ntype = 2, nd = Nd, L = L, window = "NGP", interlacing = True, Nk = 5, nthreads = 4, verbose = False)
+kP3, P3, Nk3, kT, T, Tu, Nsq = exshalos.simulation.Compute_TriSpectrum(g1, L = L, window = "NGP", Nk = 5, nthreads = 4, verbose = False)
 end = time.time()
 
 print("Time took = %f" %(end - start))
