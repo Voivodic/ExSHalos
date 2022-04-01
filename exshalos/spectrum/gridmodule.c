@@ -138,7 +138,7 @@ long double Density_Grid(fft_real *grid, int nd, fft_real L, fft_real *pos, fft_
 }
 
 /*Compute the density grids for each type of tracer*/
-void Tracer_Grid(fft_real *grid, int nd, fft_real L, fft_real *pos, size_t np, fft_real *mass,  int *type, int ntype, int window, fft_real R, fft_real R_times, int interlacing){
+void Tracer_Grid(fft_real *grid, int nd, fft_real L, int direction, fft_real *pos, fft_real *vel, size_t np, fft_real *mass,  int *type, int ntype, int window, fft_real R, fft_real R_times, int interlacing){
 	size_t j, ng, ind, ind2;
 	int i;
     fft_real post[3], Lb;
@@ -156,6 +156,11 @@ void Tracer_Grid(fft_real *grid, int nd, fft_real L, fft_real *pos, size_t np, f
 		if(interlacing == TRUE)
 			M2[i] = 0.0;
 	}
+
+	/*Put the particles in redshift space*/
+	if(direction != -1)
+		for(i=0;i<np;i++)
+			pos[3*i+direction] = pos[3*i+direction] + vel[i];
 
 	/*Case with multiple types without weight (mass) between the particles and without interlacing*/
 	if(mass == NULL && interlacing == FALSE){
