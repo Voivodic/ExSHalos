@@ -31,29 +31,33 @@ static PyObject *spectrum_check_precision(PyObject * self, PyObject * args){
 /*Function that computes the density grid for each tracer and outputs it in numpy format*/
 static PyObject *grid_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 	size_t np;
-	int nmass, ntype, nd, window, interlacing, *type, verbose, nthreads;
-	fft_real *pos, *mass, *grid;
+	int nmass, ntype, nd, window, interlacing, *type, verbose, nthreads, direction;
+	fft_real *pos, *vel, *mass, *grid;
 	fft_real L, R, R_times;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"pos", "mass", "nmass", "type", "ntype", "nd", "L", "window", "R", "R_times", "interlacing", "verbose", "nthreads", NULL};
+	static char *kwlist[] = {"pos", "vel", "mass", "nmass", "type", "ntype", "nd", "L", "direction", "window", "R", "R_times", "interlacing", "verbose", "nthreads", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
-	PyArrayObject *pos_array, *mass_array, *type_array;  
+	PyArrayObject *pos_array, *vel_array, *mass_array, *type_array;  
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOiOiififfiii", kwlist, &pos_array, &np, &mass_array, &nmass, &type_array, &ntype, &nd, &L, &window, &R, &R_times, &interlacing, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOiOiifiiffiii", kwlist, &pos_array,  &vel_array, &np, &mass_array, &nmass, &type_array, &ntype, &nd, &L, &direction, &window, &R, &R_times, &interlacing, &verbose, &nthreads))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOiOiififfiii", kwlist, &pos_array, &mass_array, &nmass, &type_array, &ntype, &nd, &L, &window, &R, &R_times, &interlacing, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOiOiifiiffiii", kwlist, &pos_array, &vel_array, &mass_array, &nmass, &type_array, &ntype, &nd, &L, &direction, &window, &R, &R_times, &interlacing, &verbose, &nthreads))
 			return NULL;
 	#endif
 
 	/*Convert the PyObjects to C arrays*/
 	pos = (fft_real *) pos_array->data;
 	np = (size_t) pos_array->dimensions[0];
+    if(direction != -1)
+        vel = (fft_real *) vel_array->data;
+    else
+        vel = NULL;
 	if(nmass == TRUE)
 		mass = (fft_real *) mass_array->data;
 	else
@@ -67,7 +71,7 @@ static PyObject *grid_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 
 	if(verbose == TRUE){
 		printf("Computing the density grid\n");
-		printf("Np = %d, L = %f, Ntype = %d, Ncells = %d, interlacing = %d, window = %d", (int) np, (float) L, ntype, nd, interlacing, window);
+		printf("Np = %d, L = %f, direction = %d, Ntype = %d, Ncells = %d, interlacing = %d, window = %d", (int) np, (float) L, direction, ntype, nd, interlacing, window);
 		if(window > 2)
 			printf(", R = %f", (float) R);
 		if(window == 4)
@@ -83,7 +87,7 @@ static PyObject *grid_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 	grid = (fft_real *) np_grid->data;
 
 	/*Compute the grids for each tracer*/
-	Tracer_Grid(grid, nd, L, pos, np, mass, type, ntype, window, R, R_times, interlacing);
+	Tracer_Grid(grid, nd, L, direction, pos, vel, np, mass, type, ntype, window, R, R_times, interlacing);
 
 	/*Returns the density grids*/
 	return PyArray_Return(np_grid);
