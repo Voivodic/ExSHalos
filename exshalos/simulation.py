@@ -1,14 +1,17 @@
+from dbm import ndbm
 import exshalos
 import numpy as np
 
 #Compute the density grid
-def Compute_Density_Grid(pos, mass = None, type = None, nd = 256, L = 1000.0, window = "CIC", R = 4.0, R_times = 5.0, interlacing = False, verbose = False, nthreads = 1):
+def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L = 1000.0, direction = None, window = "CIC", R = 4.0, R_times = 5.0, interlacing = False, verbose = False, nthreads = 1):
     """
     pos: Position of the tracers | 2D numpy array [number of tracers, 3]
+    vel: Velocities of the particles in the given direction | 1D numpy array [number of tracers]
     mass: Weight of each tracer | 1D numpy array [number of tracers]
     type: Type of each tracer | 1D numpy array [number of tracers]
     nd: Number of cells per dimension | int
     L: Size of the box in Mpc/h | float
+    direction: Direction to use to put the particles in redshift space | int
     window: Density assigment method used to construct the density grid | string or int ["NGP" = 0, "CIC" = 1, "SPHERICAL" = 2, "EXPONENTIAL" = 3]
     R: Smoothing lenght used in the spherical and exponential windows | float
     R_times: Scale considered to account for particles used in the exponential window in units of R | float
@@ -27,6 +30,8 @@ def Compute_Density_Grid(pos, mass = None, type = None, nd = 256, L = 1000.0, wi
         if(mass is not None):
             mass = mass.astype("float32")
             nmass = 1
+        if(vel is not None):
+            vel = vel.astype("float32")
         L = np.float32(L)
         R = np.float32(R)
         R_times = np.float32(R_times)
@@ -35,12 +40,30 @@ def Compute_Density_Grid(pos, mass = None, type = None, nd = 256, L = 1000.0, wi
         if(mass is not None):
             mass = mass.astype("float64")
             nmass = 1
+        if(vel is not None):
+            vel = vel.astype("float64")
         L = np.float64(L)
         R = np.float64(R)
         R_times = np.float64(R_times)      
 
     if(type is not None):
         type = type.astype("int32") 
+        ntype = len(np.unique(type))
+    else:
+        ntype = 1
+
+    if(direction == None):
+        direction = -1
+        v = None
+    elif(direction == "x" or direction == "X"):
+        direction = 0
+        v = vel[:,0]/100.0
+    elif(direction == "y" or direction == "Y"):
+        direction = 1
+        v = vel[:,1]/100.0
+    elif(direction == "z" or direction == "Z"):
+        direction = 2
+        v = vel[:,2]/100.0
 
     if(window == "NO" or window == "no" or window == 0):
         print("You need to choose some density assigment method to construct the density grid!")
@@ -54,12 +77,21 @@ def Compute_Density_Grid(pos, mass = None, type = None, nd = 256, L = 1000.0, wi
     elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
         window = 4
 
-    grid = exshalos.spectrum.spectrum.grid_compute(pos, mass, np.int32(nmass), type, np.int32(len(np.unique(type))), np.int32(nd), L, np.int32(window), R, R_times, np.int32(interlacing), np.int32(verbose), np.int32(nthreads))
+    grid = exshalos.spectrum.spectrum.grid_compute(pos, v, mass, np.int32(nmass), type, np.int32(ntype), np.int32(nd), L, np.int32(direction), np.int32(window), R, R_times, np.int32(interlacing), np.int32(verbose), np.int32(nthreads))
+
+    del v
+
+    if(interlacing == False and ntype == 1):
+        grid = grid.reshape([nd, nd, nd])
+    elif(interlacing == False):
+        grid = grid.reshape([ntype, nd, nd, nd])
+    elif(ntype == 1):
+        grid = grid.reshape([2, nd, nd, nd])
 
     return grid
 
 #Compute the power spectrum given the density grid
-def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min = None, k_max = None, l_max = 0, verbose = False, nthreads = 1):
+def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min = None, k_max = None, l_max = 0, verbose = False, nthreads = 1, ntype = 1):
     """
     grid: Density grid for all tracers | 5D numpy array [1 if interlacing == False and 2 instead, number of types of tracer, nd, nd, nd]
     L: Size of the box in Mpc/h | float
@@ -72,6 +104,7 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
     l_max: Maximum multipole computed | int
     verbose: Output or do not output information in the c code | boolean
     nthreads: Number of threads used by openmp | int
+    ntype: Number of different types of tracers | int
 
     return: All possible power spectra, the wavenumbers where the power spectra were mesured and the number of independent modes | Tuple with 3 arrays: 1D array [Nk], 2D array [Number of spectra x Nk], 1D array [Nk]
     """
@@ -82,9 +115,13 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
     if(len(grid.shape) == 3):
         interlacing = 0
         ntype = 1
-    else:
-        interlacing = grid.shape[0] - 1
+    elif(len(grid.shape) == 5):
+        interlacing = 1
         ntype = grid.shape[1]
+    elif(len(grid.shape) == 4 and ntype == 1):
+        interlacing = 1
+    elif(len(grid.shape) == 4 and ntype > 1):
+        interlacing = 0
     nd = grid.shape[-1]
 
     if(k_min is None):
@@ -118,12 +155,19 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
     elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
         window = 4
 
-    (k, Pk, Nk) = exshalos.spectrum.spectrum.power_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(l_max), np.int32(verbose), np.int32(nthreads))
+    (k, Pk, Nmodes) = exshalos.spectrum.spectrum.power_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(l_max), np.int32(verbose), np.int32(nthreads))
 
-    return k, Pk, Nk
+    if(ntype == 1 and l_max == 0):
+        Pk = Pk.reshape([Nk])
+    elif(ntype == 1):
+        Pk = Pk.reshape([l_max+1, Nk])
+    elif(l_max == 0):
+        Pk = Pk.reshape([int(ntype*(ntype + 1)/2), Nk])
+
+    return k, Pk, Nmodes
 
 #Compute the bispectrum given the density grid
-def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min = None, k_max = None, verbose = False, nthreads = 1):
+def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min = None, k_max = None, verbose = False, nthreads = 1, ntype = 1):
     """
     grid: Density grid for all tracers | 5D numpy array [1 if interlacing == False and 2 instead, number of types of tracer, nd, nd, nd]
     L: Size of the box in Mpc/h | float
@@ -135,6 +179,7 @@ def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min
     k_max: Maximum value of k to compute the power spectra | float
     verbose: Output or do not output information in the c code | boolean
     nthreads: Number of threads used by openmp | int
+    ntype: Number of different types of tracers | int
 
     return: All possible power spectra, the wavenumbers where the power spectra were mesured and the number of independent modes | Tuple with 3 arrays: 1D array [Nk], 2D array [Number of spectra x Nk], 1D array [Nk]
     """
@@ -145,9 +190,13 @@ def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min
     if(len(grid.shape) == 3):
         interlacing = 0
         ntype = 1
-    else:
-        interlacing = grid.shape[0] - 1
+    elif(len(grid.shape) == 5):
+        interlacing = 1
         ntype = grid.shape[1]
+    elif(len(grid.shape) == 4 and ntype == 1):
+        interlacing = 1
+    elif(len(grid.shape) == 4 and ntype > 1):
+        interlacing = 0
     nd = grid.shape[-1]
 
     if(k_min is None):
@@ -183,12 +232,16 @@ def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min
     elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
         window = 4
 
-    (kP, P, Nk, kB, B, Ntri) = exshalos.spectrum.spectrum.bi_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(verbose), np.int32(nthreads))
+    (kP, P, Nmodes, kB, B, Ntri) = exshalos.spectrum.spectrum.bi_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(verbose), np.int32(nthreads))
 
-    return kP, P, Nk, kB, B, Ntri
+    if(ntype == 1):
+        P = P.reshape([Nk])
+        B = B.reshape([len(Ntri)])
+
+    return kP, P, Nmodes, kB, B, Ntri
 
 #Compute the trispectrum given the density grid
-def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min = None, k_max = None, verbose = False, nthreads = 1):
+def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min = None, k_max = None, verbose = False, nthreads = 1, ntype = 1):
     """
     grid: Density grid for all tracers | 5D numpy array [1 if interlacing == False and 2 instead, number of types of tracer, nd, nd, nd]
     L: Size of the box in Mpc/h | float
@@ -200,6 +253,7 @@ def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_mi
     k_max: Maximum value of k to compute the power spectra | float
     verbose: Output or do not output information in the c code | boolean
     nthreads: Number of threads used by openmp | int
+    ntype: Number of different types of tracers | int
 
     return: All possible power spectra, the wavenumbers where the power spectra were mesured and the number of independent modes | Tuple with 3 arrays: 1D array [Nk], 2D array [Number of spectra x Nk], 1D array [Nk]
     """
@@ -210,9 +264,13 @@ def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_mi
     if(len(grid.shape) == 3):
         interlacing = 0
         ntype = 1
-    else:
-        interlacing = grid.shape[0] - 1
+    elif(len(grid.shape) == 5):
+        interlacing = 1
         ntype = grid.shape[1]
+    elif(len(grid.shape) == 4 and ntype == 1):
+        interlacing = 1
+    elif(len(grid.shape) == 4 and ntype > 1):
+        interlacing = 0
     nd = grid.shape[-1]
 
     if(k_min is None):
@@ -248,9 +306,13 @@ def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_mi
     elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
         window = 4
 
-    (kP, P, Nk, kT, T, Tu, Nsq) = exshalos.spectrum.spectrum.tri_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(verbose), np.int32(nthreads))
+    (kP, P, Nmodes, kT, T, Tu, Nsq) = exshalos.spectrum.spectrum.tri_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(verbose), np.int32(nthreads))
 
-    return kP, P, Nk, kT, T, Tu, Nsq
+    if(ntype == 1):
+        P = P.reshape([Nk])
+        T = T.reshape([len(Nsq)])
+
+    return kP, P, Nmodes, kT, T, Tu, Nsq
 
 #Compute the correlation function given the power spectrum or the power spectrum given the correlation function
 def Compute_Correlation(k, P, direction = 1, verbose = False):
