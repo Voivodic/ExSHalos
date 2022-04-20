@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <omp.h>
 #include <fftw3.h>
@@ -56,29 +57,29 @@ typedef struct Halos_centers{
 /*Structure for the final halos*/
 typedef struct Halos{
 	int x[3];		/*Index of central cell of teh halo*/
-	int cont;		/*Number of cells in the halo*/
+	int count;		/*Number of cells in the halo*/
+	fft_real Mh; 	/*Mass of the halo*/
 } HALOS;
 
 /*Structure with cosmology*/
 typedef struct Cosmo{
 	fft_real Om0;		//Omega_m value today (z=0)
 	fft_real redshift;	//Redshift of the final catalogues
-	fft_real Growth;	//Ratio between the growth function at the final redshift and the redshift of the inpur power spectrum
 	fft_real dc;		//Value of the critical density for the halo formation linearly extrapoleted 
-	fft_real Mstar;	//The mass in which delta_c == sigma(M) (used in the concentration)
+	fft_real Mstar;		//The mass in which delta_c == sigma(M) (used in the concentration)
 	fft_real rhoc;		//Critical density in unitis of M_odot/Mpc*h^2
 	fft_real Hz;		//Hubble constant at the final redshift
 	fft_real Omz;		//Matter contrast density at the final redshift
-	fft_real rhomz;	//Matter density at the final redshift
+	fft_real rhomz;		//Matter density at the final redshift
 	fft_real Dv;		//Overdensity used to put galaxies in the halos
 } COSMO;
 
 /*Structure with parameters of the barrier and other options regarding the halos*/
 typedef struct Barrier{
-	int seed;			//Seed for the random generator (same seed gives the same final catalogue)
 	int Nmin;			//Number of particles in the smaller final halo
+	int seed; 			//Seed for the random generator
 	fft_real a;			//Parameter a of the EB
-	fft_real beta;			//Parameter beta of the EB
+	fft_real beta;		//Parameter beta of the EB
 	fft_real alpha;		//Parameter alpha of the EB
 } BARRIER;
 
@@ -99,15 +100,13 @@ typedef struct Box{
 
 /*Structure with the output options*/
 typedef struct Output{
-	char OUT_INTER;		//Parameter with the information about which intermediate results must be output	
-	char OUT_HALOS;		//Parameter with the information about what to save in the final halo catalogue
-	char DEN_GRID;		//Compute a new density field (1) or just read it from a file (0)?
-	char DISP_CAT;		//Compute the displacement field (1) or just read it from a file (0)?
+	char OUT_HALOS; 	//How to output the halos?
+	char OUT_LPT;		//Output the displacements?
+	char OUT_VEL;		//Output the velocities?
 	char DO_EB;			//Parameter with the information about the utilization (or not) of the EB
 	char DO_HOD;      	//Populate the halos with no galaxies (0), one type of galaxy (1) or multiple types (2)?
 	char DO_2LPT;  		//Parameter with the information about the use (or not) of second order lagrangian perturbation theory
 	char VERBOSE; 		//Print the information about the current state of the catalogue generation: yes (1) or no (0)?
-	char FORMAT; 		//Which extension must be used in the output files? ASCII (0), C binaty (1) or HDF5 (2)?
 } OUTPUT;
 
 /*Structure with properties of the lightcone*/
@@ -148,17 +147,20 @@ fft_real cysumf(fft_real x, fft_real y, fft_real L);
 /*Define the cyclic sum for ints*/
 int cysum(int i, int j, int nd);
 
+/*Window function in the Fourier space*/
+fft_real W(fft_real k, fft_real R);
+
 /*Set the parameters of the box*/
 void set_box(int ndx, int ndy, int ndz, fft_real Lc);
 
 /*Set the parameters of the cosmology*/
-void set_cosmology(fft_real Om0, fft_real redshift, fft_real growth, fft_real dc);
+void set_cosmology(fft_real Om0, fft_real redshift, fft_real dc);
 
 /*Set the parameters of the barrier*/
-void set_barrier(int seed, int Nmin, fft_real a, fft_real beta, fft_real alpha);
+void set_barrier(int Nmin, fft_real a, fft_real beta, fft_real alpha, int seed);
 
 /*Set the parameters of the outputs*/
-void set_out(char DO_2LPT, char DO_EB, char OUT_INTER, char OUT_HALOS, char DEN_GRID, char DISP_CAT, char DO_HOD, char VERBOSE, char FORMAT);
+void set_out(char OUT_HALOS, char OUT_LPT, char OUT_VEL, char DO_2LPT, char DO_EB, char DO_HOD, char VERBOSE);
 
 /*Set the parameters of the lightcone*/
 void set_lightcone();
