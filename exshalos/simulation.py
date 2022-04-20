@@ -55,13 +55,13 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
     if(direction == None):
         direction = -1
         v = None
-    elif(direction == "x" or direction == "X"):
+    elif(direction == "x" or direction == "X" or direction == 0):
         direction = 0
         v = vel[:,0]/100.0
-    elif(direction == "y" or direction == "Y"):
+    elif(direction == "y" or direction == "Y" or direction == 1):
         direction = 1
         v = vel[:,1]/100.0
-    elif(direction == "z" or direction == "Z"):
+    elif(direction == "z" or direction == "Z" or direction == 2):
         direction = 2
         v = vel[:,2]/100.0
 
@@ -117,7 +117,7 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
         ntype = 1
     elif(len(grid.shape) == 5):
         interlacing = 1
-        ntype = grid.shape[1]
+        ntype = grid.shape[0]
     elif(len(grid.shape) == 4 and ntype == 1):
         interlacing = 1
     elif(len(grid.shape) == 4 and ntype > 1):
@@ -192,7 +192,7 @@ def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min
         ntype = 1
     elif(len(grid.shape) == 5):
         interlacing = 1
-        ntype = grid.shape[1]
+        ntype = grid.shape[0]
     elif(len(grid.shape) == 4 and ntype == 1):
         interlacing = 1
     elif(len(grid.shape) == 4 and ntype > 1):
@@ -217,9 +217,6 @@ def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min
         R = np.float64(R)
         k_min = np.float64(k_min)
         k_max = np.float64(k_max)  
-    
-    if(nd is None):
-        nd = grid.shape[-1]
 
     if(window == "NO" or window == "no" or window == 0):
         window = 0
@@ -266,7 +263,7 @@ def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_mi
         ntype = 1
     elif(len(grid.shape) == 5):
         interlacing = 1
-        ntype = grid.shape[1]
+        ntype = grid.shape[0]
     elif(len(grid.shape) == 4 and ntype == 1):
         interlacing = 1
     elif(len(grid.shape) == 4 and ntype > 1):
@@ -291,9 +288,6 @@ def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_mi
         R = np.float64(R)
         k_min = np.float64(k_min)
         k_max = np.float64(k_max)  
-    
-    if(nd is None):
-        nd = grid.shape[-1]
 
     if(window == "NO" or window == "no" or window == 0):
         window = 0
