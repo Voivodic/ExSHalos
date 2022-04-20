@@ -1,5 +1,95 @@
 #include "find_halos.h"
 
+/*Evaluate the square root of matter variance*/
+fft_real calc_sigma(fft_real *k, fft_real *P, int Nk, fft_real R){
+	int i;
+	fft_real resp;
+
+	resp = 0.0;
+	for(i=0;i<Nk-1;i++)
+		resp += (k[i+1] - k[i])/2.0*(P[i]*pow(k[i]*W(k[i],R), 2) + P[i+1]*pow(k[i+1]*W(k[i+1],R), 2));
+
+	return resp/(2.0*M_PI*M_PI);
+}
+
+/*Compute sigma(M) as function of the number of cells*/
+void Compute_Sig(int Nr, fft_real *R, double *M, double *Sig, fft_real *Sig_grid, fft_real *K, fft_real *P, int Nk){
+    int i, Ncells;
+    fft_real Rmin, Rmax;
+
+    /*Define the values of R and M*/
+    Rmin = (fft_real)pow(box.Mcell*0.9*3.0/(4.0*M_PI*cosmo.rhomz), 1.0/3.0);
+    Rmax = (fft_real)pow(M_max*3.0/(4.0*M_PI*cosmo.rhomz), 1.0/3.0);
+    for(i=0;i<Nr;i++){
+        R[i] = pow(10, log10(Rmin) + i*(log10(Rmax) - log10(Rmin))/(Nr-1));
+        M[i] = (double) 4.0/3.0*M_PI*((fft_real)cosmo.rhomz*pow(R[i], 3));
+    }
+    
+    /*Evaluating the Sigma(R)*/
+    for(i=0;i<Nr;i++)
+        Sig[i] = (double) sqrt(calc_sigma(K, P, Nk, R[i]));
+
+    /*Interpolate the Sigma(M)*/
+    gsl_interp_accel *acc = gsl_interp_accel_alloc();
+    gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, Nr);
+    gsl_spline_init(spline, M, Sig, Nr);
+
+    /*Compute the Sigma as function of the number of cells in the halo*/
+    Ncells = floor(M_max/box.Mcell);
+    Sig_grid[0] = 1e+30;
+    for(i=1;i<Ncells;i++)
+        Sig_grid[i] = pow(gsl_spline_eval(spline, (double) i*box.Mcell, acc), 2.0);
+    gsl_spline_free(spline);
+    gsl_interp_accel_free(acc);
+}
+
+/*Evaluate the mass function for a given sigma*/
+fft_real fh(fft_real sigma, int model){
+	fft_real resp, nu;
+	fft_real B, d, e, f, g;
+
+	//Press-Schechter
+	if(model == 0){
+		nu = cosmo.dc/sigma;
+		resp = sqrt(2.0/M_PI)*nu*exp(-nu*nu/2.0);
+	}
+
+	//Tinker Delta = 300
+	else if(model == 1){
+		B = 0.466;
+		d = 2.06;
+		e = 0.99;
+		f = 0.48;
+		g = 1.310;
+	
+		resp = B*(pow(sigma/e, -d) + pow(sigma, -f))*exp(-g/(sigma*sigma));
+	}
+
+	return resp;
+}
+
+/*Compute the integral over the mass function and interpolate it*/
+void Compute_nh(int model, int Nr, fft_real *R, double *M, double *Sig, gsl_spline *spline_I, gsl_spline *spline_InvI){
+    double *Int;
+    int i;
+
+    /*Alloc the arrays*/
+    Int = (double *)malloc(Nr*sizeof(double));
+    check_memory(Int, "Int")
+    Int[0] = 0.0;
+
+    /*Compute the mass function*/
+    for(i=1;i<Nr;i++)
+        Int[i] = Int[i-1] - (double) (log(Sig[i]) - log(Sig[i-1]))/2.0*(fh(Sig[i], model)/pow(R[i], 3.0) + fh(Sig[i-1], model)/pow(R[i-1], 3.0));
+
+    /*Interpolate the integral of the mass function as function of mass and its inverse*/
+    gsl_spline_init(spline_I, M, Int, Nr);
+    gsl_spline_init(spline_InvI, Int, M, Nr);
+
+    /*Free the array*/
+    free(Int);
+}
+
 /*Check if the current position is a peak of the density grid*/
 char Check_Peak(fft_real *delta, fft_real den, int i, int j, int k){
     char resp;
@@ -232,7 +322,7 @@ size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, 
 
         /*Save the halo information*/
         if(count >= barrier.Nmin){
-            halos[nh].cont = count;
+            halos[nh].count = count;
             for(i=0;i<3;i++)
                 halos[nh].x[i] = peaks[l].x[i];
             nh ++;
@@ -325,7 +415,7 @@ int Next_Count(int *spheres, int Ncells, int count){
 }
 
 /*Compute the mass of each halo*/
-void Compute_Mass(size_t nh, int *sphere, HALOS *halos, gsl_interp_accel *acc, gsl_spline *spline_I, gsl_spline *spline_InvI, fft_real *Massh){
+void Compute_Mass(size_t nh, int *sphere, HALOS *halos, gsl_interp_accel *acc, gsl_spline *spline_I, gsl_spline *spline_InvI){
     size_t i;
     int Ncells, cont;
     fft_real den_tmp;
@@ -340,9 +430,95 @@ void Compute_Mass(size_t nh, int *sphere, HALOS *halos, gsl_interp_accel *acc, g
 
     /*Compute the mass of each halo*/
 	for(i=0;i<nh;i++){
-        cont = Next_Count(sphere, Ncells, halos[i].cont);
+        cont = Next_Count(sphere, Ncells, halos[i].count);
 
-		den_tmp = gsl_spline_eval(spline_I, halos[i].cont*box.Mcell, acc) + (gsl_spline_eval(spline_I, sphere[cont]*box.Mcell, acc) - gsl_spline_eval(spline_I, halos[i].cont*box.Mcell, acc))*gsl_rng_uniform(rng_ptr);
-		Massh[i] = gsl_spline_eval(spline_InvI, den_tmp, acc);
+		den_tmp = gsl_spline_eval(spline_I, halos[i].count*box.Mcell, acc) + (gsl_spline_eval(spline_I, sphere[cont]*box.Mcell, acc) - gsl_spline_eval(spline_I, halos[i].count*box.Mcell, acc))*gsl_rng_uniform(rng_ptr);
+		halos[i].Mh = gsl_spline_eval(spline_InvI, den_tmp, acc);
 	}
+}
+
+/*Find halos from a density grid*/
+size_t Find_Halos(fft_real *delta, fft_real *K, fft_real *P, int Nk, size_t *flag, HALOS **halos){
+    int Nr, Ncells, *spheres;
+    fft_real *R, *Sig_grid;
+    double *M, *Sig;
+    char spheresfile[1000];
+    size_t np, nh; 
+    PEAKS *peaks;
+
+    /*Alloc the variables for GSL interpolation*/
+    gsl_interp_accel *acc = gsl_interp_accel_alloc();
+    gsl_spline *spline_I;
+    gsl_spline *spline_InvI;
+
+    /*Alloc arrays to used to compute sigma(M) and the mass integrated mass function*/
+	Nr = Nk;
+	Ncells = floor(M_max/box.Mcell);
+
+	R = (fft_real *)malloc(Nr*sizeof(fft_real));
+	check_memory(R, "R")
+	M = (double *)malloc(Nr*sizeof(double));
+	check_memory(M, "M")
+	Sig = (double *)malloc(Nr*sizeof(double));
+	check_memory(Sig, "Sig")
+	Sig_grid = (fft_real *)malloc(Ncells*sizeof(fft_real));
+	check_memory(Sig_grid, "Sig_grid")
+
+	/*Compute and interpolate sigma(M)*/
+	Compute_Sig(Nr, R, M, Sig, Sig_grid, K, P, Nk);
+
+	/*Compute Mstar*/
+	//cosmo.Mstar = Compute_Mstar(Nr, M, Sig);
+
+	/*Compute the integral over the mass function and interpolate it*/
+	spline_I = gsl_spline_alloc(gsl_interp_cspline, Nr);
+	spline_InvI = gsl_spline_alloc(gsl_interp_cspline, Nr);
+	Compute_nh(1, Nr, R, M, Sig, spline_I, spline_InvI);
+
+	/*Free some arrays*/
+	free(R);
+	free(M);
+	free(Sig);
+
+	/*Count the number of peaks*/
+	np = Count_Peaks(delta);
+
+	/*Alloc the array with the peaks*/
+	peaks = (PEAKS *)malloc(np*sizeof(PEAKS));
+
+	/*Save the positions and density of each peak*/
+	Find_Peaks(delta, np, peaks);
+
+	/*Sort the peaks*/
+	quickSort_peaks(peaks, 0, np-1);
+
+	/*Grow the spherical halos around the density peaks*/
+	*halos = (HALOS *)malloc(np*sizeof(HALOS));
+	if(out.VERBOSE == 1)
+		printf("There are %ld peaks\n", np);
+	nh = Grow_Halos(np, flag, Sig_grid, delta, peaks, *halos);
+
+	free(peaks);
+	if(out.VERBOSE == 1)
+		printf("There are %ld halos\n", nh);
+	free(Sig_grid);
+
+	/*Compute the file with the number of grid cells in each possible sphere (used in the mass computation)*/
+	//Compute_Spheres(Ncells);
+
+	/*Read the number of grid cells inside each possible sphere*/
+    strcpy(spheresfile,  SPHERES_DIRC);
+    strcat(spheresfile, "Spheres.dat");
+	Read_Spheres(&spheres, spheresfile);
+
+    /*Compute the mass of each halo*/
+	Compute_Mass(nh, spheres, *halos, acc, spline_I, spline_InvI);
+
+	/*Free some arrays*/
+	free(spheres);
+	gsl_spline_free(spline_I);
+	gsl_spline_free(spline_InvI);
+    gsl_interp_accel_free(acc);
+
+    return nh;
 }
