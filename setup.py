@@ -78,6 +78,7 @@ if(recompile_c_modules(double_precision)):
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/exshalos", "exshalos.c")) 
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/exshalos", "density_grid.c")) 
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/exshalos", "find_halos.c")) 
+    touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/exshalos", "lpt.c"))
 
 #Add the environmental path to FFTW3 and GSL
 append_from_env("FFTW_HOME", include_dirs, "include")
@@ -85,8 +86,10 @@ append_from_env("GSL_HOME", include_dirs, "include")
 append_from_env("FFTW_HOME", library_dirs, "lib")
 append_from_env("GSL_HOME", library_dirs, "lib")
 
-#Define the extra modules to be used by the library (files .c)
+#Get the current directory of installation
+dirc = os.getcwd()
 
+#Define the extra modules to be used by the library (files .c)
 spectrum = Extension("exshalos.spectrum.spectrum",
                           sources = ["exshalos/spectrum/spectrum.c", "exshalos/spectrum/spectrum_h.c", "exshalos/spectrum/gridmodule.c", "exshalos/spectrum/powermodule.c", "exshalos/spectrum/bimodule.c", "exshalos/spectrum/trimodule.c"],
                           extra_compile_args = extra_compile_args,
@@ -96,8 +99,8 @@ spectrum = Extension("exshalos.spectrum.spectrum",
                           libraries = libraries)
 
 exshalos = Extension("exshalos.exshalos.exshalos",
-                          sources = ["exshalos/exshalos/exshalos.c", "exshalos/exshalos/fftlog.c", "exshalos/exshalos/exshalos_h.c", "exshalos/exshalos/density_grid.c", "exshalos/exshalos/find_halos.c"],
-                          extra_compile_args = extra_compile_args,
+                          sources = ["exshalos/exshalos/exshalos.c", "exshalos/exshalos/fftlog.c", "exshalos/exshalos/exshalos_h.c", "exshalos/exshalos/density_grid.c", "exshalos/exshalos/find_halos.c", "exshalos/exshalos/lpt.c"],
+                          extra_compile_args = extra_compile_args + ['-DSPHERES_DIRC=\"%s/exshalos/exshalos/\"' %(dirc)],
                           extra_link_args=['-lgomp'],
                           include_dirs = include_dirs,
                           library_dirs = library_dirs,
