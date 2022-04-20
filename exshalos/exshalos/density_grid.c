@@ -1,13 +1,5 @@
 #include "density_grid.h"
 
-/*Window function in the Fourier space*/
-fft_real W(fft_real k, fft_real R){
-	fft_real resp;
-
-	resp = 3.0/(pow(k*R,2))*(sin(k*R)/(k*R) - cos(k*R));
-	return resp;
-}
-
 /*Read the density grid*/
 void Read_Den(char *denfile, fft_real *delta){
     FILE *den_grid;
@@ -32,7 +24,7 @@ void Read_Den(char *denfile, fft_real *delta){
                 ind = (size_t)(i*ny + j)*(size_t)nz + (size_t)k;
 
                 fread(&delta[ind], sizeof(fft_real), 1, den_grid);
-                delta[ind] = cosmo.Growth*delta[ind];
+                //delta[ind] = cosmo.Growth*delta[ind];
             }
     fclose(den_grid);
 }

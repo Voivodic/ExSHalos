@@ -3,9 +3,6 @@
 
 #include "exshalos_h.h"
 
-/*Window function in the Fourier space*/
-fft_real W(fft_real k, fft_real R);
-
 /*Read the density grid*/
 void Read_Den(char *denfile, fft_real *delta);
 
