@@ -234,11 +234,10 @@ void Tracer_Grid(fft_real *grid, int nd, fft_real L, int direction, fft_real *po
 				for(j=0;j<np;j++){
 					for(i=0;i<3;i++)
 						post[i] = pos[3*j+i];
-					M1_private[type[j]] += Density_Grid(&grid[((size_t) type[j])*ng], nd, L, post, 1.0, window, R, R_times);
+					M1_private[type[j]] += Density_Grid(&grid[2*((size_t) type[j])*ng], nd, L, post, 1.0, window, R, R_times);
 					for(i=0;i<3;i++)
 						post[i] = cysumf(post[i], -Lb/2.0, L);
-					ind = ((size_t) ntype)*ng;
-					M2_private[type[j]] += Density_Grid(&grid[((size_t) type[j])*ng + ind], nd, L, post, 1.0, window, R, R_times);
+					M2_private[type[j]] += Density_Grid(&grid[(2*((size_t) type[j]) + 1)*ng], nd, L, post, 1.0, window, R, R_times);
 				}			
 			}
 
@@ -254,12 +253,12 @@ void Tracer_Grid(fft_real *grid, int nd, fft_real L, int direction, fft_real *po
 		}
 
 		for(i=0;i<ntype;i++){
-			ind = ((size_t) i)*ng;
-			ind2 = ((size_t) ntype)*ng;
+			ind = 2*((size_t) i)*ng;
+			ind2 = (2*((size_t) i) + 1)*ng;
 			#pragma omp parallel for private(j) shared(ind, ind2, grid, M1, M2, ng)
 			for(j=0;j<ng;j++){
 				grid[ind + j] = grid[ind + j]/(M1[i]/ng) - 1.0;
-				grid[ind2 + ind + j] = grid[ind2 + ind + j]/(M2[i]/ng) - 1.0;
+				grid[ind2 + j] = grid[ind2 + j]/(M2[i]/ng) - 1.0;
 			}
 		}
 	}
@@ -336,11 +335,11 @@ void Tracer_Grid(fft_real *grid, int nd, fft_real L, int direction, fft_real *po
 				for(j=0;j<np;j++){
 					for(i=0;i<3;i++)
 						post[i] = pos[3*j+i];
-					M1_private[type[j]] += Density_Grid(&grid[((size_t) type[j])*ng], nd, L, post, mass[j], window, R, R_times);
+					M1_private[type[j]] += Density_Grid(&grid[2*((size_t) type[j])*ng], nd, L, post, mass[j], window, R, R_times);
 					for(i=0;i<3;i++)
 						post[i] = cysumf(post[i], -Lb/2.0, L);
 					ind = ((size_t) ntype)*ng;
-					M2_private[type[j]] += Density_Grid(&grid[((size_t) type[j])*ng + ind], nd, L, post, mass[j], window, R, R_times);
+					M2_private[type[j]] += Density_Grid(&grid[(2*((size_t) type[j]) + 1)*ng], nd, L, post, mass[j], window, R, R_times);
 				}			
 			}
 
@@ -356,12 +355,12 @@ void Tracer_Grid(fft_real *grid, int nd, fft_real L, int direction, fft_real *po
 		}
 
 		for(i=0;i<ntype;i++){
-			ind = ((size_t) i)*ng;
-			ind2 = ((size_t) ntype)*ng;
+			ind = 2*((size_t) i)*ng;
+			ind2 = (2*((size_t) i) + 1)*ng;
 			#pragma omp parallel for private(j) shared(ind, ind2, grid, M1, M2, ng)
 			for(j=0;j<ng;j++){
 				grid[ind + j] = grid[ind + j]/(M1[i]/ng) - 1.0;
-				grid[ind2 + ind + j] = grid[ind2 + ind + j]/(M2[i]/ng) - 1.0;
+				grid[ind2 + j] = grid[ind2 + j]/(M2[i]/ng) - 1.0;
 			}
 		}
 	}

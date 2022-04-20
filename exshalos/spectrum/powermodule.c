@@ -75,7 +75,7 @@ void Power_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, f
         {
             for(i=0;i<Nk;i++){
                 Kmean[i] += k_private[i];
-                count_k[i] += 2*count_k_private[i];
+                count_k[i] += count_k_private[i];
                 for(j=0;j<NPs;j++)
                     for(k=0;k<=l_max;k++)
                         P[(j*(l_max+1) + k)*Nk + i] += P_private[(j*(l_max+1) + k)*Nk + i];
@@ -97,5 +97,6 @@ void Power_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, f
                 for(k=0;k<=l_max;k++)
                     P[(j*(l_max+1) + k)*Nk + i] = P[(j*(l_max+1) + k)*Nk + i]/count_k[i];
             Kmean[i] = Kmean[i]/count_k[i];	
+            count_k[i] = 2.0*count_k[i];
         }
 }

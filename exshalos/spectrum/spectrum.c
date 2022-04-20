@@ -80,7 +80,7 @@ static PyObject *grid_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 	}
 
 	/*Prepare the PyObject arrays for the outputs*/
-	npy_intp dims_grid[] = {(npy_intp) interlacing+1, (npy_intp) ntype, (npy_intp) nd, (npy_intp) nd, (npy_intp) nd};
+	npy_intp dims_grid[] = {(npy_intp) ntype, (npy_intp) interlacing+1, (npy_intp) nd, (npy_intp) nd, (npy_intp) nd};
 
 	/*Alloc the PyObjects for the output*/
 	PyArrayObject *np_grid = (PyArrayObject *) PyArray_ZEROS(5, dims_grid, NP_OUT_TYPE, 0);

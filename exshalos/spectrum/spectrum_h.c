@@ -96,9 +96,12 @@ void Compute_gridk(fft_real *grid, fft_complex **gridk, int nd, fft_real L, int 
 
     for(l=0;l<ntype;l++){
         /*Create fft plans*/
-        p1 = FFTW(plan_dft_r2c_3d)(nd, nd, nd, &grid[ng*l], out1, FFTW_ESTIMATE); 
-        if (interlacing == TRUE)
-            p2 = FFTW(plan_dft_r2c_3d)(nd, nd, nd, &grid[ng*ntype + ng*l], out2, FFTW_ESTIMATE);
+        if (interlacing == TRUE){
+            p1 = FFTW(plan_dft_r2c_3d)(nd, nd, nd, &grid[2*((size_t) l)*ng], out1, FFTW_ESTIMATE); 
+            p2 = FFTW(plan_dft_r2c_3d)(nd, nd, nd, &grid[(2*((size_t) l) + 1)*ng], out2, FFTW_ESTIMATE);
+        }
+        else
+            p1 = FFTW(plan_dft_r2c_3d)(nd, nd, nd, &grid[ng*((size_t) l)], out1, FFTW_ESTIMATE); 
 
         /*Compute the FFT of the grids*/
         FFTW(execute)(p1);
