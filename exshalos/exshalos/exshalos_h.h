@@ -100,6 +100,7 @@ typedef struct Box{
 
 /*Structure with the output options*/
 typedef struct Output{
+	char OUT_DEN;		//Output the density grid?
 	char OUT_HALOS; 	//How to output the halos?
 	char OUT_LPT;		//Output the displacements?
 	char OUT_VEL;		//Output the velocities?
@@ -160,7 +161,7 @@ void set_cosmology(fft_real Om0, fft_real redshift, fft_real dc);
 void set_barrier(int Nmin, fft_real a, fft_real beta, fft_real alpha, int seed);
 
 /*Set the parameters of the outputs*/
-void set_out(char OUT_HALOS, char OUT_LPT, char OUT_VEL, char DO_2LPT, char DO_EB, char DO_HOD, char VERBOSE);
+void set_out(char OUT_DEN, char OUT_HALOS, char OUT_LPT, char OUT_VEL, char DO_2LPT, char DO_EB, char DO_HOD, char VERBOSE);
 
 /*Set the parameters of the lightcone*/
 void set_lightcone();

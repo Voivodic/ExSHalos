@@ -106,7 +106,8 @@ void set_box(int ndx, int ndy, int ndz, fft_real Lc){
 }
 
 /*Set the parameters of the outputs*/
-void set_out(char OUT_HALOS, char OUT_LPT, char OUT_VEL, char DO_2LPT, char DO_EB, char DO_HOD, char VERBOSE){
+void set_out(char OUT_DEN, char OUT_HALOS, char OUT_LPT, char OUT_VEL, char DO_2LPT, char DO_EB, char DO_HOD, char VERBOSE){
+	out.OUT_DEN = OUT_DEN;		//Output the density grid?
 	out.OUT_HALOS = OUT_HALOS;	//OUTPUT the halo in the box or lightcone
 	out.OUT_LPT = OUT_LPT;		//Output the displacements?
 	out.OUT_VEL = OUT_VEL;		//Output the velocities?
