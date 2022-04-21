@@ -4,6 +4,7 @@
 #include "density_grid.h"
 #include "find_halos.h"
 #include "lpt.h"
+#include "box.h"
 
 /*This declares the compute function*/
 static PyObject *exshalos_check_precision(PyObject * self, PyObject * args);
@@ -11,6 +12,8 @@ static PyObject *correlation_compute(PyObject *self, PyObject *args, PyObject *k
 static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs);
+static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwargs);
+static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *kwargs);
 
 /*This tells Python what methods this module has. See the Python-C API for more information.*/
 static PyMethodDef exshalos_methods[] = {
@@ -19,6 +22,8 @@ static PyMethodDef exshalos_methods[] = {
     {"density_grid_compute", density_grid_compute, METH_VARARGS | METH_KEYWORDS, "Generate the gaussian density grid"},
     {"find_halos", find_halos, METH_VARARGS | METH_KEYWORDS, "Generate the halo catalogue from a given density grid" },
     {"lpt_compute", lpt_compute, METH_VARARGS | METH_KEYWORDS, "Compute the LPT displacements from a given density grid" },
+    {"halos_box_from_pk", halos_box_from_pk, METH_VARARGS | METH_KEYWORDS, "Generate a halo catalogue from a linear power spectrum"},
+    {"halos_box_from_grid", halos_box_from_grid, METH_VARARGS | METH_KEYWORDS, "Generate a halo catalogue from a density grid"},
     {NULL, NULL, 0, NULL}
 };
 
@@ -140,6 +145,7 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
     /*Set the box structure*/
     set_cosmology(0.31, 0.0, 1.686);   //Not used in this function but needed by set box
     set_box(ndx, ndy, ndz, Lc);
+    set_barrier(1, 1.0, 0.0, 0.0, seed);
 
 	/*Convert the PyObjects to C arrays*/
     Nk = (int) K_array->dimensions[0];
@@ -163,9 +169,10 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
         np_grid = (PyArrayObject *) PyArray_ZEROS(3, dims_grid, NP_OUT_TYPE, 0);
         delta = (fft_real *) np_grid->data;
         deltak = (fft_complex *) FFTW(malloc)(((size_t) ndx)*((size_t) ndy)*((size_t) ndz/2+1)*sizeof(fft_complex));
+        check_memory(deltak, "deltak")
 
         /*Compute the density grids*/
-        Compute_Den(K, P, Nk, R_max, delta, deltak, seed);
+        Compute_Den(K, P, Nk, R_max, delta, deltak);
 
         /*Output the mesurements in PyObject format*/
         tupleresult = PyTuple_New(1);
@@ -182,7 +189,7 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
         deltak = (fft_complex *) np_gridk->data;
 
         /*Compute the density grids*/
-        Compute_Den(K, P, Nk, R_max, delta, deltak, seed);
+        Compute_Den(K, P, Nk, R_max, delta, deltak);
 
         /*Output the mesurements in PyObject format*/
         tupleresult = PyTuple_New(2);
@@ -197,7 +204,7 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
 static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     char DO_EB;
     size_t nh, ind, *flag;
-    int i, j, k, ndx, ndy, ndz, Nk, Nmin, verbose;
+    int i, j, ndx, ndy, ndz, Nk, Nmin, verbose;
     fft_real Om0, redshift, dc, Lc, a, beta, alpha, *K, *P, *delta, *Mh, *posh;
     HALOS *halos;
 
@@ -237,20 +244,15 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     set_cosmology(Om0, redshift, dc);  
     set_box(ndx, ndy, ndz, Lc);
     set_barrier(Nmin, a, beta, alpha, 12345);
-    set_out(1, 0, 0, 0, DO_EB, 0, (char) verbose);
+    set_out(0, 1, 0, 0, 0, DO_EB, 0, (char) verbose);
 
     /*Alloc the flag array*/
 	flag = (size_t *)malloc(((size_t)box.nd[0])*((size_t)box.nd[1])*((size_t)box.nd[2])*sizeof(size_t));
 	check_memory(flag, "flag")
 
 	/*Initialize the flag array*/
-	for(i=0;i<box.nd[0];i++)
-		for(j=0;j<box.nd[1];j++)
-			for(k=0;k<box.nd[2];k++){
-				ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k;
-		
-				flag[ind] = -1;
-			}
+	for(ind=0;ind<box.ng;ind++)
+		flag[ind] = box.ng;
 
     /*Find the halos in the density grid*/
     nh = Find_Halos(delta, K, P, Nk, flag, &halos);
@@ -285,14 +287,14 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     return PyArray_Return((PyArrayObject*) tupleresult);       
 }
 
-/*Generate the halo catalogue from a given density grid*/
+/*Compute the position of the particles using LPT*/
 static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
-    int ndx, ndy, ndz, verbose, DO_2LPT, OUT_VEL, INk;
+    int ndx, ndy, ndz, verbose, DO_2LPT, OUT_VEL, INk, OUT_POS;
     fft_real Om0, redshift, Lc, k_smooth, *delta, *S, *V;
     fft_complex *deltak;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"delta", "Lc", "Om0", "redshift",  "k_smooth", "DO_2LPT", "OUT_VEL", "Ink", "verbose", NULL};
+	static char *kwlist[] = {"delta", "Lc", "Om0", "redshift",  "k_smooth", "DO_2LPT", "OUT_VEL", "Ink", "OUT_POS", "verbose", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
@@ -300,10 +302,10 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oddddiiii", kwlist, &grid_array, &Lc, &Om0, &redshift, &k_smooth, &DO_2LPT, &OUT_VEL, &INk, &verbose))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oddddiiiii", kwlist, &grid_array, &Lc, &Om0, &redshift, &k_smooth, &DO_2LPT, &OUT_VEL, &INk, &OUT_POS, &verbose))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Offffiiii", kwlist, &grid_array, &Lc, &Om0, &redshift, &k_smooth, &DO_2LPT, &OUT_VEL, &INk,  &verbose))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Offffiiiii", kwlist, &grid_array, &Lc, &Om0, &redshift, &k_smooth, &DO_2LPT, &OUT_VEL, &INk, &OUT_POS, &verbose))
 			return NULL;
 	#endif
 
@@ -321,7 +323,7 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     /*Set the box structure*/
     set_cosmology(Om0, redshift, -1.0);  
     set_box(ndx, ndy, ndz, Lc);
-    set_out(0, 1, (char) OUT_VEL, (char) DO_2LPT, 0, 0, (char) verbose);
+    set_out(0, 0, 1, (char) OUT_VEL, (char) DO_2LPT, 0, 0, (char) verbose);
 
     /*Compute the density grid in Fourier space, if needed*/
     if(INk == FALSE){
@@ -347,7 +349,8 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
             Compute_2LPT(NULL, NULL, S, NULL, NULL, k_smooth);
 
         /*Compute the final positions of the particles*/
-        Compute_Pos(S);
+        if(OUT_POS == TRUE)
+            Compute_Pos(S);
 
         /*Output the mesurements in PyObject format*/
         tupleresult = PyTuple_New(1);
@@ -367,7 +370,8 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
             Compute_2LPT(NULL, NULL, S, V, NULL, k_smooth);
 
         /*Compute the final positions of the particles*/
-        Compute_Pos(S);
+        if(OUT_POS == TRUE)
+            Compute_Pos(S);
 
         /*Output the mesurements in PyObject format*/
         tupleresult = PyTuple_New(2);
@@ -378,6 +382,360 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     /*Free memory*/
     if(INk == FALSE)
         FFTW(free)(deltak);
+
+    return PyArray_Return((PyArrayObject*) tupleresult); 
+}
+
+/*Generate the halo catalogue from a given linear power spectrum*/
+static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwargs){
+    size_t *flag, nh, ind;
+    int i, j, ndx, ndy, ndz, Nk, verbose, nthreads, seed, OUT_DEN, OUT_LPT, Nmin, DO_EB, OUT_VEL, DO_2LPT, OUT_FLAG;
+    fft_real Lc, R_max, k_smooth, *K, *P, *delta, *S, *V, Om0, redshift, dc, a, beta, alpha, *posh, *velh, *posh_out, *velh_out, *Mh;
+    HALOS *halos;
+
+	/*Define the list of parameters*/
+	static char *kwlist[] = {"k", "P", "R_max", "Ndx", "Ndy", "Ndz", "Lc/Mc", "seed", "k_smooth", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "OUT_DEN", "OUT_LPT", "OUT_VEL", "DO_2LPT", "OUT_FLAG", "verbose", "nthreads", NULL};
+	import_array();
+
+	/*Define the pyobject with the 3D position of the tracers*/
+	PyArrayObject *K_array, *P_array;  
+
+	/*Read the input arguments*/
+	#ifdef DOUBLEPRECISION_FFTW
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOdiiididdddidddiiiiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &seed, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_DEN, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &verbose, &nthreads))
+			return NULL;
+	#else
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOfiiififfffifffiiiiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &seed, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_DEN, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &verbose, &nthreads))
+			return NULL;
+	#endif
+
+    if(verbose == TRUE)
+        printf("Nd = (%d, %d, %d), Lc = %f, Nthreads = %d, seed = %d\n", ndx, ndy, ndz, Lc, nthreads, seed);
+
+    /*Set the box structure*/
+    if(a == 1.0 && beta == 0.0 && alpha == 0.0)
+        DO_EB = FALSE;
+    else
+        DO_EB = TRUE;
+    set_cosmology(Om0, redshift, dc);   
+    set_box(ndx, ndy, ndz, Lc);
+    set_barrier(Nmin, a, beta, alpha, seed);
+    set_out((char) OUT_DEN, 1, (char) OUT_LPT, (char) OUT_VEL, (char) DO_2LPT, (char) DO_EB, 0, (char) verbose);
+
+	/*Convert the PyObjects to C arrays*/
+    Nk = (int) K_array->dimensions[0];
+    K = (fft_real *) K_array->data;
+    P = (fft_real *) P_array->data;
+
+    /*Initialize FFTW and openmp to run in parallel*/
+    omp_set_num_threads(nthreads);
+    FFTW(init_threads)();
+    FFTW(plan_with_nthreads)(nthreads);
+
+    /*Alloc some arrays for the cases of outputing intermediate results*/
+    npy_intp dims_grid[] = {(npy_intp) box.nd[0], (npy_intp) box.nd[1], (npy_intp) box.nd[2]};
+    npy_intp dims_S[] = {(npy_intp) box.ng, (npy_intp) 3};
+    npy_intp dims_flag[] = {(npy_intp) box.ng};
+    PyArrayObject *np_grid, *np_S, *np_V, *np_flag;
+
+    if(out.OUT_DEN == TRUE){
+        np_grid = (PyArrayObject *) PyArray_ZEROS(3, dims_grid, NP_OUT_TYPE, 0);
+        delta = (fft_real *) np_grid->data;
+    }
+    else
+        delta = NULL;
+
+    if(out.OUT_LPT == TRUE){
+        np_S = (PyArrayObject *) PyArray_ZEROS(2, dims_S, NP_OUT_TYPE, 0);
+        S = (fft_real *) np_S->data;
+        if(out.OUT_VEL == TRUE){
+            np_V = (PyArrayObject *) PyArray_ZEROS(2, dims_S, NP_OUT_TYPE, 0);
+            V = (fft_real *) np_V->data;          
+        }
+        else    
+            V = NULL;
+    }
+    else{
+        S = NULL;
+        V = NULL;
+    }
+
+    if(OUT_FLAG == TRUE){
+        np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_flag, PyArray_LONG, 0);
+        flag = (size_t *) np_flag->data;
+    }
+    else{
+        flag = (size_t *) malloc(box.ng*sizeof(size_t));
+        check_memory(flag, "flag")
+    }
+    
+    /*Initialize the flag array*/
+	for(ind=0;ind<box.ng;ind++)
+		flag[ind] = box.ng;
+
+    /*Generate the halo catalogue from the linear power spectrum*/
+    nh = Generate_Halos_Box_from_Pk(K, P, Nk, R_max, k_smooth, &halos, &posh, &velh, flag, delta, S, V);
+    if(OUT_FLAG == FALSE)
+        free(flag);
+
+    /*Alloc the output arrays*/
+    npy_intp dims_posh[] = {(npy_intp) nh, (npy_intp) 3};
+    npy_intp dims_Mh[] = {(npy_intp) nh};
+    PyArrayObject *np_posh, *np_velh, *np_Mh;
+
+    np_Mh = (PyArrayObject *) PyArray_ZEROS(1, dims_Mh, NP_OUT_TYPE, 0);
+    np_posh = (PyArrayObject *) PyArray_ZEROS(2, dims_posh, NP_OUT_TYPE, 0);
+    Mh = (fft_real *) np_Mh->data;
+    posh_out = (fft_real *) np_posh->data;
+    if(out.OUT_VEL == TRUE){
+        np_velh = (PyArrayObject *) PyArray_ZEROS(2, dims_posh, NP_OUT_TYPE, 0);
+        velh_out = (fft_real *) np_velh->data;       
+    }
+
+    /*Put the values in the output arrays*/
+    for(i=0;i<nh;i++){
+        Mh[i] = halos[i].Mh;
+        for(j=0;j<3;j++){
+            ind = (size_t) 3*i+j;
+            posh_out[ind] = posh[ind];
+            if(out.OUT_VEL == TRUE)
+                velh_out[ind] = velh[ind];
+        }
+    }
+
+    /*Free the original arrays with the halo information*/
+    free(posh);
+    free(halos);
+    if(out.OUT_VEL == TRUE) free(velh);
+
+    /*Construct the output tuple for each case*/
+    PyObject *tupleresult;
+
+    if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
+        tupleresult = PyTuple_New(2);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
+    }
+    else if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == TRUE && OUT_FLAG == FALSE){
+        tupleresult = PyTuple_New(3);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
+    }
+    else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
+        tupleresult = PyTuple_New(3);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh));
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S)); 
+    }
+    else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == TRUE && OUT_FLAG == TRUE){
+        tupleresult = PyTuple_New(6);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
+        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_S));    
+        PyTuple_SetItem(tupleresult, 4, PyArray_Return(np_V));       
+        PyTuple_SetItem(tupleresult, 5, PyArray_Return(np_flag));
+    }   
+    else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == TRUE && OUT_FLAG == TRUE){
+        tupleresult = PyTuple_New(7);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
+        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_S));    
+        PyTuple_SetItem(tupleresult, 4, PyArray_Return(np_V));       
+        PyTuple_SetItem(tupleresult, 5, PyArray_Return(np_flag));
+        PyTuple_SetItem(tupleresult, 6, PyArray_Return(np_grid));
+    }  
+    else if(OUT_DEN == TRUE && OUT_LPT == FALSE && OUT_VEL == TRUE && OUT_FLAG == FALSE){
+        tupleresult = PyTuple_New(4);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
+        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_grid));
+    } 
+    else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
+        tupleresult = PyTuple_New(4);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S));    
+        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_grid));
+    } 
+    else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
+        tupleresult = PyTuple_New(5);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S));  
+        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_flag));  
+        PyTuple_SetItem(tupleresult, 4, PyArray_Return(np_grid));
+    } 
+    else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
+        tupleresult = PyTuple_New(4);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S));    
+        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_flag));
+    } 
+
+    return PyArray_Return((PyArrayObject*) tupleresult); 
+}
+
+/*Generate the halo catalogue from a given linear power spectrum*/
+static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *kwargs){
+    size_t *flag, nh, ind;
+    int i, j, ndx, ndy, ndz, Nk, verbose, nthreads, OUT_LPT, Nmin, DO_EB, OUT_VEL, DO_2LPT, OUT_FLAG, IN_disp;
+    fft_real Lc, k_smooth, *K, *P, *delta, *S, *V, Om0, redshift, dc, a, beta, alpha, *posh, *velh, *posh_out, *velh_out, *Mh;
+    HALOS *halos;
+
+	/*Define the list of parameters*/
+	static char *kwlist[] = {"k", "P", "grid", "S", "V", "Lc/Mc", "k_smooth", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "OUT_LPT", "OUT_VEL", "DO_2LPT", "OUT_FLAG", "IN_disp", "verbose", "nthreads", NULL};
+	import_array();
+
+	/*Define the pyobject with the 3D position of the tracers*/
+	PyArrayObject *K_array, *P_array, *grid_array, *S_array, *V_array;  
+
+	/*Read the input arguments*/
+	#ifdef DOUBLEPRECISION_FFTW
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOOdddddidddiiiiiii", kwlist, &K_array, &P_array, &grid_array, &S_array, &V_array, &Lc, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &IN_disp, &verbose, &nthreads))
+			return NULL;
+	#else
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOOfffffifffiiiiiii", kwlist, &K_array, &P_array, &grid_array, &S_array, &V_array,  &Lc, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &IN_disp, &verbose, &nthreads))
+			return NULL;
+	#endif
+
+	/*Convert the PyObjects to C arrays*/
+    Nk = (int) K_array->dimensions[0];
+    K = (fft_real *) K_array->data;
+    P = (fft_real *) P_array->data;
+    ndx = (int) grid_array->dimensions[0];
+    ndy = (int) grid_array->dimensions[1];
+    ndz = (int) grid_array->dimensions[2];
+    delta = (fft_real *) grid_array->data;
+    if(IN_disp == TRUE){
+        S = (fft_real *) S_array->data;
+        if(OUT_VEL == TRUE)
+            V = (fft_real *) V_array->data;
+    }
+
+    /*Set the box structure*/
+    if(a == 1.0 && beta == 0.0 && alpha == 0.0)
+        DO_EB = FALSE;
+    else
+        DO_EB = TRUE;
+    set_cosmology(Om0, redshift, dc);   
+    set_box(ndx, ndy, ndz, Lc);
+    set_barrier(Nmin, a, beta, alpha, 1234);
+    set_out(0, 1, (char) OUT_LPT, (char) OUT_VEL, (char) DO_2LPT, (char) DO_EB, 0, (char) verbose);
+
+    /*Initialize FFTW and openmp to run in parallel*/
+    omp_set_num_threads(nthreads);
+    FFTW(init_threads)();
+    FFTW(plan_with_nthreads)(nthreads);
+
+    /*Alloc some arrays for the cases of outputing intermediate results*/
+    npy_intp dims_S[] = {(npy_intp) box.ng, (npy_intp) 3};
+    npy_intp dims_flag[] = {(npy_intp) box.ng};
+    PyArrayObject *np_S, *np_V, *np_flag;
+
+    if(out.OUT_LPT == TRUE && IN_disp == FALSE){
+        np_S = (PyArrayObject *) PyArray_ZEROS(2, dims_S, NP_OUT_TYPE, 0);
+        S = (fft_real *) np_S->data;
+        if(out.OUT_VEL == TRUE){
+            np_V = (PyArrayObject *) PyArray_ZEROS(2, dims_S, NP_OUT_TYPE, 0);
+            V = (fft_real *) np_V->data;          
+        }
+        else    
+            V = NULL;
+    }
+    else if(IN_disp == FALSE){
+        S = NULL;
+        V = NULL;
+    }
+
+    if(OUT_FLAG == TRUE){
+        np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_flag, PyArray_LONG, 0);
+        flag = (size_t *) np_flag->data;
+    }
+    else{
+        flag = (size_t *) malloc(box.ng*sizeof(size_t));
+        check_memory(flag, "flag")
+    }
+    
+    /*Initialize the flag array*/
+	for(ind=0;ind<box.ng;ind++)
+		flag[ind] = box.ng;
+
+    /*Generate the halo catalogue from the linear power spectrum*/
+    nh = Generate_Halos_Box_from_Grid(K, P, Nk, k_smooth, &halos, &posh, &velh, flag, delta, S, V, IN_disp);
+    if(OUT_FLAG == FALSE)
+        free(flag);
+
+    /*Alloc the output arrays*/
+    npy_intp dims_posh[] = {(npy_intp) nh, (npy_intp) 3};
+    npy_intp dims_Mh[] = {(npy_intp) nh};
+    PyArrayObject *np_posh, *np_velh, *np_Mh;
+
+    np_Mh = (PyArrayObject *) PyArray_ZEROS(1, dims_Mh, NP_OUT_TYPE, 0);
+    np_posh = (PyArrayObject *) PyArray_ZEROS(2, dims_posh, NP_OUT_TYPE, 0);
+    Mh = (fft_real *) np_Mh->data;
+    posh_out = (fft_real *) np_posh->data;
+    if(out.OUT_VEL == TRUE){
+        np_velh = (PyArrayObject *) PyArray_ZEROS(2, dims_posh, NP_OUT_TYPE, 0);
+        velh_out = (fft_real *) np_velh->data;       
+    }
+
+    /*Put the values in the output arrays*/
+    for(i=0;i<nh;i++){
+        Mh[i] = halos[i].Mh;
+        for(j=0;j<3;j++){
+            ind = (size_t) 3*i+j;
+            posh_out[ind] = posh[ind];
+            if(out.OUT_VEL == TRUE)
+                velh_out[ind] = velh[ind];
+        }
+    }
+
+    /*Free the original arrays with the halo information*/
+    free(posh);
+    free(halos);
+    if(out.OUT_VEL == TRUE) free(velh);
+
+    /*Construct the output tuple for each case*/
+    PyObject *tupleresult;
+
+    if(OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
+        tupleresult = PyTuple_New(2);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
+    }
+    else if(OUT_LPT == FALSE && OUT_VEL == TRUE && OUT_FLAG == FALSE){
+        tupleresult = PyTuple_New(3);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
+    }
+    else if(OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
+        tupleresult = PyTuple_New(3);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh));
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S)); 
+    }
+    else if(OUT_LPT == TRUE && OUT_VEL == TRUE && OUT_FLAG == TRUE){
+        tupleresult = PyTuple_New(6);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
+        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_S));    
+        PyTuple_SetItem(tupleresult, 4, PyArray_Return(np_V));       
+        PyTuple_SetItem(tupleresult, 5, PyArray_Return(np_flag));
+    }   
+    else if(OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
+        tupleresult = PyTuple_New(4);
+        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
+        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
+        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S));    
+        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_flag));
+    } 
 
     return PyArray_Return((PyArrayObject*) tupleresult); 
 }
