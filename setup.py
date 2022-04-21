@@ -79,6 +79,7 @@ if(recompile_c_modules(double_precision)):
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/exshalos", "density_grid.c")) 
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/exshalos", "find_halos.c")) 
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/exshalos", "lpt.c"))
+    touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/exshalos", "box.c"))
 
 #Add the environmental path to FFTW3 and GSL
 append_from_env("FFTW_HOME", include_dirs, "include")
@@ -99,7 +100,7 @@ spectrum = Extension("exshalos.spectrum.spectrum",
                           libraries = libraries)
 
 exshalos = Extension("exshalos.exshalos.exshalos",
-                          sources = ["exshalos/exshalos/exshalos.c", "exshalos/exshalos/fftlog.c", "exshalos/exshalos/exshalos_h.c", "exshalos/exshalos/density_grid.c", "exshalos/exshalos/find_halos.c", "exshalos/exshalos/lpt.c"],
+                          sources = ["exshalos/exshalos/exshalos.c", "exshalos/exshalos/fftlog.c", "exshalos/exshalos/exshalos_h.c", "exshalos/exshalos/density_grid.c", "exshalos/exshalos/find_halos.c", "exshalos/exshalos/lpt.c", "exshalos/exshalos/box.c"],
                           extra_compile_args = extra_compile_args + ['-DSPHERES_DIRC=\"%s/exshalos/exshalos/\"' %(dirc)],
                           extra_link_args=['-lgomp'],
                           include_dirs = include_dirs,
