@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.integrate import simps
 from scipy.special import binom
-import pechuga
 
 #Window function in Fourier space
 def W(k, R):
