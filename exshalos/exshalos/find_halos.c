@@ -212,7 +212,7 @@ size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, 
     for(l=0;l<np;l++){
 
         /*If this peak is already in a halo jump to the next one*/
-        if(flag[(size_t)(peaks[l].x[0]*box.nd[1] + peaks[l].x[1])*(size_t)box.nd[2] + (size_t)peaks[l].x[2]] != (size_t) -1)
+        if(flag[(size_t)(peaks[l].x[0]*box.nd[1] + peaks[l].x[1])*(size_t)box.nd[2] + (size_t)peaks[l].x[2]] != box.ng)
             continue;
 
         /*Check if this peak is near to the slice used to construct the light cone*/
@@ -269,7 +269,7 @@ size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, 
                         if(dist2(i, j, k) == (size_t) grows_tmp){
                             ind = (size_t)(cysum(peaks[l].x[0], i, box.nd[0])*box.nd[1] + cysum(peaks[l].x[1], j, box.nd[1]))*(size_t)box.nd[2] + (size_t)cysum(peaks[l].x[2], k, box.nd[2]);
 
-                            if(flag[ind] != (size_t) -1)
+                            if(flag[ind] != box.ng)
                                 den_tmp += -box.Mtot;
                             else
                                 den_tmp += delta[ind];
@@ -314,7 +314,7 @@ size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, 
                     if(dist2(i, j, k) < (size_t) grows_tmp){
                         size_t ind = (size_t)(cysum(peaks[l].x[0], i, box.nd[0])*box.nd[1] + cysum(peaks[l].x[1], j, box.nd[1]))*(size_t)box.nd[2] + (size_t)cysum(peaks[l].x[2], k, box.nd[2]);
 
-                        if(flag[ind] != (size_t) -1)
+                        if(flag[ind] != box.ng)
                             printf("(1): This flag != -1! Flag = %ld and the new one is %ld\n", flag[ind], nh);		
 
                         flag[ind] = nh;
@@ -333,7 +333,7 @@ size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, 
                     for(k=-tmp;k<=tmp;k++)
                         if(dist2(i, j, k) < (size_t) grows_tmp){
                             size_t ind = (size_t)(cysum(peaks[l].x[0], i, box.nd[0])*box.nd[1] + cysum(peaks[l].x[1], j, box.nd[1]))*(size_t)box.nd[2] + (size_t)cysum(peaks[l].x[2], k, box.nd[2]);
-                            flag[ind] = -2;
+                            flag[ind] = box.ng + 1;
                         }
         }
     }
