@@ -1,7 +1,7 @@
 #include "lpt.h"
 
 /*Compute the first order displacements*/
-void Compute_1LPT(fft_complex *deltak, fft_real **posh, fft_real **velh, fft_real *S, fft_real *V, size_t *flag, fft_real k_smooth){
+void Compute_1LPT(fft_complex *deltak, fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, size_t *flag, fft_real k_smooth){
     int i, j, k;
     size_t ind, tmp;
     fft_real kx, ky, kz, factx, facty, factz, fact, kmod;
@@ -52,14 +52,14 @@ void Compute_1LPT(fft_complex *deltak, fft_real **posh, fft_real **velh, fft_rea
     FFTW(destroy_plan)(p1);
 
 	/*Compute the first order displacements, save it in the S arrays, and update the position and velocity of each halo*/
-	tmp = -1;
+	tmp = box.ng;
 	for(i=0;i<box.nd[0];i++)
 		for(j=0;j<box.nd[1];j++)
 			for(k=0;k<box.nd[2];k++){
 				ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k;
 				if(out.OUT_HALOS != FALSE) tmp = flag[ind];
 
-				if(tmp < 0 && out.OUT_LPT == FALSE && out.DO_2LPT == FALSE)	continue;
+				if(tmp >= box.ng && out.OUT_LPT == FALSE && out.DO_2LPT == FALSE)	continue;
 	
 				kx = -(1.0*phi[(size_t)(cysum(i, 3, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k] - 9.0*phi[(size_t)(cysum(i, 2, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k] + 45.0*phi[(size_t)(cysum(i, 1, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k] - 45.0*phi[(size_t)(cysum(i, -1, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k] + 9.0*phi[(size_t)(cysum(i, -2, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k] - 1.0*phi[(size_t)(cysum(i, -3, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k])*box.Normx/(60.0*box.Lc);
 
@@ -67,14 +67,16 @@ void Compute_1LPT(fft_complex *deltak, fft_real **posh, fft_real **velh, fft_rea
 
 				kz = -(1.0*phi[(size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)cysum(k, 3, box.nd[2])] - 9.0*phi[(size_t)(i*box.nd[1] + j)*box.nd[2] + (size_t)cysum(k, 2, box.nd[2])] + 45.0*phi[(size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)cysum(k, 1, box.nd[2])] - 45.0*phi[(size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + cysum(k, -1, box.nd[2])] + 9.0*phi[(size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)cysum(k, -2, box.nd[2])] - 1.0*phi[(size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)cysum(k, -3, box.nd[2])])*box.Normx/(60.0*box.Lc);
 
-				if(out.OUT_HALOS != FALSE && tmp >= 0){
-					posh[tmp][0] += kx;
-					posh[tmp][1] += ky;
-					posh[tmp][2] += kz;
+				if(out.OUT_HALOS != FALSE && tmp < box.ng){
+					posh[3*tmp] += kx;
+					posh[3*tmp+1] += ky;
+					posh[3*tmp+2] += kz;
 	
-					velh[tmp][0] += pow(cosmo.Omz, 0.5454)*cosmo.Hz/(1.0 + cosmo.redshift)*kx;
-					velh[tmp][1] += pow(cosmo.Omz, 0.5454)*cosmo.Hz/(1.0 + cosmo.redshift)*ky;
-					velh[tmp][2] += pow(cosmo.Omz, 0.5454)*cosmo.Hz/(1.0 + cosmo.redshift)*kz;
+					if(out.OUT_VEL == TRUE){
+						velh[3*tmp] += pow(cosmo.Omz, 0.5454)*cosmo.Hz/(1.0 + cosmo.redshift)*kx;
+						velh[3*tmp+1] += pow(cosmo.Omz, 0.5454)*cosmo.Hz/(1.0 + cosmo.redshift)*ky;
+						velh[3*tmp+2] += pow(cosmo.Omz, 0.5454)*cosmo.Hz/(1.0 + cosmo.redshift)*kz;
+					}
 				}
 
 				if(out.OUT_LPT == TRUE || out.DO_2LPT == TRUE){
@@ -94,7 +96,7 @@ void Compute_1LPT(fft_complex *deltak, fft_real **posh, fft_real **velh, fft_rea
 }
 
 /*Compute the second order displacements*/
-void Compute_2LPT(fft_real **posh, fft_real **velh, fft_real *S, fft_real *V, size_t *flag, fft_real k_smooth){
+void Compute_2LPT(fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, size_t *flag, fft_real k_smooth){
     int i, j, k;
     size_t ind, tmp;
     fft_real kx, ky, kz, kmod, factx, facty, factz, fact, phixx, phixy, phixz, phiyy, phiyz, phizz;
@@ -176,14 +178,14 @@ void Compute_2LPT(fft_real **posh, fft_real **velh, fft_real *S, fft_real *V, si
 	FFTW(free)(phik);
 
 	/*Compute the second order displacements and velocities*/
-	tmp = -1;
+	tmp = box.ng;
 	for(i=0;i<box.nd[0];i++)
 		for(j=0;j<box.nd[1];j++)
 			for(k=0;k<box.nd[2];k++){
 				ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k;
 				if(out.OUT_HALOS != FALSE) tmp = flag[ind];
 
-				if(tmp < 0 && out.OUT_LPT == FALSE)	continue;
+				if(tmp >= box.ng && out.OUT_LPT == FALSE)	continue;
 
 				kx = (1.0*phi[(size_t)(cysum(i, 3, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k] - 9.0*phi[(size_t)(cysum(i, 2, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k] + 45.0*phi[(size_t)(cysum(i, 1, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k] - 45.0*phi[(size_t)(cysum(i, -1, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k] + 9.0*phi[(size_t)(cysum(i, -2, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k] - 1.0*phi[(size_t)(cysum(i, -3, box.nd[0])*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k])*box.Normx/(60.0*box.Lc);
 
@@ -195,14 +197,16 @@ void Compute_2LPT(fft_real **posh, fft_real **velh, fft_real *S, fft_real *V, si
 				ky = -3.0/7.0*pow(cosmo.Omz, -1.0/143)*ky;
 				kz = -3.0/7.0*pow(cosmo.Omz, -1.0/143)*kz;
 
-				if(out.OUT_HALOS != FALSE && tmp >= 0){	
-					posh[tmp][0] += kx;
-					posh[tmp][1] += ky;
-					posh[tmp][2] += kz;
+				if(out.OUT_HALOS != FALSE && tmp < box.ng){	
+					posh[3*tmp] += kx;
+					posh[3*tmp+1] += ky;
+					posh[3*tmp+2] += kz;
 	
-					velh[tmp][0] += 2.0*pow(cosmo.Omz, 6.0/11.0)*cosmo.Hz/(1.0 + cosmo.redshift)*kx;
-					velh[tmp][1] += 2.0*pow(cosmo.Omz, 6.0/11.0)*cosmo.Hz/(1.0 + cosmo.redshift)*ky;
-					velh[tmp][2] += 2.0*pow(cosmo.Omz, 6.0/11.0)*cosmo.Hz/(1.0 + cosmo.redshift)*kz;
+					if(out.OUT_VEL == TRUE){
+						velh[3*tmp] += 2.0*pow(cosmo.Omz, 6.0/11.0)*cosmo.Hz/(1.0 + cosmo.redshift)*kx;
+						velh[3*tmp+1] += 2.0*pow(cosmo.Omz, 6.0/11.0)*cosmo.Hz/(1.0 + cosmo.redshift)*ky;
+						velh[3*tmp+2] += 2.0*pow(cosmo.Omz, 6.0/11.0)*cosmo.Hz/(1.0 + cosmo.redshift)*kz;
+					}
 				}
 
 				if(out.OUT_LPT == TRUE){
@@ -238,17 +242,14 @@ void Compute_Pos(fft_real *S){
 }
 
 /*Compute the final position and velocity of each halo*/
-void Compute_Posh(HALOS *halos, fft_real **posh, fft_real **velh, size_t nh){
-    int i;
+void Compute_Posh(HALOS *halos, fft_real *posh, fft_real *velh, size_t nh){
+    int i, j;
 
     /*Compute the mean position and velocity of each halo*/
-    for(i=0;i<nh;i++){
-		posh[i][0] = cysumf(halos[i].x[0]*box.Lc + box.Lc/2.0, posh[i][0]/halos[i].count, box.L[0]);
-		posh[i][1] = cysumf(halos[i].x[1]*box.Lc + box.Lc/2.0, posh[i][1]/halos[i].count, box.L[1]);
-		posh[i][2] = cysumf(halos[i].x[2]*box.Lc + box.Lc/2.0, posh[i][2]/halos[i].count, box.L[2]);
-
-		velh[i][0] = velh[i][0]/halos[i].count;
-		velh[i][1] = velh[i][1]/halos[i].count;
-		velh[i][2] = velh[i][2]/halos[i].count;
-	}
+    for(i=0;i<nh;i++)
+		for(j=0;j<3;j++){
+			posh[3*i+j] = cysumf(halos[i].x[j]*box.Lc + box.Lc/2.0, posh[3*i+j]/halos[i].count, box.L[j]);
+			if(out.OUT_VEL == TRUE)
+				velh[3*i+j] = velh[3*i+j]/halos[i].count;
+		}
 }
