@@ -68,7 +68,7 @@ void Inter_Power(fft_real *K, fft_real *P, int Nk, fft_real R_max, gsl_spline *s
 }
 
 /*Compute the Gaussian density grid*/
-void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *delta, fft_complex *deltak, int seed){
+void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *delta, fft_complex *deltak){
     int i, j, k;
     fft_real kx , ky, kz, kmod, std;
     size_t ind, ind2;
@@ -88,7 +88,7 @@ void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *del
 	/*Alloc the needed quantities for the random generator*/
 	gsl_rng *rng_ptr;
 	rng_ptr = gsl_rng_alloc(gsl_rng_taus);
-	gsl_rng_set(rng_ptr, seed);
+	gsl_rng_set(rng_ptr, barrier.seed);
 
 	/*Constructing the Fourier space density grid*/
 	for(i=0;i<box.nd[0];i++){

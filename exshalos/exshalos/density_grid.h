@@ -10,7 +10,7 @@ void Read_Den(char *denfile, fft_real *delta);
 void Inter_Power(fft_real *K, fft_real *P, int Nk, fft_real R_max, gsl_spline *spline);
 
 /*Compute the Gaussian density grid*/
-void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *delta, fft_complex *deltak, int seed);
+void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *delta, fft_complex *deltak);
 
 /*Compute deltak given delta*/
 void Compute_Denk(fft_real *delta, fft_complex *deltak);
