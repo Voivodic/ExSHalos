@@ -47,7 +47,7 @@ def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = No
         return grid, gridk
 
 #Generate a halo catalogue (in Lagrangian space) given an initial density grid
-def Find_Halos_from_Grid(grid, k, P, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = 1.686, Nmin = 10, a = 1.0, beta = 0.0, alpha = 0.0, verbose = False):
+def Find_Halos_from_Grid(grid, k, P, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = -1.0, Nmin = 10, a = 1.0, beta = 0.0, alpha = 0.0, verbose = False):
     """
     grid: Density grid where the halos will be find | 3D numpy array (Ndx, Ndy, Ndz)
     k: Wavenumbers of the power spectrum | 1D numpy array
@@ -91,15 +91,16 @@ def Find_Halos_from_Grid(grid, k, P, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = 1.
 
 
 #Compute the positions and velocities of particles given a grid using LPT
-def Displace_LPT(grid, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 0.15, DO_2LPT = False, OUT_vel = False, Input_k = False, verbose = False):
+def Displace_LPT(grid, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 10000.0, DO_2LPT = False, OUT_VEL = False, Input_k = False, OUT_POS = True, verbose = False):
     """
     grid: Density grid where the halos will be find | 3D numpy array (Ndx, Ndy, Ndz)
     Lc: Size of each cell in Mpc/h | float
     z: Redshift of the density grid and final halo catalogue | float
     k_smooth: Scale used to smooth the displacements | float
     DO_2LPT: Use or do not the second order | boolean
-    OUT_vel: Output or do not the velocities of the particles | boolean
+    OUT_VEL: Output or do not the velocities of the particles | boolean
     Inpute_k: The density grid is in real or Fourier space | boolean
+    OUT_POS: Output the position or just the displacements | boolean
     verbose: Output or do not output information in the c code | boolean
 
     return: Position and velocities (if ordered) of all particles in the grid | 2D (or 1D) tuple with the positions and velocies of all particles (Np x 3) + (Np x 3)
@@ -119,11 +120,11 @@ def Displace_LPT(grid, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 0.15, DO_2LPT =
         z = np.float64(z)
         k_smooth = np.float64(k_smooth)
 
-    if(OUT_vel == False):
-        S = exshalos.exshalos.exshalos.lpt_compute(grid, Lc, Om0, z, k_smooth, np.int32(DO_2LPT), np.int32(OUT_vel), np.int32(Input_k), np.int32(verbose))
+    if(OUT_VEL == False):
+        S = exshalos.exshalos.exshalos.lpt_compute(grid, Lc, Om0, z, k_smooth, np.int32(DO_2LPT), np.int32(OUT_VEL), np.int32(Input_k), np.int32(OUT_POS), np.int32(verbose))
 
         return S[0]
     else:
-        (S, V) = exshalos.exshalos.exshalos.lpt_compute(grid, Lc, Om0, z, k_smooth, np.int32(DO_2LPT), np.int32(OUT_vel), np.int32(Input_k), np.int32(verbose))
+        (S, V) = exshalos.exshalos.exshalos.lpt_compute(grid, Lc, Om0, z, k_smooth, np.int32(DO_2LPT), np.int32(OUT_VEL), np.int32(Input_k), np.int32(OUT_POS), np.int32(verbose))
 
         return S, V
