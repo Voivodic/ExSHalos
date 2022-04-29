@@ -151,3 +151,124 @@ def Generate_Halos_Box_from_Grid(grid,  k, P, S = None, V = None, Lc = 2.0, Om0 
     resp = exshalos.exshalos.exshalos.halos_box_from_grid(k, P, grid, S, V, Lc, k_smooth, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, np.int32(OUT_LPT), np.int32(OUT_VEL), np.int32(DO_2LPT), np.int32(OUT_FLAG), np.int32(In_disp), np.int32(verbose), np.int32(nthreads))
 
     return resp
+
+#Populate the halos with one type of galaxy using a HOD
+def Generate_Galaxies_from_Halos(posh, Mh, velh = None, Ch = None, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, Om0 = 0.31, z = 0.0, logMmin = 13.25424743, siglogM =  0.26461332, logM0 = 13.28383025, logM1 = 14.32465146, alpha = 1.00811277, sigma = 0.5, Deltah = -1.0, seed = 12345, OUT_VEL = False, OUT_FLAG = False, verbose = False):
+    """
+    posh: Positions of the halos| 2D array (Nh, 3)
+    velh: Velocities of the halos| 2D array (Nh, 3)
+    Mh: Mass of the halos | 1D array (Nh)
+    Ch: Concentration of the halos | 1D array (Nh)
+    nd or ndx, ndy, ndz: Number of cells in each direction | ints
+    Lc: Size of each cell in Mpc/h | float
+    Om0: Value of the matter overdensity today | float
+    z: Redshift of the density grid and final halo catalogue | float
+    logMmin, siglogM, logM0, logM1, alpha: Parameters of the HOD models (Zheng 2005) | float
+    sigma: Parameter of the exclusion term of the halo density profile (Voivodic 2020) | float
+    Deltah: Overdensity of the halos | float
+    seed: Seed used to generate the density field | int
+    OUT_VEL: Output the velocities of halos and particles | boolean
+    OUT_FLAG: Output the flag of the host halo of each galaxy | boolean
+    verbose: Output or do not output information in the c code | boolean
+
+    return: Numpy arrays with the positions, velocities and flags of the halos | 2D arrays (Ng, 3) for positons and velocies and 1D array (Ng) for the flags
+    """
+
+    precision = exshalos.hod.hod.check_precision()
+
+    In_C = False
+    if(precision == 4):
+        posh = posh.astype("float32")
+        if(velh is not None):
+            velh = velh.astype("float32")
+        Mh = Mh.astype("float32")
+        if(Ch is not None):
+            In_C = True
+            Ch = Ch.astype("float32")
+        Lc = np.float32(Lc)
+        Om0 = np.float32(Om0)
+        z = np.float32(z)    
+        logMmin = np.float32(logMmin)
+        siglogM = np.float32(siglogM)
+        logM0 = np.float32(logM0)
+        logM1 = np.float32(logM1)
+        alpha = np.float32(alpha)
+        sigma = np.float32(sigma)
+        Deltah = np.float32(Deltah)
+
+    else:
+        posh = posh.astype("float64")
+        if(velh is not None):
+            velh = velh.astype("float64")
+        Mh = Mh.astype("float64")
+        if(Ch is not None):
+            In_C = True
+            Ch = Ch.astype("float64")
+        Lc = np.float64(Lc)
+        Om0 = np.float64(Om0)
+        z = np.float64(z)    
+        logMmin = np.float64(logMmin)
+        siglogM = np.float64(siglogM)
+        logM0 = np.float64(logM0)
+        logM1 = np.float64(logM1)
+        alpha = np.float64(alpha)
+        sigma = np.float64(sigma)
+        Deltah = np.float64(Deltah)
+
+    if(ndx is None):
+        ndx = nd
+    if(ndy is None):
+        ndy = nd
+    if(ndz is None):
+        ndz = nd    
+
+    if(OUT_VEL == False and OUT_FLAG == False):
+        posg = exshalos.hod.hod.populate_halos(posh, velh, Mh, Ch, Lc, Om0, z, np.int32(ndx), np.int32(ndy), np.int32(ndz), logMmin, siglogM, logM0, logM1, alpha, sigma, Deltah, np.int32(seed), np.int32(OUT_VEL), np.int32(OUT_FLAG), np.int32(In_C), np.int32(verbose))
+
+        return posg[0]
+    else:
+        resp = exshalos.hod.hod.populate_halos(posh, velh, Mh, Ch, Lc, Om0, z, np.int32(ndx), np.int32(ndy), np.int32(ndz), logMmin, siglogM, logM0, logM1, alpha, sigma, Deltah, np.int32(seed), np.int32(OUT_VEL), np.int32(OUT_FLAG), np.int32(In_C), np.int32(verbose))
+
+        return resp
+
+#Split the galaxies in two colors
+def Split_Galaxies(Mh, Flag, C3 = 0.0, C2 = 0.17497771, C1 = -5.07596644, C0 = 37.10265321, S3 = 0.0, S2 = 0.10443049, S1 = -2.8352781, S0 = 19.84341938, seed = 12345, verbose = False):
+    """
+    Mh: Mass of the halos | 1D array (Nh)
+    Flag: Flag with the label of the host halo of each galaxy | 1D array (Ng)
+    C3, C2, C1, C0: Parameters used to split the central galaxies | float
+    S3, S2, S1, S0: Parameters used to split the satellite galaxies | float
+    seed: Seed used to generate the random numbers | int
+    verbose: Output or do not output information in the c code | boolean
+
+    return: Type of each galaxy | 1D array (Ng)
+    """
+
+    precision = exshalos.hod.hod.check_precision()
+
+    if(precision == 4):
+        Mh = Mh.astype("float32")
+        Flag = Flag.astype("float32")
+        C3 = np.float32(C3)
+        C2 = np.float32(C2)
+        C1 = np.float32(C1)
+        C0 = np.float32(C0)
+        S3 = np.float32(S3)
+        S2 = np.float32(S2)
+        S1 = np.float32(S1)
+        S0 = np.float32(S0)
+    else:
+        Mh = Mh.astype("float64")
+        Flag = Flag.astype("float64")
+        C3 = np.float64(C3)
+        C2 = np.float64(C2)
+        C1 = np.float64(C1)
+        C0 = np.float64(C0)
+        S3 = np.float64(S3)
+        S2 = np.float64(S2)
+        S1 = np.float64(S1)
+        S0 = np.float64(S0)
+
+    resp = exshalos.hod.hod.split_galaxies(Mh, Flag, C3, C2, C1, C0, S3, S2, S1, S0, np.int32(seed), np.int32(verbose))
+
+    return resp
