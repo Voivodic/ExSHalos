@@ -744,7 +744,7 @@ static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *k
 #if PY_VERSION_HEX >= 0x03000000
 static struct PyModuleDef exshalos = {
    PyModuleDef_HEAD_INIT,
-   "power", NULL, -1, exshalos_methods
+   "exshalos", NULL, -1, exshalos_methods
 };
 
 PyMODINIT_FUNC PyInit_exshalos(void)
