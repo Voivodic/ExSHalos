@@ -2,6 +2,7 @@ import numpy as np
 import exshalos
 import pylab as pl
 import time
+import h5py
 
 #Parameters
 Lc = 2.0
@@ -137,19 +138,75 @@ pl.savefig("Power_halos1.pdf")
 '''
 
 start = time.time()
-posh2, Mh2 = exshalos.Generate_Halos_Box_from_Pk(k, P, nd = Nd, Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_DEN = False, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
+posh2, Mh2 = exshalos.mock.Generate_Halos_Box_from_Pk(k, P, nd = Nd, Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_DEN = False, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
 end = time.time()
 run1 = end - start
 
 start = time.time()
-posh3, Mh3= exshalos.Generate_Halos_Box_from_Grid(grid = grid, k = k, P = P, Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
+posh3, Mh3= exshalos.mock.Generate_Halos_Box_from_Grid(grid = grid, k = k, P = P, Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
 end = time.time()
 run2 = end - start
 
 start = time.time()
-posh4, Mh4= exshalos.Generate_Halos_Box_from_Grid(grid = grid, k = k, P = P, S = pos, Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
+posh4, Mh4= exshalos.mock.Generate_Halos_Box_from_Grid(grid = grid, k = k, P = P, S = pos, Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
 end = time.time()
 run3 = end - start
 
 print(posh2.shape, posh3.shape, posh4.shape)
 print(run1, run2, run3)
+
+print("Generating the galaxy catalogue")
+print(posh2.shape, Mh2.shape)
+star = time.time()
+posg = exshalos.mock.Generate_Galaxies_from_Halos(posh2, Mh2, nd = Nd, Lc = Lc, Om0 = 0.31, z = 0.0, OUT_VEL = False)
+end = time.time()
+rung = end - star
+
+gridh = exshalos.simulation.Compute_Density_Grid(posh2, nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1, verbose = False)
+kh, Ph, Nkh = exshalos.simulation.Compute_Power_Spectrum(gridh, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
+
+gridg = exshalos.simulation.Compute_Density_Grid(posg, nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1, verbose = False)
+kg, Pg, Nkg = exshalos.simulation.Compute_Power_Spectrum(gridg, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
+
+pl.clf()
+pl.plot(kg, Pg , "o", color = "blue")
+pl.plot(kh, Ph , "o", color = "red")
+pl.plot(ks, Ps, "o", color = "black")
+
+pl.grid(True)
+pl.xscale("log")
+pl.yscale("log")
+pl.savefig("Power_gal.pdf")
+
+print(posg.shape)
+print(rung)
+
+
+print("Populating multidark")
+f = h5py.File("/home/voivodic/Documents/Multi_EFT/MD4_M13.2_xyz_Vxyz_TF.hdf5", 'r')
+x = f['catalog'][:]
+nh = len(x)
+f.close()
+
+x1 = np.loadtxt("/home/voivodic/Documents/Multi_EFT/HODs/Power_gals.dat")
+pl.clf()
+pl.plot(x1[:,0], x1[:,-2], "-", color = "black")
+
+for i in range(1):
+    print(i)
+
+    posg = exshalos.mock.Generate_Galaxies_from_Halos(x[:,1:4], pow(10.0, x[:,0]), nd = 4000, Lc = 1.0, Om0 = 0.31, z = 0.0, OUT_VEL = False, seed = i*642)
+    end = time.time()
+
+    gridg = exshalos.simulation.Compute_Density_Grid(posg, nd = 512, L = 4000.0, window = Window, interlacing = True, nthreads = 1, verbose = False)
+    kg, Pg, Nkg = exshalos.simulation.Compute_Power_Spectrum(gridg, L = 4000.0, window = Window, Nk = 128, nthreads = 1, l_max = 0)
+
+    pl.plot(x1[:,0], Pg , "--")
+
+pl.grid(True)
+pl.xscale("log")
+pl.yscale("log")
+pl.savefig("Power_gal_MD.pdf")
+
+print(posg.shape)
+print(rung)
