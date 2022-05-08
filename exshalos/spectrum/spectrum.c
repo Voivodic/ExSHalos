@@ -5,6 +5,7 @@
 #include "powermodule.h"
 #include "bimodule.h"
 #include "trimodule.h"
+#include "abundance.h"
 
 /*This declares the compute function*/
 static PyObject *spectrum_check_precision(PyObject * self, PyObject * args);
@@ -12,6 +13,7 @@ static PyObject *grid_compute(PyObject * self, PyObject * args, PyObject *kwargs
 static PyObject *power_compute(PyObject * self, PyObject * args, PyObject *kwargs);
 static PyObject *bi_compute(PyObject * self, PyObject * args, PyObject *kwargs);
 static PyObject *tri_compute(PyObject * self, PyObject * args, PyObject *kwargs);
+static PyObject *abundance_compute(PyObject * self, PyObject * args, PyObject *kwargs);
 
 /*This tells Python what methods this module has. See the Python-C API for more information.*/
 static PyMethodDef spectrum_methods[] = {
@@ -20,6 +22,7 @@ static PyMethodDef spectrum_methods[] = {
     {"power_compute", power_compute, METH_VARARGS | METH_KEYWORDS, "Computes the PowerSpectrum of a given density grid"},
     {"bi_compute", bi_compute, METH_VARARGS | METH_KEYWORDS, "Computes the BiSpectrum of a given density grid"},
     {"tri_compute", tri_compute, METH_VARARGS | METH_KEYWORDS, "Computes the TriSpectrum of a given density grid"},
+    {"abundance_compute", abundance_compute, METH_VARARGS | METH_KEYWORDS, "Computes the differential abundance of halos"},
     {NULL, NULL, 0, NULL}
 };
 
@@ -171,13 +174,14 @@ static PyObject *power_compute(PyObject *self, PyObject *args, PyObject *kwargs)
     free(Kmean);
     free(P);
 
-    /*Output the mesurements in PyObject format*/
-    PyObject *tupleresult = PyTuple_New(3);
-    PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_k));
-    PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_P));
-    PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_count_k));
+    /*Construct the output tuple for each case*/
+    PyObject *dict = PyDict_New();
+    
+    PyDict_SetItemString(dict, "k", PyArray_Return(np_k));
+    PyDict_SetItemString(dict, "Pk", PyArray_Return(np_P));
+    PyDict_SetItemString(dict, "Nk", PyArray_Return(np_count_k));
 
-    return PyArray_Return((PyArrayObject*) tupleresult);
+    return dict;
 }
 
 /*Function that computes the cross bispectrum for all tracers and outputs it in numpy format*/
@@ -285,16 +289,17 @@ static PyObject *bi_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     free(P); free(B);
     free(IP); free(I);
 
-    /*Output the mesurements in PyObject format*/
-    PyObject *tupleresult = PyTuple_New(6);
-    PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_kP));
-    PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_P));
-    PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_count_k));
-    PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_kB));
-    PyTuple_SetItem(tupleresult, 4, PyArray_Return(np_B));
-    PyTuple_SetItem(tupleresult, 5, PyArray_Return(np_count_tri));
+    /*Construct the output tuple for each case*/
+    PyObject *dict = PyDict_New();
+    
+    PyDict_SetItemString(dict, "kP", PyArray_Return(np_kP));
+    PyDict_SetItemString(dict, "Pk", PyArray_Return(np_P));
+    PyDict_SetItemString(dict, "Nk", PyArray_Return(np_count_k));
+    PyDict_SetItemString(dict, "kB", PyArray_Return(np_kB));
+    PyDict_SetItemString(dict, "Bk", PyArray_Return(np_B));
+    PyDict_SetItemString(dict, "Ntri", PyArray_Return(np_count_tri));
 
-    return PyArray_Return((PyArrayObject*) tupleresult);
+    return dict;
 }
 
 /*Function that computes the cross bispectrum for all tracers and outputs it in numpy format*/
@@ -409,17 +414,88 @@ static PyObject *tri_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     free(P); free(T); free(Tu);
     free(IP); free(I);
 
-    /*Output the mesurements in PyObject format*/
-    PyObject *tupleresult = PyTuple_New(7);
-    PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_kP));
-    PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_P));
-    PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_count_k));
-    PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_kT));
-    PyTuple_SetItem(tupleresult, 4, PyArray_Return(np_T));
-    PyTuple_SetItem(tupleresult, 5, PyArray_Return(np_Tu));
-    PyTuple_SetItem(tupleresult, 6, PyArray_Return(np_count_sq));
+    /*Construct the output tuple for each case*/
+    PyObject *dict = PyDict_New();
+    
+    PyDict_SetItemString(dict, "kP", PyArray_Return(np_kP));
+    PyDict_SetItemString(dict, "Pk", PyArray_Return(np_P));
+    PyDict_SetItemString(dict, "Nk", PyArray_Return(np_count_k));
+    PyDict_SetItemString(dict, "kT", PyArray_Return(np_kT));
+    PyDict_SetItemString(dict, "Tk", PyArray_Return(np_T));
+    PyDict_SetItemString(dict, "Tuk", PyArray_Return(np_Tu));
+    PyDict_SetItemString(dict, "Nsq", PyArray_Return(np_count_sq));
 
-    return PyArray_Return((PyArrayObject*) tupleresult);
+    return dict;
+}
+
+/*Function that computes the differential abundance of a given halo catalogue*/
+static PyObject *abundance_compute(PyObject *self, PyObject *args, PyObject *kwargs){
+    int ndx, ndy, ndz, Nm, verbose;
+    size_t i, nh;
+    fft_real *Mh, Mmin, Mmax, Lc, *dn, *Mmean, *dn_err, Lx, Ly, Lz;
+
+	/*Define the list of parameters*/
+	static char *kwlist[] = {"Mh_array", "Mmin", "Mmax", "Nm", "Lc", "ndx", "ndy", "ndz", "verbose", NULL};
+	import_array();
+
+	/*Define the pyobject with the 3D position of the tracers*/
+	PyArrayObject *Mh_array;  
+
+	/*Read the input arguments*/
+	#ifdef DOUBLEPRECISION_FFTW
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oddidiiii", kwlist, &Mh_array, &Mmin, &Mmax, &Nm, &Lc, &ndx, &ndy, &ndz, &verbose))
+			return NULL;
+	#else
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Offifiiii", kwlist, &Mh_array, &Mmin, &Mmax, &Nm, &Lc, &ndx, &ndy, &ndz, &verbose))
+			return NULL;
+	#endif
+
+    /*Convert the PyObjects to C arrays*/
+    nh = (size_t) Mh_array->dimensions[0];
+    Mh = (fft_real *) Mh_array->data;
+
+    /*Set some parameters*/
+    Lx = Lc*ndx;
+    Ly = Lc*ndy;
+    Lz = Lc*ndz;
+
+    /*Find Mmin and Mmax, if they were not given*/
+    if(Mmin < 0.0){
+        Mmin = 1e+20;
+        for(i=0;i<nh;i++)
+            if(Mh[i] < Mmin)
+                Mmin = Mh[i];
+        Mmin = Mmin*0.9999;
+    }
+    if(Mmax < 0.0){
+        for(i=0;i<nh;i++)
+            if(Mh[i] > Mmax)
+                Mmax = Mh[i];
+        Mmax = Mmax*1.0001;
+    }
+
+    /*Prepare the PyObject arrays for the outputs*/
+    npy_intp dims_M[] = {(npy_intp) Nm};
+
+	/*Alloc the PyObjects for the output*/
+    PyArrayObject *np_Mmean = (PyArrayObject *) PyArray_ZEROS(1, dims_M, NP_OUT_TYPE, 0);
+    PyArrayObject *np_dn = (PyArrayObject *) PyArray_ZEROS(1, dims_M, NP_OUT_TYPE, 0);
+    PyArrayObject *np_dn_err = (PyArrayObject *) PyArray_ZEROS(1, dims_M, NP_OUT_TYPE, 0);
+    Mmean = (fft_real *) np_Mmean->data;
+    dn = (fft_real *) np_dn->data;
+    dn_err = (fft_real *) np_dn_err->data;
+
+    /*Compute the abundance*/
+    Measure_Abundance(Mh, nh, Mmin, Mmax, Nm, Mmean, dn, dn_err, Lx, Ly, Lz);
+
+    /*Construct the output tuple for each case*/
+    PyObject *dict = PyDict_New();
+    
+    PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mmean));
+    PyDict_SetItemString(dict, "dn", PyArray_Return(np_dn));
+    PyDict_SetItemString(dict, "dn_err", PyArray_Return(np_dn_err));
+
+    return dict;
 }
 
 /* This initiates the module using the above definitions. */
