@@ -72,6 +72,7 @@ if(recompile_c_modules(double_precision)):
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/spectrum", "powermodule.c"))
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/spectrum", "bimodule.c"))
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/spectrum", "trimodule.c"))
+    touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/spectrum", "abundance.c"))
 
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/exshalos", "exshalos_h.c"))
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/exshalos", "fftlog.c"))
@@ -97,7 +98,7 @@ dirc = os.getcwd()
 
 #Define the extra modules to be used by the library (files .c)
 spectrum = Extension("exshalos.spectrum.spectrum",
-                          sources = ["exshalos/spectrum/spectrum.c", "exshalos/spectrum/spectrum_h.c", "exshalos/spectrum/gridmodule.c", "exshalos/spectrum/powermodule.c", "exshalos/spectrum/bimodule.c", "exshalos/spectrum/trimodule.c"],
+                          sources = ["exshalos/spectrum/spectrum.c", "exshalos/spectrum/spectrum_h.c", "exshalos/spectrum/gridmodule.c", "exshalos/spectrum/powermodule.c", "exshalos/spectrum/bimodule.c", "exshalos/spectrum/trimodule.c", "exshalos/spectrum/abundance.c"],
                           extra_compile_args = extra_compile_args,
                           extra_link_args=['-lgomp'],
                           include_dirs = include_dirs,
