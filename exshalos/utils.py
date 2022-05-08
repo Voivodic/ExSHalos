@@ -1,5 +1,7 @@
 import exshalos
 import numpy as np
+from scipy.optimize import minimize
+from scipy.interpolate import interp1d
 
 #Compute the gaussian density grid given the power spectrum
 def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, outk = False, seed = 12345, verbose = False, nthreads = 1):
@@ -37,14 +39,9 @@ def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = No
     if(ndz is None):
         ndz = nd   
 
-    if(outk == False):
-        grid = exshalos.exshalos.exshalos.density_grid_compute(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(outk), np.int32(seed), np.int32(verbose), np.int32(nthreads)) 
+    x = exshalos.exshalos.exshalos.density_grid_compute(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(outk), np.int32(seed), np.int32(verbose), np.int32(nthreads)) 
 
-        return grid[0] 
-    else:
-        (grid, gridk) = exshalos.exshalos.exshalos.density_grid_compute(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(outk), np.int32(seed), np.int32(verbose), np.int32(nthreads)) 
-
-        return grid, gridk
+    return x
 
 #Generate a halo catalogue (in Lagrangian space) given an initial density grid
 def Find_Halos_from_Grid(grid, k, P, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = -1.0, Nmin = 10, a = 1.0, beta = 0.0, alpha = 0.0, verbose = False):
@@ -53,6 +50,7 @@ def Find_Halos_from_Grid(grid, k, P, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = -1
     k: Wavenumbers of the power spectrum | 1D numpy array
     P: Power spectrum | 1D numpy array
     Lc: Size of each cell in Mpc/h | float
+    Om0: Value of the matter overdensity today | float
     z: Redshift of the density grid and final halo catalogue | float
     delta_c: Critical density of the halo formation linearly extrapolated to z | float
     Nmin: Minimum number of particles in each halo | int
@@ -85,9 +83,9 @@ def Find_Halos_from_Grid(grid, k, P, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = -1
         beta = np.float64(beta)
         alpha = np.float64(alpha)
 
-    (posh, Mh) = exshalos.exshalos.exshalos.find_halos(grid, k, P, Lc, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, verbose)
+    x = exshalos.exshalos.exshalos.find_halos(grid, k, P, Lc, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, verbose)
 
-    return posh, Mh
+    return x
 
 
 #Compute the positions and velocities of particles given a grid using LPT
@@ -120,11 +118,60 @@ def Displace_LPT(grid, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 10000.0, DO_2LP
         z = np.float64(z)
         k_smooth = np.float64(k_smooth)
 
-    if(OUT_VEL == False):
-        S = exshalos.exshalos.exshalos.lpt_compute(grid, Lc, Om0, z, k_smooth, np.int32(DO_2LPT), np.int32(OUT_VEL), np.int32(Input_k), np.int32(OUT_POS), np.int32(verbose))
+    x = exshalos.exshalos.exshalos.lpt_compute(grid, Lc, Om0, z, k_smooth, np.int32(DO_2LPT), np.int32(OUT_VEL), np.int32(Input_k), np.int32(OUT_POS), np.int32(verbose))
 
-        return S[0]
-    else:
-        (S, V) = exshalos.exshalos.exshalos.lpt_compute(grid, Lc, Om0, z, k_smooth, np.int32(DO_2LPT), np.int32(OUT_VEL), np.int32(Input_k), np.int32(OUT_POS), np.int32(verbose))
+    return x
 
-        return S, V
+#Fit the parameters of the barrier given a mass function
+def Fit_Barrier(k, P, M, dndlnM, grid = None, R_max = 100000.0, Mmin = -1.0, Mmax = -1.0, Nm = 25, nd = 256, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = -1.0, Nmin = 10, seed = 12345, x0 = None, verbose = False, nthreads = 1, Max_inter = 100, tol = None):
+    """
+    k: Wavenumbers of the power spectrum | 1D numpy array
+    P: Power spectrum | 1D numpy array
+    R_max: Maximum size used to compute the correlation function in Mpc/h | float
+    Mmin: Minimum mass used to construct the mass bins | float
+    Mmax: Maximum mass used to construct the mass bins | float
+    Nm: Number of mass bins | int
+    nd: Number of cells in each direction | ints
+    Lc: Size of each cell in Mpc/h | float
+    Om0: Value of the matter overdensity today | float    
+    z: Redshift of the density grid and final halo catalogue | float
+    delta_c: Critical density of the halo formation linearly extrapolated to z | float
+    Nmin: Minimum number of particles in each halo | int
+    seed: Seed used to generate the random numbers | int
+    verbose: Output or do not output information in the c code | boolean
+    nthreads: Number of threads used by openmp | int
+    Max_inter: Maximum number of interations used in the minimization | int
+
+    return: The values of the parameters of the ellipsoidal barrier | 3 x float
+    """
+
+    #Interpolate the given mass function
+    fdn = interp1d(np.log(M), dndlnM)
+
+    #Construct the gaussian density grid
+    if(grid == None):
+        grid = Generate_Density_Grid(k, P, R_max, nd = nd, Lc = Lc, seed = seed, verbose = verbose, nthreads = nthreads)
+
+    #Define the function to be minimized to find the best parameters of the barrier
+    def Chi2(theta):
+        a, beta, alpha = theta
+
+        x = exshalos.utils.Find_Halos_from_Grid(grid["grid"], k, P, Lc = Lc, Om0 = Om0, z = z, delta_c = delta_c, Nmin = Nmin, a = a, beta = beta, alpha = alpha, verbose = verbose)
+
+        dnh = exshalos.simulation.Compute_Abundance(x["Mh"], Mmin = Mmin, Mmax = Mmax, Nm = Nm, Lc = Lc, nd = nd, verbose = verbose)
+
+        mask = dnh["dn"] > 0.0
+        chi2 = np.sum(np.power((dnh["dn"][mask] - fdn(np.log(dnh["Mh"][mask])))/dnh["dn_err"][mask], 2.0))/(Nm - 4)
+        print("Current try: (%f, %f, %f) with chi2 = %f" %(a, beta, alpha, chi2))
+
+        return chi2
+
+    #Define the inital position
+    if(x0 is None):
+        x0 = [0.55, 0.4, 0.7]#np.random.random(3)*[2.0, 1.0, 1.0]
+
+    #Minimaze the Chi2 to get the best fit parameters
+    bounds = [[0.0, 2.0], [0.0, 1.0], [0.0, 1.0]]
+    x = minimize(Chi2, x0 = x0, bounds = bounds, method = "Nelder-Mead", options = {"maxiter" : Max_inter}, tol = tol)
+
+    return x

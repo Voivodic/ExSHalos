@@ -29,6 +29,7 @@ def Generate_Halos_Box_from_Pk(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy
     return: Numpy arrays with all output ordered between: halo positions (nh, 3), halo velocities (nh, 3), halo masses (nh), particle positions (np, 3), particle velocities (np, 3), particle flags (np) and density grid (ndx, ndy, ndz)
     """
 
+    #Check the precision and convert the arrays
     precision = exshalos.exshalos.exshalos.check_precision()
 
     if(precision == 4):
@@ -57,6 +58,7 @@ def Generate_Halos_Box_from_Pk(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy
         beta = np.float64(beta)
         alpha = np.float64(alpha)  
 
+    #Define the number of cells in each direction
     if(ndx is None):
         ndx = nd
     if(ndy is None):
@@ -64,9 +66,10 @@ def Generate_Halos_Box_from_Pk(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy
     if(ndz is None):
         ndz = nd     
 
-    resp = exshalos.exshalos.exshalos.halos_box_from_pk(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(seed), k_smooth, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, np.int32(OUT_DEN), np.int32(OUT_LPT), np.int32(OUT_VEL), np.int32(DO_2LPT), np.int32(OUT_FLAG), np.int32(verbose), np.int32(nthreads))
+    #Run the .C program to generate the halo catalogue
+    x = exshalos.exshalos.exshalos.halos_box_from_pk(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(seed), k_smooth, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, np.int32(OUT_DEN), np.int32(OUT_LPT), np.int32(OUT_VEL), np.int32(DO_2LPT), np.int32(OUT_FLAG), np.int32(verbose), np.int32(nthreads))
 
-    return resp
+    return x
 
 #Generate a halo catalogue from a density grid
 def Generate_Halos_Box_from_Grid(grid,  k, P, S = None, V = None, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 10000.0, delta_c = -1.0, Nmin = 10, a = 1.0, beta = 0.0, alpha = 0.0, seed = 12345, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False, verbose = False, nthreads = 1):
@@ -148,9 +151,9 @@ def Generate_Halos_Box_from_Grid(grid,  k, P, S = None, V = None, Lc = 2.0, Om0 
         if(V is not None):
             V = V.astype("float64")
 
-    resp = exshalos.exshalos.exshalos.halos_box_from_grid(k, P, grid, S, V, Lc, k_smooth, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, np.int32(OUT_LPT), np.int32(OUT_VEL), np.int32(DO_2LPT), np.int32(OUT_FLAG), np.int32(In_disp), np.int32(verbose), np.int32(nthreads))
+    x = exshalos.exshalos.exshalos.halos_box_from_grid(k, P, grid, S, V, Lc, k_smooth, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, np.int32(OUT_LPT), np.int32(OUT_VEL), np.int32(DO_2LPT), np.int32(OUT_FLAG), np.int32(In_disp), np.int32(verbose), np.int32(nthreads))
 
-    return resp
+    return x
 
 #Populate the halos with one type of galaxy using a HOD
 def Generate_Galaxies_from_Halos(posh, Mh, velh = None, Ch = None, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, Om0 = 0.31, z = 0.0, logMmin = 13.25424743, siglogM =  0.26461332, logM0 = 13.28383025, logM1 = 14.32465146, alpha = 1.00811277, sigma = 0.5, Deltah = -1.0, seed = 12345, OUT_VEL = False, OUT_FLAG = False, verbose = False):
@@ -222,14 +225,9 @@ def Generate_Galaxies_from_Halos(posh, Mh, velh = None, Ch = None, nd = 256, ndx
     if(ndz is None):
         ndz = nd    
 
-    if(OUT_VEL == False and OUT_FLAG == False):
-        posg = exshalos.hod.hod.populate_halos(posh, velh, Mh, Ch, Lc, Om0, z, np.int32(ndx), np.int32(ndy), np.int32(ndz), logMmin, siglogM, logM0, logM1, alpha, sigma, Deltah, np.int32(seed), np.int32(OUT_VEL), np.int32(OUT_FLAG), np.int32(In_C), np.int32(verbose))
+    x = exshalos.hod.hod.populate_halos(posh, velh, Mh, Ch, Lc, Om0, z, np.int32(ndx), np.int32(ndy), np.int32(ndz), logMmin, siglogM, logM0, logM1, alpha, sigma, Deltah, np.int32(seed), np.int32(OUT_VEL), np.int32(OUT_FLAG), np.int32(In_C), np.int32(verbose))
 
-        return posg[0]
-    else:
-        resp = exshalos.hod.hod.populate_halos(posh, velh, Mh, Ch, Lc, Om0, z, np.int32(ndx), np.int32(ndy), np.int32(ndz), logMmin, siglogM, logM0, logM1, alpha, sigma, Deltah, np.int32(seed), np.int32(OUT_VEL), np.int32(OUT_FLAG), np.int32(In_C), np.int32(verbose))
-
-        return resp
+    return x
 
 #Split the galaxies in two colors
 def Split_Galaxies(Mh, Flag, C3 = 0.0, C2 = 0.17497771, C1 = -5.07596644, C0 = 37.10265321, S3 = 0.0, S2 = 0.10443049, S1 = -2.8352781, S0 = 19.84341938, seed = 12345, verbose = False):
@@ -269,6 +267,6 @@ def Split_Galaxies(Mh, Flag, C3 = 0.0, C2 = 0.17497771, C1 = -5.07596644, C0 = 3
         S1 = np.float64(S1)
         S0 = np.float64(S0)
 
-    resp = exshalos.hod.hod.split_galaxies(Mh, Flag, C3, C2, C1, C0, S3, S2, S1, S0, np.int32(seed), np.int32(verbose))
+    x = exshalos.hod.hod.split_galaxies(Mh, Flag, C3, C2, C1, C0, S3, S2, S1, S0, np.int32(seed), np.int32(verbose))
 
-    return resp
+    return x

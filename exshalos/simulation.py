@@ -106,7 +106,7 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
     nthreads: Number of threads used by openmp | int
     ntype: Number of different types of tracers | int
 
-    return: All possible power spectra, the wavenumbers where the power spectra were mesured and the number of independent modes | Tuple with 3 arrays: 1D array [Nk], 2D array [Number of spectra x Nk], 1D array [Nk]
+    return: All possible power spectra, the wavenumbers where the power spectra were mesured and the number of independent modes | Dictionary with 3 arrays. "k": 1D array [Nk], "Pk": 2D array [Number of spectra x Nk], "Nk": 1D array [Nk]
     """
 
     precision = exshalos.spectrum.spectrum.check_precision()
@@ -127,7 +127,7 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
     if(k_min is None):
         k_min = 2.0*np.pi/L
 
-    if(k_max is None):
+    if(k_max is None or k_max > np.pi/L*nd):
         k_max = np.pi/L*nd
 
     if(precision == 4):
@@ -155,16 +155,16 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
     elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
         window = 4
 
-    (k, Pk, Nmodes) = exshalos.spectrum.spectrum.power_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(l_max), np.int32(verbose), np.int32(nthreads))
+    x = exshalos.spectrum.spectrum.power_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(l_max), np.int32(verbose), np.int32(nthreads))
 
     if(ntype == 1 and l_max == 0):
-        Pk = Pk.reshape([Nk])
+        x["Pk"] = x["Pk"].reshape([Nk])
     elif(ntype == 1):
-        Pk = Pk.reshape([l_max+1, Nk])
+        x["Pk"] = x["Pk"].reshape([l_max+1, Nk])
     elif(l_max == 0):
-        Pk = Pk.reshape([int(ntype*(ntype + 1)/2), Nk])
+        x["Pk"] = x["Pk"].reshape([int(ntype*(ntype + 1)/2), Nk])
 
-    return k, Pk, Nmodes
+    return x
 
 #Compute the bispectrum given the density grid
 def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min = None, k_max = None, verbose = False, nthreads = 1, ntype = 1):
@@ -181,7 +181,7 @@ def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min
     nthreads: Number of threads used by openmp | int
     ntype: Number of different types of tracers | int
 
-    return: All possible power spectra, the wavenumbers where the power spectra were mesured and the number of independent modes | Tuple with 3 arrays: 1D array [Nk], 2D array [Number of spectra x Nk], 1D array [Nk]
+    return: All possible power spectra, the wavenumbers where the power spectra were mesured, the number of independent modes, all triplet of ks for the bispectra, all possible bispectra and the number of triangular configurations | Dictionaty with 6 arrays. "kP": 1D array [Nk], "Pk": 2D array [Number of spectra x Nk], "Nk": 1D array [Nk], "kB": 2D array [Number of bins of the bispectrum, 3], "Bk": 2D array [Number of bispectra, Number of bins of the bispectrum], "Ntri": 1D array [Number of independent triangles in this bin]
     """
 
     precision = exshalos.spectrum.spectrum.check_precision()
@@ -229,13 +229,13 @@ def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min
     elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
         window = 4
 
-    (kP, P, Nmodes, kB, B, Ntri) = exshalos.spectrum.spectrum.bi_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(verbose), np.int32(nthreads))
+    x = exshalos.spectrum.spectrum.bi_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(verbose), np.int32(nthreads))
 
     if(ntype == 1):
-        P = P.reshape([Nk])
-        B = B.reshape([len(Ntri)])
+        x["Pk"] = x["Pk"].reshape([Nk])
+        x["Bk"] = x["Bk"].reshape([len(x["Ntri"])])
 
-    return kP, P, Nmodes, kB, B, Ntri
+    return x
 
 #Compute the trispectrum given the density grid
 def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min = None, k_max = None, verbose = False, nthreads = 1, ntype = 1):
@@ -300,13 +300,14 @@ def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_mi
     elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
         window = 4
 
-    (kP, P, Nmodes, kT, T, Tu, Nsq) = exshalos.spectrum.spectrum.tri_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(verbose), np.int32(nthreads))
+    x = exshalos.spectrum.spectrum.tri_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(verbose), np.int32(nthreads))
 
     if(ntype == 1):
-        P = P.reshape([Nk])
-        T = T.reshape([len(Nsq)])
+        x["Pk"] = x["Pk"].reshape([Nk])
+        x["Tk"] = x["Tk"].reshape([len(x["Nsq"])])
+        x["Tuk"] = x["Tuk"].reshape([len(x["Nsq"])])
 
-    return kP, P, Nmodes, kT, T, Tu, Nsq
+    return x
 
 #Compute the correlation function given the power spectrum or the power spectrum given the correlation function
 def Compute_Correlation(k, P, direction = 1, verbose = False):
@@ -316,7 +317,7 @@ def Compute_Correlation(k, P, direction = 1, verbose = False):
     direction: Direction to compute the fftlog: 1 to compute the correlation and -1 to compute the power spectrum | int
     verbose: Output or do not output information in the c code | boolean
 
-    return: The correlation function (direction == 1) or the power spectrum (direction == -1) | 2 1D numpy arrays 
+    return: The correlation function (direction == 1) or the power spectrum (direction == -1) | Dictonaty with 2 arrays. "R" 1D array (Number of radial bins), "Xi" 1D array (Number of radial bins) 
     """
 
     precision = exshalos.exshalos.exshalos.check_precision()
@@ -332,6 +333,44 @@ def Compute_Correlation(k, P, direction = 1, verbose = False):
         print("Wrong direction gave! It must be 1 or -1 NOT %d!" %(direction))  
         return None
 
-    (R, Xi) = exshalos.exshalos.exshalos.correlation_compute(k, P, np.int32(direction), np.int32(verbose))
+    x = exshalos.exshalos.exshalos.correlation_compute(k, P, np.int32(direction), np.int32(verbose))
 
-    return R, Xi
+    return x
+
+#Measure the abundance of a list of halo masses
+def Compute_Abundance(Mh, Mmin = -1.0, Mmax = -1.0, Nm = 25, Lc = 2.0, nd = 256, ndx = None, ndy = None, ndz = None, verbose = False):
+    """
+    Mh: Mass of each halo | 1D numpy array (Nh)
+    Mmin: Minimum mass used to construct the mass bins | float
+    Mmax: Maximum mass used to construct the mass bins | float
+    Nm: Number of mass bins | int
+    Lc: Size of each cell
+    nd, ndx, ndy, ndz: Number of cells in each direction | int
+    verbose: Output or do not output information in the c code | boolean
+    
+    return: The mean mass, differential abundance, and error in the differential abundance for each mass bins | Dictonary with 3 numpy arrays with size Nh
+    """
+
+    precision = exshalos.spectrum.spectrum.check_precision()
+
+    if(precision == 4):
+        Mh = Mh.astype("float32")
+        Mmin = np.float32(Mmin)
+        Mmax = np.float32(Mmax)
+        Lc = np.float32(Lc)
+    else:
+        Mh = Mh.astype("float64")
+        Mmin = np.float64(Mmin)
+        Mmax = np.float64(Mmax)
+        Lc = np.float64(Lc)
+
+    if(ndx is None):
+        ndx = nd
+    if(ndy is None):
+        ndy = nd
+    if(ndz is None):
+        ndz = nd   
+
+    x = exshalos.spectrum.spectrum.abundance_compute(Mh, Mmin, Mmax, np.int32(Nm), Lc, np.int32(ndx), np.int32(ndy), np.int32(ndz), np.int32(verbose))
+
+    return x
