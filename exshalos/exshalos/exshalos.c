@@ -110,11 +110,12 @@ static PyObject *correlation_compute(PyObject *self, PyObject *args, PyObject *k
     free(kd); free(Pd); free(Rd); free(Xid);
 
     /*Output the mesurements in PyObject format*/
-    PyObject *tupleresult = PyTuple_New(2);
-    PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_R));
-    PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Xi));
+    PyObject *dict = PyDict_New();
 
-    return PyArray_Return((PyArrayObject*) tupleresult);
+    PyDict_SetItemString(dict, "R", PyArray_Return(np_R));
+    PyDict_SetItemString(dict, "Xi", PyArray_Return(np_Xi));
+
+    return dict;
 }
 
 /*Compute the Gaussian density grid*/
@@ -161,7 +162,6 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
     npy_intp dims_grid[] = {(npy_intp) ndx, (npy_intp) ndy, (npy_intp) ndz};
     npy_intp dims_gridk[] = {(npy_intp) ndx, (npy_intp) ndy, (npy_intp) ndz/2 + 1, (npy_intp) 2};
     PyArrayObject *np_grid, *np_gridk;
-    PyObject *tupleresult;
 
     /*Output the grid only in real space*/
     if(outk == FALSE){
@@ -169,15 +169,7 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
         np_grid = (PyArrayObject *) PyArray_ZEROS(3, dims_grid, NP_OUT_TYPE, 0);
         delta = (fft_real *) np_grid->data;
         deltak = (fft_complex *) FFTW(malloc)(((size_t) ndx)*((size_t) ndy)*((size_t) ndz/2+1)*sizeof(fft_complex));
-        check_memory(deltak, "deltak")
-
-        /*Compute the density grids*/
-        Compute_Den(K, P, Nk, R_max, delta, deltak);
-
-        /*Output the mesurements in PyObject format*/
-        tupleresult = PyTuple_New(1);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_grid));  
-        FFTW(free)(deltak);     
+        check_memory(deltak, "deltak")   
     }
 
     /*Output the grid in real and Fourier space*/
@@ -187,17 +179,21 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
         delta = (fft_real *) np_grid->data;
         np_gridk = (PyArrayObject *) PyArray_ZEROS(4, dims_gridk, NP_OUT_TYPE, 0);
         deltak = (fft_complex *) np_gridk->data;
-
-        /*Compute the density grids*/
-        Compute_Den(K, P, Nk, R_max, delta, deltak);
-
-        /*Output the mesurements in PyObject format*/
-        tupleresult = PyTuple_New(2);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_grid));
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_gridk));
     }
 
-    return PyArray_Return((PyArrayObject*) tupleresult);       
+    /*Compute the density grids*/
+    Compute_Den(K, P, Nk, R_max, delta, deltak);
+
+    /*Put the arrays in the output dict*/
+    PyObject *dict = PyDict_New();
+    
+    PyDict_SetItemString(dict, "grid", PyArray_Return(np_grid));
+    if(outk == TRUE)
+        PyDict_SetItemString(dict, "gridk", PyArray_Return(np_gridk));
+    else
+        FFTW(free)(deltak); 
+
+    return dict;       
 }
 
 /*Generate the halo catalogue from a given density grid*/
@@ -279,12 +275,13 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     }
     free(halos);
 
-    /*Output the mesurements in PyObject format*/
-    tupleresult = PyTuple_New(2);
-    PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_pos));
-    PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh));
+    /*Put the arrays in the output dict*/
+    PyObject *dict = PyDict_New();
+    
+    PyDict_SetItemString(dict, "posh", PyArray_Return(np_pos));
+    PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
 
-    return PyArray_Return((PyArrayObject*) tupleresult);       
+    return dict;       
 }
 
 /*Compute the position of the particles using LPT*/
@@ -336,8 +333,8 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     /*Define the variables for the output*/
     npy_intp dims_pos[] = {(npy_intp) box.ng, (npy_intp) 3};
     PyArrayObject *np_S, *np_V;
-    PyObject *tupleresult;
-
+    PyObject *dict = PyDict_New();
+    
     /*Do not output the velocities*/
     if(OUT_VEL == FALSE){
         np_S = (PyArrayObject *) PyArray_ZEROS(2, dims_pos, NP_OUT_TYPE, 0);
@@ -353,8 +350,7 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
             Compute_Pos(S);
 
         /*Output the mesurements in PyObject format*/
-        tupleresult = PyTuple_New(1);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_S));    
+        PyDict_SetItemString(dict, "pos", PyArray_Return(np_S)); 
     }
 
     /*Output the velocities*/
@@ -374,16 +370,15 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
             Compute_Pos(S);
 
         /*Output the mesurements in PyObject format*/
-        tupleresult = PyTuple_New(2);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_S));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_V));  
+        PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
+        PyDict_SetItemString(dict, "vel", PyArray_Return(np_V));
     }
 
     /*Free memory*/
     if(INk == FALSE)
         FFTW(free)(deltak);
 
-    return PyArray_Return((PyArrayObject*) tupleresult); 
+    return dict; 
 }
 
 /*Generate the halo catalogue from a given linear power spectrum*/
@@ -509,75 +504,66 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
     if(out.OUT_VEL == TRUE) free(velh);
 
     /*Construct the output tuple for each case*/
-    PyObject *tupleresult;
+    PyObject *dict = PyDict_New();
 
     if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
-        tupleresult = PyTuple_New(2);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));       
     }
     else if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == TRUE && OUT_FLAG == FALSE){
-        tupleresult = PyTuple_New(3);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "velh", PyArray_Return(np_velh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
     }
     else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
-        tupleresult = PyTuple_New(3);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh));
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S)); 
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
     }
     else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == TRUE && OUT_FLAG == TRUE){
-        tupleresult = PyTuple_New(6);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
-        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_S));    
-        PyTuple_SetItem(tupleresult, 4, PyArray_Return(np_V));       
-        PyTuple_SetItem(tupleresult, 5, PyArray_Return(np_flag));
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "velh", PyArray_Return(np_velh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
+        PyDict_SetItemString(dict, "vel", PyArray_Return(np_V));
+        PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
     }   
     else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == TRUE && OUT_FLAG == TRUE){
-        tupleresult = PyTuple_New(7);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
-        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_S));    
-        PyTuple_SetItem(tupleresult, 4, PyArray_Return(np_V));       
-        PyTuple_SetItem(tupleresult, 5, PyArray_Return(np_flag));
-        PyTuple_SetItem(tupleresult, 6, PyArray_Return(np_grid));
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "velh", PyArray_Return(np_velh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
+        PyDict_SetItemString(dict, "vel", PyArray_Return(np_V));
+        PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
+        PyDict_SetItemString(dict, "grid", PyArray_Return(np_grid));
     }  
     else if(OUT_DEN == TRUE && OUT_LPT == FALSE && OUT_VEL == TRUE && OUT_FLAG == FALSE){
-        tupleresult = PyTuple_New(4);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
-        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_grid));
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "velh", PyArray_Return(np_velh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "grid", PyArray_Return(np_grid));
     } 
     else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
-        tupleresult = PyTuple_New(4);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S));    
-        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_grid));
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
+        PyDict_SetItemString(dict, "grid", PyArray_Return(np_grid));
     } 
     else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
-        tupleresult = PyTuple_New(5);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S));  
-        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_flag));  
-        PyTuple_SetItem(tupleresult, 4, PyArray_Return(np_grid));
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
+        PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
+        PyDict_SetItemString(dict, "grid", PyArray_Return(np_grid));
     } 
     else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
-        tupleresult = PyTuple_New(4);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S));    
-        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_flag));
-    } 
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
+        PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
+    }
 
-    return PyArray_Return((PyArrayObject*) tupleresult); 
+    return dict; 
 }
 
 /*Generate the halo catalogue from a given linear power spectrum*/
@@ -701,43 +687,38 @@ static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *k
     if(out.OUT_VEL == TRUE) free(velh);
 
     /*Construct the output tuple for each case*/
-    PyObject *tupleresult;
+    PyObject *dict = PyDict_New();
 
     if(OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
-        tupleresult = PyTuple_New(2);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
     }
     else if(OUT_LPT == FALSE && OUT_VEL == TRUE && OUT_FLAG == FALSE){
-        tupleresult = PyTuple_New(3);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "velh", PyArray_Return(np_velh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh)); 
     }
     else if(OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
-        tupleresult = PyTuple_New(3);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh));
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S)); 
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
     }
     else if(OUT_LPT == TRUE && OUT_VEL == TRUE && OUT_FLAG == TRUE){
-        tupleresult = PyTuple_New(6);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_velh));
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_Mh)); 
-        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_S));    
-        PyTuple_SetItem(tupleresult, 4, PyArray_Return(np_V));       
-        PyTuple_SetItem(tupleresult, 5, PyArray_Return(np_flag));
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "velh", PyArray_Return(np_velh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
+        PyDict_SetItemString(dict, "vel", PyArray_Return(np_V));
+        PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
     }   
     else if(OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
-        tupleresult = PyTuple_New(4);
-        PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_posh));    
-        PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_Mh)); 
-        PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_S));    
-        PyTuple_SetItem(tupleresult, 3, PyArray_Return(np_flag));
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
+        PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
     } 
 
-    return PyArray_Return((PyArrayObject*) tupleresult); 
+    return dict; 
 }
 
 /* This initiates the module using the above definitions. */
