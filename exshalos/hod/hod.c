@@ -88,7 +88,6 @@ static PyObject *populate_halos(PyObject *self, PyObject *args, PyObject *kwargs
     fft_real *posg_out, *velg_out;
     long *flag_out;
     PyArrayObject *np_pos, *np_vel, *np_flag;
-    PyObject *tupleresult;
 
     np_pos = (PyArrayObject *) PyArray_ZEROS(2, dims_pos, NP_OUT_TYPE, 0);
     posg_out = (fft_real *) np_pos->data;
@@ -117,33 +116,32 @@ static PyObject *populate_halos(PyObject *self, PyObject *args, PyObject *kwargs
     if(OUT_FLAG == TRUE)
         free(gal_type);
 
+    /*Construct the output tuple for each case*/
+    PyObject *dict = PyDict_New();
+
     /*Output the mesurements in PyObject format*/
     if(OUT_VEL == TRUE){
         if(OUT_FLAG == FALSE){
-            tupleresult = PyTuple_New(2);
-            PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_pos));    
-            PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_vel));  
+            PyDict_SetItemString(dict, "posg", PyArray_Return(np_pos));
+            PyDict_SetItemString(dict, "velg", PyArray_Return(np_vel));
         }
         else{
-            tupleresult = PyTuple_New(3);
-            PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_pos));    
-            PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_vel));        
-            PyTuple_SetItem(tupleresult, 2, PyArray_Return(np_flag));        
+            PyDict_SetItemString(dict, "posg", PyArray_Return(np_pos));
+            PyDict_SetItemString(dict, "velg", PyArray_Return(np_vel));
+            PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));      
         }
     }
     else{
         if(OUT_FLAG == FALSE){
-            tupleresult = PyTuple_New(1);
-            PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_pos));  
+            PyDict_SetItemString(dict, "posg", PyArray_Return(np_pos));
         }
         else{
-            tupleresult = PyTuple_New(2);
-            PyTuple_SetItem(tupleresult, 0, PyArray_Return(np_pos));    
-            PyTuple_SetItem(tupleresult, 1, PyArray_Return(np_flag));        
+            PyDict_SetItemString(dict, "posg", PyArray_Return(np_pos));
+            PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));        
         }  
     }
 
-    return PyArray_Return((PyArrayObject*) tupleresult); 
+    return dict; 
 }
 
 /*Split the galaxies between red and blue*/
