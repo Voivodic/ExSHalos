@@ -45,7 +45,7 @@
 #define check_memory(p, name) if(p == NULL){printf("Problems to alloc %s.\n", name); exit(0);} //Check the memory allocation
 #define Lc_MAX	1.0e+2  //Maximum size of a cell
 #define Mc_MIN	1.0e+5  //Minimum mass of a cell
-#define M_max 	6.0e+15 //Maximum mass of a halo
+#define M_max 	1e+16 //Maximum mass of a halo
 #define nbar_max 1.0e-2	//Maximum number density for the galaxies
 
 /*Structure for the peaks in the density field*/
