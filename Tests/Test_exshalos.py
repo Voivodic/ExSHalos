@@ -49,6 +49,22 @@ print(posh.shape, Mh.shape)
 print(np.min(posh), np.max(posh))
 print("%e %e" %(np.min(Mh), np.max(Mh)))
 
+#Compute the mass function
+t1 = time.time()
+M, dn, dn_err = exshalos.simulation.Compute_Abundance(Mh, Mmin = 1e+13, Mmax = 1e+15, Nm = 20, Lc = Lc, nd = Nd)
+t1 = time.time() - t1
+
+t2 = time.time()
+Mbin = np.logspace(13, 15, 21)
+n = np.histogram(Mh, bins = Mbin)[0]
+
+dn2 = n/(np.log(Mbin[1:]) - np.log(Mbin[:-1]))/(Lc**3*Nd**3)
+dn2_err = np.sqrt(n)/(np.log(Mbin[1:]) - np.log(Mbin[:-1]))/(Lc**3*Nd**3)
+t2 = time.time() - t2
+
+print(t1, t2)
+
+#COmpute the spectrum
 gridh = exshalos.simulation.Compute_Density_Grid(posh, nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1, verbose = False)
 kh, Ph, Nkh = exshalos.simulation.Compute_Power_Spectrum(gridh, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
 

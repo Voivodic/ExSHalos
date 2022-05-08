@@ -3,6 +3,7 @@ import h5py
 import exshalos
 import pylab as pl
 import time
+import bacco
 
 #Generate the fake data
 L = 4000.0
@@ -54,6 +55,15 @@ end = time.time()
 
 print("Time took = %f" %(end - start))
 print(kB.shape, B.shape, Ntri.shape, kP2.shape, P2.shape, Nmodes2.shape)
+print(P2)
+
+start = time.time()
+kP2, P2, Nmodes2, kB, B, Ntri = bacco.statistics.Compute_BiSpectrum(g1, L = L, window = window, Nk = Nk, nthreads = nthreads, verbose = verbose, ntype = ntypes)
+end = time.time()
+
+print("Time took = %f" %(end - start))
+print(kB.shape, B.shape, Ntri.shape, kP2.shape, P2.shape, Nmodes2.shape)
+print(P2)
 
 print("Computing the trispectrum")
 start = time.time()
