@@ -433,6 +433,7 @@ void Compute_Mass(size_t nh, int *sphere, HALOS *halos, gsl_interp_accel *acc, g
         cont = Next_Count(sphere, Ncells, halos[i].count);
 
 		den_tmp = gsl_spline_eval(spline_I, halos[i].count*box.Mcell, acc) + (gsl_spline_eval(spline_I, sphere[cont]*box.Mcell, acc) - gsl_spline_eval(spline_I, halos[i].count*box.Mcell, acc))*gsl_rng_uniform(rng_ptr);
+
 		halos[i].Mh = gsl_spline_eval(spline_InvI, den_tmp, acc);
 	}
 }
