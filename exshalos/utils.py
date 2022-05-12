@@ -177,7 +177,7 @@ def Fit_Barrier(k, P, M, dndlnM, grid = None, R_max = 100000.0, Mmin = -1.0, Mma
     return x
 
 #Fit the parameters of the HOD
-def Fit_HOD(k, P, posh = None, Mh = None, velh = None, Ch = None, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, Om0 = 0.31, z = 0.0, x0 = None, sigma = 0.5, Deltah = -1.0, seed = 12345, USE_VEL = False, verbose = False):
+'''def Fit_HOD(k, P, posh = None, Mh = None, velh = None, Ch = None, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, Om0 = 0.31, z = 0.0, x0 = None, sigma = 0.5, Deltah = -1.0, seed = 12345, USE_VEL = False, verbose = False):
     """
     posh: Positions of the halos| 2D array (Nh, 3)
     velh: Velocities of the halos| 2D array (Nh, 3)
@@ -202,4 +202,4 @@ def Fit_HOD(k, P, posh = None, Mh = None, velh = None, Ch = None, nd = 256, ndx 
 
 
 
-    return pass
+    return pass'''
