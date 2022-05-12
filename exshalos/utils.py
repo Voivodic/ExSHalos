@@ -175,3 +175,31 @@ def Fit_Barrier(k, P, M, dndlnM, grid = None, R_max = 100000.0, Mmin = -1.0, Mma
     x = minimize(Chi2, x0 = x0, bounds = bounds, method = "Nelder-Mead", options = {"maxiter" : Max_inter}, tol = tol)
 
     return x
+
+#Fit the parameters of the HOD
+def Fit_HOD(k, P, posh = None, Mh = None, velh = None, Ch = None, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, Om0 = 0.31, z = 0.0, x0 = None, sigma = 0.5, Deltah = -1.0, seed = 12345, USE_VEL = False, verbose = False):
+    """
+    posh: Positions of the halos| 2D array (Nh, 3)
+    velh: Velocities of the halos| 2D array (Nh, 3)
+    Mh: Mass of the halos | 1D array (Nh)
+    Ch: Concentration of the halos | 1D array (Nh)
+    nd or ndx, ndy, ndz: Number of cells in each direction | ints
+    Lc: Size of each cell in Mpc/h | float
+    Om0: Value of the matter overdensity today | float
+    z: Redshift of the density grid and final halo catalogue | float
+    x0: Itial guess for the best fit parameters of the hod | 1D array (5)
+    sigma: Parameter of the exclusion term of the halo density profile (Voivodic 2020) | float
+    Deltah: Overdensity of the halos | float
+    seed: Seed used to generate the density field | int
+    USE_VEL: Use the power spectrum in redshift space | boolean
+    verbose: Output or do not output information in the c code | boolean
+
+    return: Return the 5 best fit parameters of the HOD | 1D numpy array (5)
+    """
+
+    #Interpolate the given mass power spectrum
+    fP = interp1d(k, P)
+
+
+
+    return pass
