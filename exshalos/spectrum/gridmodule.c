@@ -1,5 +1,10 @@
 #include "gridmodule.h"
 
+/*Define the Hubble function in units of h*/
+fft_real H(fft_real Om0, fft_real z){
+	return 100.0*sqrt(Om0*pow(1.0 + z, 3) + (1.0 - Om0));
+}
+
 /*Give the density to each grid using the NGP density assignment*/
 long double NGP(fft_real *grid, fft_real *pos, int nd, fft_real L, fft_real mass){
 	fft_real Ld = L/nd;
@@ -138,7 +143,7 @@ long double Density_Grid(fft_real *grid, int nd, fft_real L, fft_real *pos, fft_
 }
 
 /*Compute the density grids for each type of tracer*/
-void Tracer_Grid(fft_real *grid, int nd, fft_real L, int direction, fft_real *pos, fft_real *vel, size_t np, fft_real *mass,  int *type, int ntype, int window, fft_real R, fft_real R_times, int interlacing){
+void Tracer_Grid(fft_real *grid, int nd, fft_real L, int direction, fft_real *pos, fft_real *vel, size_t np, fft_real *mass,  int *type, int ntype, int window, fft_real R, fft_real R_times, int interlacing, fft_real Om0, fft_real z){
 	size_t j, ng, ind, ind2;
 	int i;
     fft_real post[3], Lb;
@@ -160,7 +165,7 @@ void Tracer_Grid(fft_real *grid, int nd, fft_real L, int direction, fft_real *po
 	/*Put the particles in redshift space*/
 	if(direction != -1)
 		for(i=0;i<np;i++)
-			pos[3*i+direction] = pos[3*i+direction] + vel[i];
+			pos[3*i+direction] = pos[3*i+direction] + vel[3*i+direction]*pow(1.0 + z, 3.0)/H(Om0, z);
 
 	/*Case with multiple types without weight (mass) between the particles and without interlacing*/
 	if(mass == NULL && interlacing == FALSE){

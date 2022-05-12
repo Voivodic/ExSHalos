@@ -3,7 +3,7 @@ import exshalos
 import numpy as np
 
 #Compute the density grid
-def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L = 1000.0, direction = None, window = "CIC", R = 4.0, R_times = 5.0, interlacing = False, verbose = False, nthreads = 1):
+def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L = 1000.0, Om0 = 0.31, z = 0.0, direction = None, window = "CIC", R = 4.0, R_times = 5.0, interlacing = False, verbose = False, nthreads = 1):
     """
     pos: Position of the tracers | 2D numpy array [number of tracers, 3]
     vel: Velocities of the particles in the given direction | 1D numpy array [number of tracers]
@@ -27,6 +27,7 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
 
     if(precision == 4):
         pos = pos.astype("float32")
+        vel = vel.astype("float32")
         if(mass is not None):
             mass = mass.astype("float32")
             nmass = 1
@@ -35,8 +36,11 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
         L = np.float32(L)
         R = np.float32(R)
         R_times = np.float32(R_times)
+        Om0 = np.float32(Om0)
+        z = np.float32(z)
     else:
         pos = pos.astype("float64")
+        vel = vel.astype("float64")
         if(mass is not None):
             mass = mass.astype("float64")
             nmass = 1
@@ -44,7 +48,9 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
             vel = vel.astype("float64")
         L = np.float64(L)
         R = np.float64(R)
-        R_times = np.float64(R_times)      
+        R_times = np.float64(R_times)   
+        Om0 = np.float64(Om0)
+        z = np.float64(z)   
 
     if(type is not None):
         type = type.astype("int32") 
@@ -57,13 +63,13 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
         v = None
     elif(direction == "x" or direction == "X" or direction == 0):
         direction = 0
-        v = vel[:,0]/100.0
+        v = vel[:,0]/100.0*(1.0 + z)/exshalos.theory.Get_Hz(Om0 = Om0, z = z)
     elif(direction == "y" or direction == "Y" or direction == 1):
         direction = 1
-        v = vel[:,1]/100.0
+        v = vel[:,1]/100.0*(1.0 + z)/exshalos.theory.Get_Hz(Om0 = Om0, z = z)
     elif(direction == "z" or direction == "Z" or direction == 2):
         direction = 2
-        v = vel[:,2]/100.0
+        v = vel[:,2]/100.0*(1.0 + z)/exshalos.theory.Get_Hz(Om0 = Om0, z = z)
 
     if(window == "NO" or window == "no" or window == 0):
         print("You need to choose some density assigment method to construct the density grid!")
@@ -77,7 +83,7 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
     elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
         window = 4
 
-    grid = exshalos.spectrum.spectrum.grid_compute(pos, v, mass, np.int32(nmass), type, np.int32(ntype), np.int32(nd), L, np.int32(direction), np.int32(window), R, R_times, np.int32(interlacing), np.int32(verbose), np.int32(nthreads))
+    grid = exshalos.spectrum.spectrum.grid_compute(pos, v, mass, np.int32(nmass), type, np.int32(ntype), np.int32(nd), L, Om0, z, np.int32(direction), np.int32(window), R, R_times, np.int32(interlacing), np.int32(verbose), np.int32(nthreads))
 
     del v
 
