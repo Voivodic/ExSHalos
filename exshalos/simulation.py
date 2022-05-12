@@ -60,16 +60,6 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
 
     if(direction == None):
         direction = -1
-        v = None
-    elif(direction == "x" or direction == "X" or direction == 0):
-        direction = 0
-        v = vel[:,0]/100.0*(1.0 + z)/exshalos.theory.Get_Hz(Om0 = Om0, z = z)
-    elif(direction == "y" or direction == "Y" or direction == 1):
-        direction = 1
-        v = vel[:,1]/100.0*(1.0 + z)/exshalos.theory.Get_Hz(Om0 = Om0, z = z)
-    elif(direction == "z" or direction == "Z" or direction == 2):
-        direction = 2
-        v = vel[:,2]/100.0*(1.0 + z)/exshalos.theory.Get_Hz(Om0 = Om0, z = z)
 
     if(window == "NO" or window == "no" or window == 0):
         print("You need to choose some density assigment method to construct the density grid!")
@@ -83,9 +73,7 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
     elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
         window = 4
 
-    grid = exshalos.spectrum.spectrum.grid_compute(pos, v, mass, np.int32(nmass), type, np.int32(ntype), np.int32(nd), L, Om0, z, np.int32(direction), np.int32(window), R, R_times, np.int32(interlacing), np.int32(verbose), np.int32(nthreads))
-
-    del v
+    grid = exshalos.spectrum.spectrum.grid_compute(pos, vel, mass, np.int32(nmass), type, np.int32(ntype), np.int32(nd), L, Om0, z, np.int32(direction), np.int32(window), R, R_times, np.int32(interlacing), np.int32(verbose), np.int32(nthreads))
 
     if(interlacing == False and ntype == 1):
         grid = grid.reshape([nd, nd, nd])
