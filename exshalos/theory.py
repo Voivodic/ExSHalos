@@ -10,6 +10,10 @@ def Get_Omz(Om0 = 0.31, z = 0.0):
 def Get_deltac(Omz = 0.31):
 	return 1.686*pow(Omz, 0.0055)
 
+#Return the Hubble function in units of 100*h
+def Get_Hz(Om0 = 0.31, z = 0.0):
+	return np.sqrt(Om0*np.power(1.0 + z, 3.0) + (1.0 - Om0))
+
 #Window function in Fourier space
 def W(k, R):
 	resp = 3.0/(np.power(k*R,2))*(np.sin(k*R)/(k*R) - np.cos(k*R))
