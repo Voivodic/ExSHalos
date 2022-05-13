@@ -43,12 +43,13 @@ print(np.mean(g1[0]), np.std(g1[0]))
 #Compute the power spectra
 print("Computing the power spectrum")
 start = time.time()
-P = exshalos.simulation.Compute_Power_Spectrum(g1, L = L, window = window, Nk = Nk, nthreads = nthreads, verbose = verbose, ntype = ntypes)
+P = exshalos.simulation.Compute_Power_Spectrum(g1, L = L, window = window, Nk = Nk, nthreads = 2, verbose = verbose, ntype = ntypes, l_max = 4)
 end = time.time()
 
 print("Time took = %f" %(end - start))
 print(P['k'].shape, P["Pk"].shape, P["Nk"].shape)
-
+print(P["Pk"])
+'''
 print("Computing the bispectrum")
 start = time.time()
 B = exshalos.simulation.Compute_BiSpectrum(g1, L = L, window = window, Nk = Nk, nthreads = nthreads, verbose = verbose, ntype = ntypes)
@@ -86,4 +87,4 @@ else:
 
 pl.savefig("Test_power.pdf")
 
-print("Done!")
+print("Done!")'''

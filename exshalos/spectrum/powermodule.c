@@ -58,10 +58,10 @@ void Power_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, f
 
                         count = 0;
                         for(l=0;l<ntype;l++)
-                            for(m=0;m<=l;m++)
-                                for(n=0;n<=l_max;n++){
+                            for(m=0;m<=l;m++){
+                                for(n=0;n<=l_max;n++)
                                     P_private[(count*(l_max+1) + n)*Nk + ind] += (long double) (gridk[l][tmp][0]*gridk[m][tmp][0] + gridk[l][tmp][1]*gridk[m][tmp][1])*gsl_sf_legendre_Pl(n, mu);
-                                    count++;
+                                count++;
                                 }
 
                         k_private[ind] += (long double) k_mod;
@@ -80,10 +80,11 @@ void Power_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, f
                     for(k=0;k<=l_max;k++)
                         P[(j*(l_max+1) + k)*Nk + i] += P_private[(j*(l_max+1) + k)*Nk + i];
             }
+
+            free(P_private);
+            free(k_private);
+            free(count_k_private);
         }
-        free(P_private);
-        free(k_private);
-        free(count_k_private);
     }
 
     for(i=0;i<ntype;i++)
