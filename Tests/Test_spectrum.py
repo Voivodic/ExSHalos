@@ -19,9 +19,10 @@ verbose = False
 f = h5py.File('/home/voivodic/Documents/Multi_EFT/MD4_M13.2_xyz_Vxyz_TF.hdf5','r')  
 logM = np.array(f['catalog'][:,0])
 pos = np.array(f['catalog'][:,1:4])
+vel = np.array(f['catalog'][:,4:7])
 f.close()
 
-print(logM.shape, pos.shape)
+print(logM.shape, pos.shape, vel.shape)
 
 types = np.zeros(len(logM))
 if(ntypes == 2):
@@ -32,7 +33,7 @@ else:
 #Compute the density grid
 print("Computing the density grid")
 start = time.time()
-g1 = exshalos.simulation.Compute_Density_Grid(pos, nd = Nd, type = types, L = L, window = window, interlacing = interlacing, nthreads = nthreads, verbose = verbose)
+g1 = exshalos.simulation.Compute_Density_Grid(pos, vel = vel, nd = Nd, type = types, direction = "z", L = L, window = window, interlacing = interlacing, nthreads = nthreads, verbose = verbose)
 end = time.time()
 
 print("Time took = %f" %(end - start))
@@ -42,55 +43,46 @@ print(np.mean(g1[0]), np.std(g1[0]))
 #Compute the power spectra
 print("Computing the power spectrum")
 start = time.time()
-k, P, Nmodes = exshalos.simulation.Compute_Power_Spectrum(g1, L = L, window = window, Nk = Nk, nthreads = nthreads, verbose = verbose, ntype = ntypes)
+P = exshalos.simulation.Compute_Power_Spectrum(g1, L = L, window = window, Nk = Nk, nthreads = nthreads, verbose = verbose, ntype = ntypes)
 end = time.time()
 
 print("Time took = %f" %(end - start))
-print(k.shape, P.shape, Nmodes.shape)
+print(P['k'].shape, P["Pk"].shape, P["Nk"].shape)
 
 print("Computing the bispectrum")
 start = time.time()
-kP2, P2, Nmodes2, kB, B, Ntri = exshalos.simulation.Compute_BiSpectrum(g1, L = L, window = window, Nk = Nk, nthreads = nthreads, verbose = verbose, ntype = ntypes)
+B = exshalos.simulation.Compute_BiSpectrum(g1, L = L, window = window, Nk = Nk, nthreads = nthreads, verbose = verbose, ntype = ntypes)
 end = time.time()
 
 print("Time took = %f" %(end - start))
-print(kB.shape, B.shape, Ntri.shape, kP2.shape, P2.shape, Nmodes2.shape)
-print(P2)
-
-start = time.time()
-kP2, P2, Nmodes2, kB, B, Ntri = bacco.statistics.Compute_BiSpectrum(g1, L = L, window = window, Nk = Nk, nthreads = nthreads, verbose = verbose, ntype = ntypes)
-end = time.time()
-
-print("Time took = %f" %(end - start))
-print(kB.shape, B.shape, Ntri.shape, kP2.shape, P2.shape, Nmodes2.shape)
-print(P2)
+print(B["kB"].shape, B["Bk"].shape, B["Ntri"].shape, B["kP"].shape, B["Pk"].shape, B["Nk"].shape)
 
 print("Computing the trispectrum")
 start = time.time()
-kP3, P3, Nmodes3, kT, T, Tu, Nsq = exshalos.simulation.Compute_TriSpectrum(g1, L = L, window = window, Nk = Nk, nthreads = nthreads, verbose = verbose, ntype = ntypes)
+T= exshalos.simulation.Compute_TriSpectrum(g1, L = L, window = window, Nk = Nk, nthreads = nthreads, verbose = verbose, ntype = ntypes)
 end = time.time()
 
 print("Time took = %f" %(end - start))
-print(kT.shape, T.shape, Tu.shape, Nsq.shape, kP3.shape, P3.shape, Nmodes3.shape)
+print(T["kT"].shape, T["Tk"].shape, T["Tuk"].shape, T["Nsq"].shape, T["kP"].shape, T["Pk"].shape, T["Nk"].shape)
 
 pl.clf()
 if(ntypes == 2):
-    pl.loglog(k, P[0,:], "-", color = "red")
-    pl.loglog(k, P[1,:], "-", color = "red")
-    pl.loglog(k, P[2,:], "-", color = "red")
+    pl.loglog(P["k"], P["Pk"][0,:], "-", color = "red")
+    pl.loglog(P["k"], P["Pk"][1,:], "-", color = "red")
+    pl.loglog(P["k"], P["Pk"][2,:], "-", color = "red")
 
-    pl.loglog(kP2, P2[0,:], "--", color = "blue")
-    pl.loglog(kP2, P2[1,:], "--", color = "blue")
-    pl.loglog(kP2, P2[2,:], "--", color = "blue")
+    pl.loglog(B["kP"], B["Pk"][0,:], "--", color = "blue")
+    pl.loglog(B["kP"], B["Pk"][1,:], "--", color = "blue")
+    pl.loglog(B["kP"], B["Pk"][2,:], "--", color = "blue")
 
-    pl.loglog(kP3, P3[0,:], ":", color = "darkgreen")
-    pl.loglog(kP3, P3[1,:], ":", color = "darkgreen")
-    pl.loglog(kP3, P3[2,:], ":", color = "darkgreen")
+    pl.loglog(T["kP"], T["Pk"][0,:], ":", color = "darkgreen")
+    pl.loglog(T["kP"], T["Pk"][1,:], ":", color = "darkgreen")
+    pl.loglog(T["kP"], T["Pk"][2,:], ":", color = "darkgreen")
 
 else:
-    pl.loglog(k, P, "-", color = "red")
-    pl.loglog(kP2, P2, "--", color = "blue")
-    pl.loglog(kP3, P3, ":", color = "darkgreen")
+    pl.loglog(P["k"], P["Pk"], "-", color = "red")
+    pl.loglog(B["kP"], B["Pk"], "--", color = "blue")
+    pl.loglog(T["kP"], T["Pk"], ":", color = "darkgreen")
 
 pl.savefig("Test_power.pdf")
 

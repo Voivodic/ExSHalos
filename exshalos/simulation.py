@@ -27,7 +27,8 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
 
     if(precision == 4):
         pos = pos.astype("float32")
-        vel = vel.astype("float32")
+        if(vel is not None):
+            vel = vel.astype("float32")
         if(mass is not None):
             mass = mass.astype("float32")
             nmass = 1
@@ -40,7 +41,8 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
         z = np.float32(z)
     else:
         pos = pos.astype("float64")
-        vel = vel.astype("float64")
+        if(vel is not None):
+            vel = vel.astype("float32")
         if(mass is not None):
             mass = mass.astype("float64")
             nmass = 1
@@ -58,8 +60,16 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
     else:
         ntype = 1
 
-    if(direction == None):
+    if(direction == None or direction == -1):
         direction = -1
+    elif(direction == "x" or direction == "X" or direction == 0):
+        direction = 0
+    elif(direction == "y" or direction == "Y" or direction == 1):
+        direction = 1
+    elif(direction == "z" or direction == "Z" or direction == 2):
+        direction = 2
+    else:
+        raise ValueError("Direction must be None, x, y or z!")
 
     if(window == "NO" or window == "no" or window == 0):
         print("You need to choose some density assigment method to construct the density grid!")
