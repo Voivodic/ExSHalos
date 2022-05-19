@@ -65,11 +65,11 @@ def f(s, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0):
 	resp = np.zeros(len(s))
 
 	#Press-Schechter
-	if(model == 0):	
+	if(model == 0 or model == "ps" or model == "PS" or model == "1SB"):	
 		resp = np.sqrt(2.0/np.pi)*nu*np.exp(-nu*nu/2)
 
 	#Sheth-Tormen
-	elif(model == 1):
+	elif(model == 1 or model == "ST" or model == "st" or model == "elliptical"):
 		if(theta != None):
 			a, b, p = theta
 		else:
@@ -83,7 +83,7 @@ def f(s, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0):
 		resp = np.sqrt(2.0*a/np.pi)*nu*np.exp(-B*B/(2.0*s*s))*(1.0 + b*A*np.power(a*nu*nu, -p))
 	
 	#Tinker
-	elif(model == 2):
+	elif(model == 2 or model == "Tinker" or model == "tinker" or model == "TINKER"):
 		if(theta != None):
 			Delta = theta
 		else:
@@ -116,7 +116,7 @@ def f(s, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0):
 		resp = B*(np.power(s/e, -d) + np.power(s, -f))*np.exp(-g/(s*s))
 
 	#Linear difusive barrier
-	elif(model == 3):
+	elif(model == 3 or model == "2LDB"):
 		if(theta != None):
 			b, D, dv, J_max = theta
 		else:
@@ -151,11 +151,11 @@ def bh(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0, 
 	resp = np.zeros(len(s))
 
 	#Press-Schechter
-	if(model == 0):	
+	if(model == 0 or model == "ps" or model == "PS" or model == "1SB"):	
 		resp = 1.0 + (nu*nu - 1.0)/delta_c
 
 	#Sheth-Tormen
-	elif(model == 1):
+	elif(model == 1 or model == "ST" or model == "st" or model == "elliptical"):
 		if(theta != None):
 			a, b, p = theta
 		else:
@@ -168,7 +168,7 @@ def bh(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0, 
 		resp = 1.0 + np.sqrt(a)*nu*nu/delta_c*(1.0 + b*np.power(a*nu*nu, -p)) - 1.0/(np.sqrt(a)*delta_c*(1.0 + A*np.power(a*nu*nu, -p)))
 
 	#Tinker
-	elif(model == 2):
+	elif(model == 2 or model == "Tinker" or model == "tinker" or model == "TINKER"):
 		if(theta != None):
 			Del = theta
 		else:
@@ -185,7 +185,7 @@ def bh(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0, 
 		resp = 1.0 - A*np.power(nu,a)/(np.power(nu,a) + pow(delta_c,a)) + B*np.power(nu,b) + C*np.power(nu,c)
 
 	#Linear difusive barrier
-	elif(model == 3):
+	elif(model == 3 or model == "2LDB"):
 		if(theta != None):
 			b, D, dv, J_max = theta
 		else:
