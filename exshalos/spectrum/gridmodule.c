@@ -165,7 +165,7 @@ void Tracer_Grid(fft_real *grid, int nd, fft_real L, int direction, fft_real *po
 	/*Put the particles in redshift space*/
 	if(direction != -1)
 		for(i=0;i<np;i++)
-			pos[3*i+direction] = pos[3*i+direction] + vel[3*i+direction]*pow(1.0 + z, 3.0)/H(Om0, z);
+			pos[3*i+direction] = cysumf(pos[3*i+direction], vel[3*i+direction]*pow(1.0 + z, 3.0)/H(Om0, z), L);
 
 	/*Case with multiple types without weight (mass) between the particles and without interlacing*/
 	if(mass == NULL && interlacing == FALSE){

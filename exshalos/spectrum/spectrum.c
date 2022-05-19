@@ -99,13 +99,13 @@ static PyObject *grid_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 /*Function that computes the cross power spectrum for all tracers and outputs it in numpy format*/
 static PyObject *power_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     long *count_k;
-	int i, j, k, ntype, nd, window, interlacing, Nk, verbose, nthreads, NPs, l_max;
+	int i, j, k, ntype, nd, window, interlacing, Nk, verbose, nthreads, NPs, l_max, direction, ls;
     long double *P, *Kmean;
 	fft_real *grid, k_min, k_max, *P_out, *Kmean_out;
 	fft_real L, R;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"grid", "ntype", "nd", "L", "window", "R", "interlacing", "Nk", "k_min", "k_max", "l_max", "verbose", "nthreads", NULL};
+	static char *kwlist[] = {"grid", "ntype", "nd", "L", "window", "R", "interlacing", "Nk", "k_min", "k_max", "l_max", "direction", "verbose", "nthreads", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
@@ -113,16 +113,17 @@ static PyObject *power_compute(PyObject *self, PyObject *args, PyObject *kwargs)
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiididiiddiii", kwlist, &grid_array &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &l_max, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiididiiddiiii", kwlist, &grid_array &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &l_max, &direction, &verbose, &nthreads))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiififiiffiii", kwlist, &grid_array, &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &l_max, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiififiiffiiii", kwlist, &grid_array, &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &l_max, &direction, &verbose, &nthreads))
 			return NULL;
 	#endif
 
 	/*Convert the PyObjects to C arrays*/
 	grid = (fft_real *) grid_array->data;
     NPs = (ntype*(ntype+1))/2;
+    ls = floor(l_max/2) + 1;
 
     /*Initialize FFTW and openmp to run in parallel*/
     omp_set_num_threads(nthreads);
@@ -138,7 +139,7 @@ static PyObject *power_compute(PyObject *self, PyObject *args, PyObject *kwargs)
 	}
 
     /*Prepare the PyObject arrays for the outputs*/
-	npy_intp dims_P[] = {(npy_intp) NPs, (npy_intp) l_max + 1, (npy_intp) Nk};
+	npy_intp dims_P[] = {(npy_intp) NPs, (npy_intp) ls, (npy_intp) Nk};
     npy_intp dims_k[] = {(npy_intp) Nk};
 
 	/*Alloc the PyObjects for the output*/
@@ -150,24 +151,24 @@ static PyObject *power_compute(PyObject *self, PyObject *args, PyObject *kwargs)
     count_k = (long *) np_count_k->data;
 
     /*Allocs the arrays for P and k*/
-    P = (long double *) malloc(NPs*Nk*(l_max+1)*sizeof(long double));
+    P = (long double *) malloc(NPs*Nk*ls*sizeof(long double));
     Kmean = (long double *) malloc(Nk*sizeof(long double));
     for(i=0;i<Nk;i++){
         Kmean[i] = 0.0;
         for(j=0;j<NPs;j++)
-            for(k=0;k<=l_max;k++)
-                P[(j*(l_max+1) + k)*Nk + i] = 0.0;
+            for(k=0;k<ls;k++)
+                P[(j*ls + k)*Nk + i] = 0.0;
     }   
 
 	/*Compute the spectra for all tracers*/
-	Power_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, Kmean, P, count_k, l_max);
+	Power_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, Kmean, P, count_k, l_max, direction);
 
     /*Put the values in the outputs*/
     for(i=0;i<Nk;i++){
         Kmean_out[i] = (fft_real) Kmean[i];
         for(j=0;j<NPs;j++)
-            for(k=0;k<=l_max;k++)
-                P_out[(j*(l_max+1) + k)*Nk + i] = (fft_real) P[(j*(l_max+1) + k)*Nk + i];
+            for(k=0;k<ls;k++)
+                P_out[(j*ls + k)*Nk + i] = (fft_real) P[(j*ls + k)*Nk + i];
     }
 
     /*Free the arrays*/

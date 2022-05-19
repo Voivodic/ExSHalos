@@ -95,7 +95,7 @@ def Compute_Density_Grid(pos, vel = None, mass = None, type = None, nd = 256, L 
     return grid
 
 #Compute the power spectrum given the density grid
-def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min = None, k_max = None, l_max = 0, verbose = False, nthreads = 1, ntype = 1):
+def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min = None, k_max = None, l_max = 0, direction = None,  verbose = False, nthreads = 1, ntype = 1):
     """
     grid: Density grid for all tracers | 5D numpy array [1 if interlacing == False and 2 instead, number of types of tracer, nd, nd, nd]
     L: Size of the box in Mpc/h | float
@@ -159,12 +159,23 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
     elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
         window = 4
 
-    x = exshalos.spectrum.spectrum.power_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(l_max), np.int32(verbose), np.int32(nthreads))
+    if(direction == None or direction == -1):
+        direction = -1
+    elif(direction == "x" or direction == "X" or direction == 0):
+        direction = 0
+    elif(direction == "y" or direction == "Y" or direction == 1):
+        direction = 1
+    elif(direction == "z" or direction == "Z" or direction == 2):
+        direction = 2
+    else:
+        raise ValueError("Direction must be None, x, y or z!")
+
+    x = exshalos.spectrum.spectrum.power_compute(grid, np.int32(ntype), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(l_max), np.int32(direction), np.int32(verbose), np.int32(nthreads))
 
     if(ntype == 1 and l_max == 0):
         x["Pk"] = x["Pk"].reshape([Nk])
     elif(ntype == 1):
-        x["Pk"] = x["Pk"].reshape([l_max+1, Nk])
+        x["Pk"] = x["Pk"].reshape([int(l_max/2)+1, Nk])
     elif(l_max == 0):
         x["Pk"] = x["Pk"].reshape([int(ntype*(ntype + 1)/2), Nk])
 
