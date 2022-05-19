@@ -2,6 +2,14 @@ import numpy as np
 from scipy.integrate import simps
 from scipy.special import binom
 
+#Get the mass of each cell given its size
+def Get_Mcell(Om0 = 0.31, Lc = 2.0):
+	return 2.775e+11*Om0*np.power(Lc, 3.0)
+
+#Get the size of each cell given its mass
+def Get_Lc(Om0 = 0.31, Mcell = 8.5e+10):
+	return np.power(Mcell/(2.775e+11*Om0), 1.0/3.0)
+
 #Return the value of the matter overdensity in a given redshift
 def Get_Omz(Om0 = 0.31, z = 0.0):
 	return Om0*pow(1.0 + z, 3.0)/(Om0*pow(1.0 + z, 3.0) + (1.0 - Om0))
