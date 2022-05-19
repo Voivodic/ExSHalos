@@ -1,7 +1,7 @@
 #include "box.h"
 
 /*Generate a halo catalogue in a box from a given linear power spectrum*/
-size_t Generate_Halos_Box_from_Pk(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real k_smooth, HALOS **halos, fft_real **posh, fft_real **velh, size_t *flag, fft_real *delta, fft_real *S, fft_real *V){
+size_t Generate_Halos_Box_from_Pk(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real k_smooth, HALOS **halos, fft_real **posh, fft_real **velh, size_t *flag, fft_real *delta, fft_real *S, fft_real *V, int fixed, fft_real phase){
     int i, j;
     size_t nh;
     fft_complex *deltak;
@@ -15,7 +15,7 @@ size_t Generate_Halos_Box_from_Pk(fft_real *K, fft_real *P, int Nk, fft_real R_m
     check_memory(deltak, "deltak")
 
     /*Compute the density grids*/
-    Compute_Den(K, P, Nk, R_max, delta, deltak);
+    Compute_Den(K, P, Nk, R_max, delta, deltak, fixed, phase);
 
     /*Find the halos in the density grid*/
     nh = Find_Halos(delta, K, P, Nk, flag, halos);

@@ -68,9 +68,9 @@ void Inter_Power(fft_real *K, fft_real *P, int Nk, fft_real R_max, gsl_spline *s
 }
 
 /*Compute the Gaussian density grid*/
-void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *delta, fft_complex *deltak){
+void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *delta, fft_complex *deltak, int fixed, fft_real phase){
     int i, j, k;
-    fft_real kx , ky, kz, kmod, std;
+    fft_real kx , ky, kz, kmod, std, theta, A;
     size_t ind, ind2;
     fft_complex *deltak_tmp;
     FFTW(plan) p1;
@@ -130,11 +130,16 @@ void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *del
 	
 				kmod = (fft_real) sqrt(kx*kx + ky*ky + kz*kz);	
 				if(kmod == 0.0)	kmod = (fft_real) pow(box.kl[0]*box.kl[1]*box.kl[2], 1.0/3.0)/4.0;
-				std = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc)/2.0);
+				std = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc));
+                if(fixed == FALSE)
+                    A = (fft_real) gsl_ran_gaussian(rng_ptr, (double) std);
+                else
+                    A = std;
+                theta = 2.0*M_PI*((fft_real) gsl_rng_uniform(rng_ptr));
 	
 				/*Generate Gaussian random number with std*/
-				deltak[ind][0] = (fft_real)gsl_ran_gaussian(rng_ptr, (double) std); 
-				deltak[ind][1] = (fft_real)gsl_ran_gaussian(rng_ptr, (double) std);
+                deltak[ind][0] = A*cos(theta + phase); 
+                deltak[ind][1] = A*sin(theta + phase);   
 				deltak_tmp[ind][0] = deltak[ind][0];
 				deltak_tmp[ind][1] = deltak[ind][1];
 	

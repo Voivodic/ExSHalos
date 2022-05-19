@@ -112,20 +112,26 @@ static PyObject *correlation_compute(PyObject *self, PyObject *args, PyObject *k
     /*Output the mesurements in PyObject format*/
     PyObject *dict = PyDict_New();
 
-    PyDict_SetItemString(dict, "R", PyArray_Return(np_R));
-    PyDict_SetItemString(dict, "Xi", PyArray_Return(np_Xi));
+    if(direction == 1){
+        PyDict_SetItemString(dict, "R", PyArray_Return(np_R));
+        PyDict_SetItemString(dict, "Xi", PyArray_Return(np_Xi));
+    }
+    else{
+        PyDict_SetItemString(dict, "k", PyArray_Return(np_R));
+        PyDict_SetItemString(dict, "Pk", PyArray_Return(np_Xi));        
+    }
 
     return dict;
 }
 
 /*Compute the Gaussian density grid*/
 static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *kwargs){
-    int ndx, ndy, ndz, outk, Nk, verbose, nthreads, seed;
-    fft_real Lc, R_max, *K, *P, *delta;
+    int ndx, ndy, ndz, outk, Nk, verbose, nthreads, seed, fixed;
+    fft_real Lc, R_max, *K, *P, *delta, phase;
     fft_complex *deltak;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"k", "P", "R_max", "Ndx", "Ndy", "Ndz", "Lc/Mc", "outk", "seed", "verbose", "nthreads", NULL};
+	static char *kwlist[] = {"k", "P", "R_max", "Ndx", "Ndy", "Ndz", "Lc/Mc", "outk", "seed", "fixed", "phase", "verbose", "nthreads", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
@@ -133,10 +139,10 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOdiiidiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &outk, &seed, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOdiiidiiidii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &outk, &seed, &fixed, &phase, &verbose, &nthreads))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOfiiifiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &outk, &seed, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOfiiifiiifii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &outk, &seed, &fixed, &phase, &verbose, &nthreads))
 			return NULL;
 	#endif
 
@@ -182,7 +188,7 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
     }
 
     /*Compute the density grids*/
-    Compute_Den(K, P, Nk, R_max, delta, deltak);
+    Compute_Den(K, P, Nk, R_max, delta, deltak, fixed, phase);
 
     /*Put the arrays in the output dict*/
     PyObject *dict = PyDict_New();
@@ -384,12 +390,12 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 /*Generate the halo catalogue from a given linear power spectrum*/
 static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwargs){
     size_t *flag, nh, ind;
-    int i, j, ndx, ndy, ndz, Nk, verbose, nthreads, seed, OUT_DEN, OUT_LPT, Nmin, DO_EB, OUT_VEL, DO_2LPT, OUT_FLAG;
-    fft_real Lc, R_max, k_smooth, *K, *P, *delta, *S, *V, Om0, redshift, dc, a, beta, alpha, *posh, *velh, *posh_out, *velh_out, *Mh;
+    int i, j, ndx, ndy, ndz, Nk, verbose, nthreads, seed, OUT_DEN, OUT_LPT, Nmin, DO_EB, OUT_VEL, DO_2LPT, OUT_FLAG, fixed;
+    fft_real Lc, R_max, k_smooth, *K, *P, *delta, *S, *V, Om0, redshift, dc, a, beta, alpha, *posh, *velh, *posh_out, *velh_out, *Mh, phase;
     HALOS *halos;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"k", "P", "R_max", "Ndx", "Ndy", "Ndz", "Lc/Mc", "seed", "k_smooth", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "OUT_DEN", "OUT_LPT", "OUT_VEL", "DO_2LPT", "OUT_FLAG", "verbose", "nthreads", NULL};
+	static char *kwlist[] = {"k", "P", "R_max", "Ndx", "Ndy", "Ndz", "Lc/Mc", "seed", "k_smooth", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "fixed", "phase", "OUT_DEN", "OUT_LPT", "OUT_VEL", "DO_2LPT", "OUT_FLAG", "verbose", "nthreads", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
@@ -397,10 +403,10 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOdiiididdddidddiiiiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &seed, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_DEN, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOdiiididdddidddidiiiiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &seed, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &fixed, &phase, &OUT_DEN, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &verbose, &nthreads))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOfiiififfffifffiiiiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &seed, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_DEN, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOfiiififfffifffifiiiiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &seed, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &fixed, &phase, &OUT_DEN, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &verbose, &nthreads))
 			return NULL;
 	#endif
 
@@ -469,7 +475,7 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
 		flag[ind] = box.ng;
 
     /*Generate the halo catalogue from the linear power spectrum*/
-    nh = Generate_Halos_Box_from_Pk(K, P, Nk, R_max, k_smooth, &halos, &posh, &velh, flag, delta, S, V);
+    nh = Generate_Halos_Box_from_Pk(K, P, Nk, R_max, k_smooth, &halos, &posh, &velh, flag, delta, S, V, fixed, phase);
     if(OUT_FLAG == FALSE)
         free(flag);
 

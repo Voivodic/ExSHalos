@@ -2,7 +2,7 @@ import exshalos
 import numpy as np
 
 #Generate a halo catalogue from a linear power spectrum
-def Generate_Halos_Box_from_Pk(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 10000.0, delta_c = -1.0, Nmin = 10, a = 1.0, beta = 0.0, alpha = 0.0, seed = 12345, OUT_DEN = False, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False, verbose = False, nthreads = 1):
+def Generate_Halos_Box_from_Pk(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 10000.0, delta_c = -1.0, Nmin = 10, a = 1.0, beta = 0.0, alpha = 0.0, seed = 12345, fixed = False, phase = 0.0, OUT_DEN = False, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False, verbose = False, nthreads = 1):
     """
     k: Wavenumbers of the power spectrum | 1D numpy array
     P: Power spectrum | 1D numpy array
@@ -44,6 +44,7 @@ def Generate_Halos_Box_from_Pk(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy
         a = np.float32(a)
         beta = np.float32(beta)
         alpha = np.float32(alpha)
+        phase - np.float32(phase)
 
     else:
         k = k.astype("float64")
@@ -56,7 +57,8 @@ def Generate_Halos_Box_from_Pk(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy
         delta_c = np.float64(delta_c)
         a = np.float64(a)
         beta = np.float64(beta)
-        alpha = np.float64(alpha)  
+        alpha = np.float64(alpha) 
+        phase = np.float64(phase) 
 
     #Define the number of cells in each direction
     if(ndx is None):
@@ -67,7 +69,7 @@ def Generate_Halos_Box_from_Pk(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy
         ndz = nd     
 
     #Run the .C program to generate the halo catalogue
-    x = exshalos.exshalos.exshalos.halos_box_from_pk(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(seed), k_smooth, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, np.int32(OUT_DEN), np.int32(OUT_LPT), np.int32(OUT_VEL), np.int32(DO_2LPT), np.int32(OUT_FLAG), np.int32(verbose), np.int32(nthreads))
+    x = exshalos.exshalos.exshalos.halos_box_from_pk(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(seed), k_smooth, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, np.int32(fixed), phase, np.int32(OUT_DEN), np.int32(OUT_LPT), np.int32(OUT_VEL), np.int32(DO_2LPT), np.int32(OUT_FLAG), np.int32(verbose), np.int32(nthreads))
 
     return x
 

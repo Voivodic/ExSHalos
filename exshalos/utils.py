@@ -4,7 +4,7 @@ from scipy.optimize import minimize
 from scipy.interpolate import interp1d
 
 #Compute the gaussian density grid given the power spectrum
-def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, outk = False, seed = 12345, verbose = False, nthreads = 1):
+def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, outk = False, seed = 12345, fixed = False, phase = 0.0, verbose = False, nthreads = 1):
     """
     k: Wavenumbers of the power spectrum | 1D numpy array
     P: Power spectrum | 1D numpy array
@@ -26,11 +26,13 @@ def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = No
         P = P.astype("float32")
         R_max = np.float32(R_max)
         Lc = np.float32(Lc)
+        phase = np.float32(phase)
     else:
         k = k.astype("float64")
         P = P.astype("float64")
         R_max = np.float64(R_max)
         Lc = np.float64(Lc)  
+        phase = np.float64(phase)
 
     if(ndx is None):
         ndx = nd
@@ -39,7 +41,7 @@ def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = No
     if(ndz is None):
         ndz = nd   
 
-    x = exshalos.exshalos.exshalos.density_grid_compute(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(outk), np.int32(seed), np.int32(verbose), np.int32(nthreads)) 
+    x = exshalos.exshalos.exshalos.density_grid_compute(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(outk), np.int32(seed), np.int32(fixed), phase, np.int32(verbose), np.int32(nthreads)) 
 
     return x
 
@@ -177,7 +179,7 @@ def Fit_Barrier(k, P, M, dndlnM, grid = None, R_max = 100000.0, Mmin = -1.0, Mma
     return x
 
 #Fit the parameters of the HOD
-'''def Fit_HOD(k, P, posh = None, Mh = None, velh = None, Ch = None, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, Om0 = 0.31, z = 0.0, x0 = None, sigma = 0.5, Deltah = -1.0, seed = 12345, USE_VEL = False, verbose = False):
+def Fit_HOD(k, P, nbar = None, posh = None, Mh = None, velh = None, Ch = None, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, Om0 = 0.31, z = 0.0, x0 = None, sigma = 0.5, Deltah = -1.0, seed = 12345, USE_VEL = False, l_max = 0, direction = "z", window = "cic", R = 4.0, R_times = 5.0, interlacing = True, Nk = 25, k_min = None, k_max = 0.3, verbose = False, nthreads = 1, Max_inter = 100, tol = None):
     """
     posh: Positions of the halos| 2D array (Nh, 3)
     velh: Velocities of the halos| 2D array (Nh, 3)
@@ -197,9 +199,36 @@ def Fit_Barrier(k, P, M, dndlnM, grid = None, R_max = 100000.0, Mmin = -1.0, Mma
     return: Return the 5 best fit parameters of the HOD | 1D numpy array (5)
     """
 
-    #Interpolate the given mass power spectrum
+    #Interpolate the given power spectrum
     fP = interp1d(k, P)
 
+    #Define the function to be minimized
+    def Chi2(theta):
+        logMmin, siglogM, logM0, logM1, alpha = theta
 
+        gals = exshalos.mock.Generate_Galaxies_from_Halos(posh, Mh, velh = velh, Ch = Ch, nd = nd, ndx = ndx, ndy = ndy, ndz = ndz, Lc = Lc, Om0 = Om0, z = z, logMmin = logMmin, siglogM = siglogM, logM0 = logM0, logM1 = logM1, alpha = alpha, sigma = sigma, Deltah = Deltah, seed = seed, OUT_VEL = USE_VEL, OUT_FLAG = False, verbose = verbose)
 
-    return pass'''
+        if(USE_VEL == True):
+            grid = exshalos.simulation.Compute_Density_Grid(gals["posg"], vel = gals["velg"], mass = None, type = None, nd = nd, L = nd*Lc, Om0 = Om0, z = z, direction = direction, window = "CIC", R = R, R_times = R_times, interlacing = interlacing, verbose = verbose, nthreads = nthreads)
+        else:
+            grid = exshalos.simulation.Compute_Density_Grid(gals["posg"], vel = None, mass = None, type = None, nd = nd, L = nd*Lc, Om0 = Om0, z = z, direction = None, window = "CIC", R = R, R_times = R_times, interlacing = interlacing, verbose = verbose, nthreads = nthreads)
+
+        Pk = exshalos.simulation.Compute_Power_Spectrum(grid, L = nd*Lc, window = window, R = R, Nk = Nk, k_min = k_min, k_max = k_max, l_max = l_max, verbose = verbose, nthreads = nthreads, ntype = 1, direction = direction)
+
+        if(nbar is None):
+            chi2 = (np.sum(np.power((Pk["Pk"] - fP(Pk["k"]))/(Pk["Pk"]/Pk["Nk"]), 2.0)))/(Nk - 6)
+        else:
+            chi2 = (np.sum(np.power((Pk["Pk"] - fP(Pk["k"]))/(Pk["Pk"]/Pk["Nk"]), 2.0)) + np.power((len(gals["posg"]) - nbar*(Lc*nd)**3)/len(gals["posg"]), 2.0))/(Nk - 6)            
+
+        return chi2
+
+    #Define the inital position
+    if(x0 is None):
+        x0 = [13.25424743, 0.26461332, 13.28383025, 14.32465146, 1.00811277]
+
+    #Minimaze the Chi2 to get the best fit parameters
+    bounds = [[9.0, 15.0], [0.0, 1.0], [9.0, 15.0], [9.0, 15.0], [0.0, 2.0]]
+    x = minimize(Chi2, x0 = x0, bounds = bounds, method = "Nelder-Mead", options = {"maxiter" : Max_inter}, tol = tol)
+    
+
+    return x
