@@ -232,7 +232,7 @@ def Generate_Galaxies_from_Halos(posh, Mh, velh = None, Ch = None, nd = 256, ndx
     return x
 
 #Split the galaxies in two colors
-def Split_Galaxies(Mh, Flag, C3 = 0.0, C2 = 0.17497771, C1 = -5.07596644, C0 = 37.10265321, S3 = 0.0, S2 = 0.10443049, S1 = -2.8352781, S0 = 19.84341938, seed = 12345, verbose = False):
+def Split_Galaxies(Mh, Flag, params_cen = np.array([37.10265321, -5.07596644, 0.17497771]), params_sat = np.array([19.84341938, -2.8352781, 0.10443049]), seed = 12345, verbose = False):
     """
     Mh: Mass of the halos | 1D array (Nh)
     Flag: Flag with the label of the host halo of each galaxy | 1D array (Ng)
@@ -248,27 +248,21 @@ def Split_Galaxies(Mh, Flag, C3 = 0.0, C2 = 0.17497771, C1 = -5.07596644, C0 = 3
 
     if(precision == 4):
         Mh = Mh.astype("float32")
-        Flag = Flag.astype("float32")
-        C3 = np.float32(C3)
-        C2 = np.float32(C2)
-        C1 = np.float32(C1)
-        C0 = np.float32(C0)
-        S3 = np.float32(S3)
-        S2 = np.float32(S2)
-        S1 = np.float32(S1)
-        S0 = np.float32(S0)
+        params_cen = params_cen.astype("float32")
+        params_sat = params_sat.astype("float32")
     else:
         Mh = Mh.astype("float64")
-        Flag = Flag.astype("float64")
-        C3 = np.float64(C3)
-        C2 = np.float64(C2)
-        C1 = np.float64(C1)
-        C0 = np.float64(C0)
-        S3 = np.float64(S3)
-        S2 = np.float64(S2)
-        S1 = np.float64(S1)
-        S0 = np.float64(S0)
+        params_cen = params_cen.astype("float64")
+        params_sat = params_sat.astype("float64")
 
-    x = exshalos.hod.hod.split_galaxies(Mh, Flag, C3, C2, C1, C0, S3, S2, S1, S0, np.int32(seed), np.int32(verbose))
+    if(len(params_cen.shape) == 1):
+        params_cen = params_cen.reshape([1, len(params_cen)])
+    if(len(params_sat.shape) == 1):
+        params_sat = params_sat.reshape([1, len(params_sat)])        
+
+    if(params_cen.shape[0] != params_sat.shape[0]):
+        raise ValueError("Different number of types of galaxies for the centrals and satellites! %d != %d!" %(params_cen.shape[0],  params_sat.shape[0]))
+
+    x = exshalos.hod.hod.split_galaxies(Mh, Flag, params_cen, params_sat, np.int32(seed), np.int32(verbose))
 
     return x

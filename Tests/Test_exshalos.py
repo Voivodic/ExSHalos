@@ -203,8 +203,12 @@ nh = len(x)
 f.close()
 
 x1 = np.loadtxt("/home/voivodic/Documents/Multi_EFT/HODs/Power_gals.dat")
+print(x1.shape)
 pl.clf()
-pl.plot(x1[:,0], x1[:,-2], "-", color = "black")
+pl.plot(x1[:,1], x1[:,5], linestyle = "-", color = "black")
+pl.plot(x1[:,1], x1[:,2], linestyle = "-", color = "blue")
+pl.plot(x1[:,1], x1[:,3], linestyle = "-", color = "red")
+pl.plot(x1[:,1], x1[:,4], linestyle = "-", color = "darkgreen")
 
 print(len(x[:,0]))
 
@@ -212,14 +216,28 @@ for i in range(1):
     print(i)
 
     star = time.time()
-    gals = exshalos.mock.Generate_Galaxies_from_Halos(x[:,1:4], pow(10.0, x[:,0]), nd = 4000, Lc = 1.0, Om0 = 0.31, z = 0.0, OUT_VEL = False, seed = i*642)
+    gals = exshalos.mock.Generate_Galaxies_from_Halos(x[:,1:4], pow(10.0, x[:,0]), nd = 4000, Lc = 1.0, Om0 = 0.31, z = 0.0, OUT_VEL = False, OUT_FLAG = True, seed = i*642)
+    gals_types = exshalos.mock.Split_Galaxies(pow(10.0, x[:,0]), gals["flag"], seed = i*642, verbose = False)
     end = time.time()
     rung = end - start
+
+    print(rung)
 
     gridg = exshalos.simulation.Compute_Density_Grid(gals["posg"], nd = 512, L = 4000.0, window = Window, interlacing = True, nthreads = 1, verbose = False)
     Pg = exshalos.simulation.Compute_Power_Spectrum(gridg, L = 4000.0, window = Window, Nk = 128, nthreads = 1, l_max = 0)
 
-    pl.plot(x1[:,0], Pg["Pk"] , "--")
+    pl.plot(Pg["k"], Pg["Pk"], linestyle = "--", color = "black")
+
+    print("Measuring the multi-grid")
+
+    gridg = exshalos.simulation.Compute_Density_Grid(gals["posg"], types = gals_types, nd = 512, L = 4000.0, window = Window, interlacing = True, nthreads = 1, verbose = False)
+    print(gridg.shape)
+    Pg = exshalos.simulation.Compute_Power_Spectrum(gridg, L = 4000.0, window = Window, Nk = 128, nthreads = 1, l_max = 0, ntypes = 2)
+    print(Pg["Pk"].shape)
+
+    pl.plot(Pg["k"], Pg["Pk"][0], linestyle = "--", color = "darkgreen")
+    pl.plot(Pg["k"], Pg["Pk"][1], linestyle = "--", color = "red")
+    pl.plot(Pg["k"], Pg["Pk"][2], linestyle = "--", color = "blue")   
 
 pl.grid(True)
 pl.xscale("log")

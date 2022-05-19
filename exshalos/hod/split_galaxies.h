@@ -3,18 +3,13 @@
 
 #include "hod_h.h"
 
-/*Relative occupancy of central red galaxies*/
-fft_real Occ_red_cen(fft_real Mh);
+/*Relative occupancy of central galaxies for each type*/
+fft_real Occ_cen(fft_real log10Mh, int type);
 
-/*Relative occupancy of central blue galaxies*/
-fft_real Occ_blue_cen(fft_real Mh);
-
-/*Relative occupancy of satellite red galaxies*/
-fft_real Occ_red_sat(fft_real Mh);
-
-/*Relative occupancy of satellite blue galaxies*/
-fft_real Occ_blue_sat(fft_real Mh);
+/*Relative occupancy of satellite galaxies for each type*/
+fft_real Occ_sat(fft_real log10Mh, int type);
 
 /*Determine the type of each galaxy*/
-void Galaxy_Types(size_t ng, fft_real *Massh, long *flag, int *gal_type, gsl_rng *rng_ptr);
+void Galaxy_Types(size_t ng, fft_real *Massh, long *flag, int *type, gsl_rng *rng_ptr);
+
 #endif

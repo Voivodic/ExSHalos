@@ -90,15 +90,23 @@ void set_hod(fft_real logMmin, fft_real siglogM, fft_real logM0, fft_real logM1,
 }
 
 /*Set the parameters used to make the split between the different colors*/
-void set_split(fft_real C3, fft_real C2, fft_real C1, fft_real C0, fft_real S3, fft_real S2, fft_real S1, fft_real S0){
-	split.C3 = C3; 		//Parameter of ln(M)^2 of the centrals
-	split.C2 = C2;		//Parameter of ln(M)^2 of the centrals
-	split.C1 = C1;		//Parameter of ln(M)^1 of the centrals
-	split.C0 = C0;		//Parameter of ln(M)^0 of the centrals
-	split.S3 = S3;		//Parameter of ln(M)^2 of the satellites
-	split.S2 = S2;		//Parameter of ln(M)^2 of the satellites
-	split.S1 = S1;		//Parameter of ln(M)^1 of the satellites
-	split.S0 = S0;		//Parameter of ln(M)^0 of the satellites
+void set_split(fft_real *params_cen, fft_real *params_sat, int ntypes, int order_cen, int order_sat){
+	int i, j;
+
+	split.ntypes = ntypes;
+	split.order_cen = order_cen;
+	split.order_sat = order_sat;
+
+	split.params_cen = (fft_real **)malloc((ntypes - 1)*sizeof(fft_real *));
+	split.params_sat = (fft_real **)malloc((ntypes - 1)*sizeof(fft_real *));
+	for(i=0;i<ntypes-1;i++){
+		split.params_cen[i] = (fft_real *)malloc(order_cen*sizeof(fft_real));
+		for(j=0;j<order_cen;j++)
+			split.params_cen[i][j] = params_cen[i*order_cen + j];
+		split.params_sat[i] = (fft_real *)malloc(order_sat*sizeof(fft_real));	
+		for(j=0;j<order_sat;j++)
+			split.params_sat[i][j] = params_sat[i*order_sat + j];
+	}
 }
 
 /*Set the parameters of the outputs*/

@@ -147,23 +147,23 @@ static PyObject *populate_halos(PyObject *self, PyObject *args, PyObject *kwargs
 /*Split the galaxies between red and blue*/
 static PyObject *split_galaxies(PyObject *self, PyObject *args, PyObject *kwargs){
     size_t ng;
-    int verbose, seed_in, *type;
+    int verbose, seed_in, *type, ntypes, order_cen, order_sat;
     long *flag;
-    fft_real *Mh, C3, C2, C1, C0, S3, S2, S1, S0;
+    fft_real *Mh, *params_cen, *params_sat;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"Mh_array", "Flag_array", "seed", "verbose", NULL};
+	static char *kwlist[] = {"Mh_array", "Flag_array", "params_cen_array", "params_sat_array", "seed", "verbose", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
-	PyArrayObject *Mh_array, *Flag_array;  
+	PyArrayObject *Mh_array, *Flag_array, *params_cen_array, *params_sat_array;  
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOddddddddii", kwlist, &Mh_array, &Flag_array, &C3, &C2, &C1, &C0, &S3, &S2, &S1, &S0, &seed_in, &verbose))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOii", kwlist, &Mh_array, &Flag_array, &params_cen_array, &params_sat_array, &seed_in, &verbose))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOffffffffii", kwlist, &Mh_array, &Flag_array, &C3, &C2, &C1, &C0, &S3, &S2, &S1, &S0, &seed_in, &verbose))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOii", kwlist, &Mh_array, &Flag_array, &params_cen_array, &params_sat_array, &seed_in, &verbose))
 			return NULL;
 	#endif
 
@@ -171,10 +171,20 @@ static PyObject *split_galaxies(PyObject *self, PyObject *args, PyObject *kwargs
     ng = (size_t) Flag_array->dimensions[0];
     Mh = (fft_real *) Mh_array->data;
     flag = (long *) Flag_array->data;
+    params_cen = (fft_real *) params_cen_array->data;
+    params_sat = (fft_real *) params_sat_array->data;
     seed = seed_in;
+    if(params_cen_array->dimensions[0] == params_sat_array->dimensions[0])
+        ntypes = params_cen_array->dimensions[0] + 1;
+    else{
+        printf("The number of types for centrals and satellites are different! %d != %d!\n", params_cen_array->dimensions[0],  params_sat_array->dimensions[0]);
+        exit(0);
+    }
+    order_cen = params_cen_array->dimensions[1];
+    order_sat = params_sat_array->dimensions[1];
 
     /*Set the free parameters used to do the separation*/
-    set_split(C3, C2, C1, C0, S3, S2, S1, S0);
+    set_split(params_cen, params_sat, ntypes, order_cen, order_sat);
 
     /*Initialize the randonm seed*/
     gsl_rng *rng_ptr;

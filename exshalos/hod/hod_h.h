@@ -90,14 +90,11 @@ typedef struct HOD{
 
 /*Structure with the parameters of the color split*/
 typedef struct Split{
-	fft_real C3; 		//Parameter of ln(M)^2 of the centrals
-	fft_real C2;		//Parameter of ln(M)^2 of the centrals
-	fft_real C1;		//Parameter of ln(M)^1 of the centrals
-	fft_real C0;		//Parameter of ln(M)^0 of the centrals
-	fft_real S3;		//Parameter of ln(M)^2 of the satellites
-	fft_real S2;		//Parameter of ln(M)^2 of the satellites
-	fft_real S1;		//Parameter of ln(M)^1 of the satellites
-	fft_real S0;		//Parameter of ln(M)^0 of the satellites
+	fft_real **params_cen;	//Parameters to split the central galaxies	
+	fft_real **params_sat;	//Parameters to split the satellite galaxies
+	int ntypes;				//Number of different types of galaxies
+	int order_cen;			//Order of the polynomium used to split the central galaxies
+	int order_sat;			//Order of the polynomium used to split the satellite galaxies
 } SPLIT;
 
 /*Structure with the output options*/
@@ -132,7 +129,7 @@ void set_cosmology(fft_real Om0, fft_real redshift, fft_real dc);
 void set_hod(fft_real logMmin, fft_real siglogM, fft_real logM0, fft_real logM1, fft_real alpha, fft_real sigma);
 
 /*Set the parameters used to make the split between the different colors*/
-void set_split(fft_real C3, fft_real C2, fft_real C1, fft_real C0, fft_real S3, fft_real S2, fft_real S1, fft_real S0);
+void set_split(fft_real *params_cen, fft_real *params_sat, int ntypes, int order_cen, int order_sat);
 
 /*Set the parameters of the outputs*/
 void set_out(char OUT_VEL, char DO_HOD, char IN_C, char VERBOSE);
