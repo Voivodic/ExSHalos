@@ -16,47 +16,46 @@ k, P = np.loadtxt("MDPL2_z00_matterpower.dat", unpack = True)
 
 #Compute the correlation function
 print("Computing the correlation")
-R, Xi = exshalos.simulation.Compute_Correlation(k, P, verbose = True)
-k2, P2 = exshalos.simulation.Compute_Correlation(R, Xi, direction = -1, verbose = True)
+Xi = exshalos.simulation.Compute_Correlation(k, P, verbose = True)
+P2 = exshalos.simulation.Compute_Correlation(Xi["R"], Xi["Xi"], direction = -1, verbose = True)
 
 #Plot the correlation
 pl.clf()
-pl.loglog(k, P, "-")
-pl.loglog(k2, P2, "--")
+pl.loglog(k, P, "-", marker = "")
+pl.loglog(P2["k"], P2["Pk"], "--", marker = "")
 pl.savefig("Correlation.pdf")
 
 #Compute the density grid
 print("Generating the density grid")
 grid = exshalos.utils.Generate_Density_Grid(k, P, Lc = Lc, nd = Nd)
-print(grid.shape)
+print(grid["grid"].shape)
 
-ks, Ps, Nks = exshalos.simulation.Compute_Power_Spectrum(grid, L = L, window = 0, Nk = Nk, nthreads = 1, l_max = 0)
+P_grid = exshalos.simulation.Compute_Power_Spectrum(grid["grid"], L = L, window = 0, Nk = Nk, nthreads = 1, l_max = 0)
 
-print(Ps.shape)
+print(P_grid["Pk"].shape)
 
 pl.clf()
 pl.loglog(k, P, "-")
-pl.loglog(ks, Ps, "o")
+pl.loglog(P_grid["k"], P_grid["Pk"], "o")
 pl.ylim(1e+2, 5e+4)
 pl.xlim(5e-3, 1e+0)
 pl.savefig("Power_sim.pdf")
 
 #Find the halos in the grid above
 print("Finding the halos")
-posh, Mh = exshalos.utils.Find_Halos_from_Grid(grid, k, P, Lc = Lc, Nmin = 10)
-print(posh.shape, Mh.shape)
+halos = exshalos.utils.Find_Halos_from_Grid(grid["grid"], k, P, Lc = Lc, Nmin = 10)
+print(halos["posh"].shape, halos["Mh"].shape)
 
-print(np.min(posh), np.max(posh))
-print("%e %e" %(np.min(Mh), np.max(Mh)))
+print("%e %e" %(np.min(halos["Mh"]), np.max(halos["Mh"])))
 
 #Compute the mass function
 t1 = time.time()
-M, dn, dn_err = exshalos.simulation.Compute_Abundance(Mh, Mmin = 1e+13, Mmax = 1e+15, Nm = 20, Lc = Lc, nd = Nd)
+dn = exshalos.simulation.Compute_Abundance(halos["Mh"], Mmin = 1e+13, Mmax = 1e+15, Nm = 20, Lc = Lc, nd = Nd)
 t1 = time.time() - t1
 
 t2 = time.time()
 Mbin = np.logspace(13, 15, 21)
-n = np.histogram(Mh, bins = Mbin)[0]
+n = np.histogram(halos["Mh"], bins = Mbin)[0]
 
 dn2 = n/(np.log(Mbin[1:]) - np.log(Mbin[:-1]))/(Lc**3*Nd**3)
 dn2_err = np.sqrt(n)/(np.log(Mbin[1:]) - np.log(Mbin[:-1]))/(Lc**3*Nd**3)
@@ -65,24 +64,24 @@ t2 = time.time() - t2
 print(t1, t2)
 
 #COmpute the spectrum
-gridh = exshalos.simulation.Compute_Density_Grid(posh, nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1, verbose = False)
-kh, Ph, Nkh = exshalos.simulation.Compute_Power_Spectrum(gridh, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
+gridh = exshalos.simulation.Compute_Density_Grid(halos["posh"], nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1, verbose = False)
+P_halos = exshalos.simulation.Compute_Power_Spectrum(gridh, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
 
 pl.clf()
-pl.loglog(kh, Ph , "s")
-pl.loglog(ks, Ps, "o")
+pl.loglog(P_halos["k"], P_halos["Pk"] , "s")
+pl.loglog(P_grid["k"], P_grid["Pk"], "o")
 #pl.ylim(1e+2, 5e+4)
 #pl.xlim(5e-3, 1e+0)
 pl.savefig("Power_halos.pdf")
 
 pl.clf()
-pl.hist(Mh, bins = np.logspace(11, 15, 41), log=True)
+pl.hist(halos["Mh"], bins = np.logspace(11, 15, 41), log=True)
 pl.xscale("log")
 pl.savefig("Hist_Mh.pdf")
 
 #Compute the LPT using the same grid
 print("Doing LPT")
-pos, vel = exshalos.utils.Displace_LPT(grid, Lc = Lc, k_smooth = 0.4, DO_2LPT = False, OUT_VEL = True, OUT_POS = False)
+lpt = exshalos.utils.Displace_LPT(grid["grid"], Lc = Lc, k_smooth = 0.4, DO_2LPT = False, OUT_VEL = True, OUT_POS = False)
 
 #gridp = exshalos.simulation.Compute_Density_Grid(pos, nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1)
 #kp, Pp, Nkp = exshalos.simulation.Compute_Power_Spectrum(gridp, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
@@ -154,47 +153,46 @@ pl.savefig("Power_halos1.pdf")
 '''
 
 start = time.time()
-posh2, Mh2 = exshalos.mock.Generate_Halos_Box_from_Pk(k, P, nd = Nd, Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_DEN = False, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
+halos2 = exshalos.mock.Generate_Halos_Box_from_Pk(k, P, nd = Nd, Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_DEN = False, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
 end = time.time()
 run1 = end - start
 
 start = time.time()
-posh3, Mh3= exshalos.mock.Generate_Halos_Box_from_Grid(grid = grid, k = k, P = P, Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
+halos3 = exshalos.mock.Generate_Halos_Box_from_Grid(grid = grid["grid"], k = k, P = P, Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
 end = time.time()
 run2 = end - start
 
 start = time.time()
-posh4, Mh4= exshalos.mock.Generate_Halos_Box_from_Grid(grid = grid, k = k, P = P, S = pos, Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
+halos4 = exshalos.mock.Generate_Halos_Box_from_Grid(grid = grid["grid"], k = k, P = P, S = lpt["pos"], Lc = Lc, Om0 = 0.31, z = 0.0, k_smooth = 0.4, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False)
 end = time.time()
 run3 = end - start
 
-print(posh2.shape, posh3.shape, posh4.shape)
+print(halos2["posh"].shape, halos3["posh"].shape, halos4["posh"].shape)
 print(run1, run2, run3)
 
 print("Generating the galaxy catalogue")
-print(posh2.shape, Mh2.shape)
 star = time.time()
-posg = exshalos.mock.Generate_Galaxies_from_Halos(posh2, Mh2, nd = Nd, Lc = Lc, Om0 = 0.31, z = 0.0, OUT_VEL = False)
+gals = exshalos.mock.Generate_Galaxies_from_Halos(halos2["posh"], halos2["Mh"], nd = Nd, Lc = Lc, Om0 = 0.31, z = 0.0, OUT_VEL = False)
 end = time.time()
 rung = end - star
 
-gridh = exshalos.simulation.Compute_Density_Grid(posh2, nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1, verbose = False)
-kh, Ph, Nkh = exshalos.simulation.Compute_Power_Spectrum(gridh, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
+gridh = exshalos.simulation.Compute_Density_Grid(halos2["posh"], nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1, verbose = False)
+Ph = exshalos.simulation.Compute_Power_Spectrum(gridh, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
 
-gridg = exshalos.simulation.Compute_Density_Grid(posg, nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1, verbose = False)
-kg, Pg, Nkg = exshalos.simulation.Compute_Power_Spectrum(gridg, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
+gridg = exshalos.simulation.Compute_Density_Grid(gals["posg"], nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1, verbose = False)
+Pg = exshalos.simulation.Compute_Power_Spectrum(gridg, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
 
 pl.clf()
-pl.plot(kg, Pg , "o", color = "blue")
-pl.plot(kh, Ph , "o", color = "red")
-pl.plot(ks, Ps, "o", color = "black")
+pl.plot(Pg["k"], Pg["Pk"], "o", color = "blue")
+pl.plot(Ph["k"], Ph["Pk"], "o", color = "red")
+pl.plot(P_grid["k"], P_grid["Pk"], "o", color = "black")
 
 pl.grid(True)
 pl.xscale("log")
 pl.yscale("log")
 pl.savefig("Power_gal.pdf")
 
-print(posg.shape)
+print(gals["posg"].shape)
 print(rung)
 
 
@@ -208,21 +206,25 @@ x1 = np.loadtxt("/home/voivodic/Documents/Multi_EFT/HODs/Power_gals.dat")
 pl.clf()
 pl.plot(x1[:,0], x1[:,-2], "-", color = "black")
 
+print(len(x[:,0]))
+
 for i in range(1):
     print(i)
 
-    posg = exshalos.mock.Generate_Galaxies_from_Halos(x[:,1:4], pow(10.0, x[:,0]), nd = 4000, Lc = 1.0, Om0 = 0.31, z = 0.0, OUT_VEL = False, seed = i*642)
+    star = time.time()
+    gals = exshalos.mock.Generate_Galaxies_from_Halos(x[:,1:4], pow(10.0, x[:,0]), nd = 4000, Lc = 1.0, Om0 = 0.31, z = 0.0, OUT_VEL = False, seed = i*642)
     end = time.time()
+    rung = end - start
 
-    gridg = exshalos.simulation.Compute_Density_Grid(posg, nd = 512, L = 4000.0, window = Window, interlacing = True, nthreads = 1, verbose = False)
-    kg, Pg, Nkg = exshalos.simulation.Compute_Power_Spectrum(gridg, L = 4000.0, window = Window, Nk = 128, nthreads = 1, l_max = 0)
+    gridg = exshalos.simulation.Compute_Density_Grid(gals["posg"], nd = 512, L = 4000.0, window = Window, interlacing = True, nthreads = 1, verbose = False)
+    Pg = exshalos.simulation.Compute_Power_Spectrum(gridg, L = 4000.0, window = Window, Nk = 128, nthreads = 1, l_max = 0)
 
-    pl.plot(x1[:,0], Pg , "--")
+    pl.plot(x1[:,0], Pg["Pk"] , "--")
 
 pl.grid(True)
 pl.xscale("log")
 pl.yscale("log")
 pl.savefig("Power_gal_MD.pdf")
 
-print(posg.shape)
+print(gals["posg"].shape)
 print(rung)
