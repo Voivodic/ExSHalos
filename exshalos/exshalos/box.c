@@ -34,7 +34,7 @@ size_t Generate_Halos_Box_from_Pk(fft_real *K, fft_real *P, int Nk, fft_real R_m
 		}
 
     /*Alloc the array for the displacements*/
-    if(out.DO_2LPT == TRUE || out.OUT_LPT == FALSE)
+    if(out.DO_2LPT == TRUE && out.OUT_LPT == FALSE)
         S = (fft_real *) malloc(3*box.ng*sizeof(fft_real));
 
     /*Compute the LPT*/
