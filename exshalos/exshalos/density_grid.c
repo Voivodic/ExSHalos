@@ -134,7 +134,7 @@ void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *del
                 if(fixed == FALSE)
                     A = (fft_real) gsl_ran_gaussian(rng_ptr, (double) std);
                 else
-                    A = std;
+                    A = std*(1.0 + 1e-6*(-1.0 + 2.0*(fft_real) gsl_rng_uniform(rng_ptr)));
                 theta = 2.0*M_PI*((fft_real) gsl_rng_uniform(rng_ptr));
 	
 				/*Generate Gaussian random number with std*/
