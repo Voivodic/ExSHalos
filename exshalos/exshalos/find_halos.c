@@ -161,7 +161,7 @@ size_t partition_peaks(PEAKS *a, size_t l, size_t r){
 	for(k=0;k<3;k++) pivot.x[k] = a[l].x[k];	
    	i = l; j = r+1;
 		
-   	while( 1){
+   	while(TRUE){
    	do ++i; while( a[i].den >= pivot.den && i < r );
    	do --j; while( a[j].den < pivot.den );
    	if( i >= j ) break;
