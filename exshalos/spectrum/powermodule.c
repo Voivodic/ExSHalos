@@ -101,7 +101,7 @@ void Power_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, f
         if(count_k[i]>0){
             for(j=0;j<NPs;j++)
                 for(k=0;k<ls;k++)
-                    P[(j*ls + k)*Nk + i] = (2.0*k + 1.0)*P[(j*ls + k)*Nk + i]/count_k[i];
+                    P[(j*ls + k)*Nk + i] = (4.0*k + 1.0)*P[(j*ls + k)*Nk + i]/count_k[i];
             Kmean[i] = Kmean[i]/count_k[i];	
             count_k[i] = 2.0*count_k[i];
         }
