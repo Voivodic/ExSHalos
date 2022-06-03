@@ -86,38 +86,34 @@ lpt = exshalos.utils.Displace_LPT(grid["grid"], Lc = Lc, k_smooth = 0.4, DO_2LPT
 #gridp = exshalos.simulation.Compute_Density_Grid(pos, nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1)
 #kp, Pp, Nkp = exshalos.simulation.Compute_Power_Spectrum(gridp, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
 
-'''
-
 pl.clf()
 #pl.plot(ks, Ps, "o", label = "Gaussian")
-k_smooth = [1.0]
+k_smooth = [0.1, 0.5, 2.0]
 cores = ["blue", "red", "darkgreen", "purple", "black"]
 for ks, cor in zip(k_smooth, cores):
-    pos = exshalos.utils.Displace_LPT(grid, Lc = Lc, k_smooth = ks, DO_2LPT = False)
+    print(ks)
 
-    gridp = exshalos.simulation.Compute_Density_Grid(pos, nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1)
-    kp, Pp, Nkp = exshalos.simulation.Compute_Power_Spectrum(gridp, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
+    pos = exshalos.utils.Displace_LPT(grid['grid'], Lc = Lc, k_smooth = ks, DO_2LPT = False)
 
-    pl.plot(kp, Pp/Ps - 1.0, "s", color = cor, label = r"$k_{\rm smooth} = %.2f$" %(ks))
+    gridp = exshalos.simulation.Compute_Density_Grid(pos['pos'], nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1)
+    Plpt = exshalos.simulation.Compute_Power_Spectrum(gridp, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
 
-    pos = exshalos.utils.Displace_LPT(grid, Lc = Lc, k_smooth = ks, DO_2LPT = True)
+    pl.plot(Plpt['k'], Plpt['Pk']/P_grid["Pk"] - 1.0, "s", color = cor, label = r"$k_{\rm smooth} = %.2f$" %(ks))
 
-    gridp = exshalos.simulation.Compute_Density_Grid(pos, nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1)
-    kp, Pp, Nkp = exshalos.simulation.Compute_Power_Spectrum(gridp, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
+    pos = exshalos.utils.Displace_LPT(grid['grid'], Lc = Lc, k_smooth = ks, DO_2LPT = True)
 
-    pl.plot(kp, Pp/Ps - 1.0, "^", color = cor)   
+    gridp = exshalos.simulation.Compute_Density_Grid(pos['pos'], nd = Nd, L = L, window = Window, interlacing = True, nthreads = 1)
+    Plpt = exshalos.simulation.Compute_Power_Spectrum(gridp, L = L, window = Window, Nk = Nk, nthreads = 1, l_max = 0)
+
+    pl.plot(Plpt['k'], Plpt['Pk']/P_grid["Pk"] - 1.0, "^", color = cor)   
 
 pl.grid(True)
 pl.yscale("linear")
 pl.ylim(-0.5, 0.25)
-pl.xlim(0.0, 0.6)
+pl.xlim(0.0, 1.0)
 pl.legend(loc = "best")
 pl.savefig("Power_LPT.pdf")
 
-print(np.mean(grid), np.std(grid))
-print(np.mean(gridp[0]), np.std(gridp[0]))
-print(np.mean(gridh[0]), np.std(gridh[0]))
-'''
 #Generate a halo catalogue from a given power spectrum
 print("Generating the halo catalogue")
 '''
