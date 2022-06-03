@@ -13,24 +13,24 @@ void Compute_1LPT(fft_complex *deltak, fft_real *posh, fft_real *velh, fft_real 
 		if(2*i<box.nd[0]) kx = i*box.kl[0];
 		else kx = (i-box.nd[0])*box.kl[0];
 
-		factx = 1.0/90.0*(2.0*cos(3.0*kx*box.Lc) - 27.0*cos(2.0*kx*box.Lc) + 270.0*cos(kx*box.Lc) - 245.0)/(box.Lc*box.Lc);
+		//factx = 1.0/90.0*(2.0*cos(3.0*kx*box.Lc) - 27.0*cos(2.0*kx*box.Lc) + 270.0*cos(kx*box.Lc) - 245.0)/(box.Lc*box.Lc);
 	
 		for(j=0;j<box.nd[1];j++){
 			if(2*j<box.nd[1]) ky = j*box.kl[1];
 			else ky = (j-box.nd[1])*box.kl[1];
 
-			facty = 1.0/90.0*(2.0*cos(3.0*ky*box.Lc) - 27.0*cos(2.0*ky*box.Lc) + 270.0*cos(ky*box.Lc) - 245.0)/(box.Lc*box.Lc);
+			//facty = 1.0/90.0*(2.0*cos(3.0*ky*box.Lc) - 27.0*cos(2.0*ky*box.Lc) + 270.0*cos(ky*box.Lc) - 245.0)/(box.Lc*box.Lc);
 	
 			for(k=0;k<box.nz2;k++){
 				kz = k*box.kl[2];
 				if(k == box.nd[2]/2) kz = -(fft_real)box.nd[2]/2.0*box.kl[2];
 
-				factz = 1.0/90.0*(2.0*cos(3.0*kz*box.Lc) - 27.0*cos(2.0*kz*box.Lc) + 270.0*cos(kz*box.Lc) - 245.0)/(box.Lc*box.Lc);
+				//factz = 1.0/90.0*(2.0*cos(3.0*kz*box.Lc) - 27.0*cos(2.0*kz*box.Lc) + 270.0*cos(kz*box.Lc) - 245.0)/(box.Lc*box.Lc);
 				kmod = sqrt(pow(kx, 2.0) + pow(ky, 2.0) + pow(kz, 2.0));
 
 				ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nz2 + (size_t)k;
 				if((kx != 0.0 || ky != 0.0 || kz != 0.0) && (kmod <= k_smooth)){
-					fact = factx + facty + factz;
+					fact = -pow(kmod, 2.0);//factx + facty + factz;
 					
 					deltak[ind][0] = deltak[ind][0]/fact;
 					deltak[ind][1] = deltak[ind][1]/fact;
@@ -142,24 +142,24 @@ void Compute_2LPT(fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, size
 		if(2*i<box.nd[0]) kx = i*box.kl[0];
 		else kx = (i-box.nd[0])*box.kl[0];
 	
-		factx = 1.0/90.0*(2.0*cos(3.0*kx*box.Lc) - 27.0*cos(2.0*kx*box.Lc) + 270.0*cos(kx*box.Lc) - 245.0)/(box.Lc*box.Lc);
+		//factx = 1.0/90.0*(2.0*cos(3.0*kx*box.Lc) - 27.0*cos(2.0*kx*box.Lc) + 270.0*cos(kx*box.Lc) - 245.0)/(box.Lc*box.Lc);
 
 		for(j=0;j<box.nd[1];j++){
 			if(2*j<box.nd[1]) ky = j*box.kl[1];
 			else ky = (j-box.nd[1])*box.kl[1];
 
-			facty = 1.0/90.0*(2.0*cos(3.0*ky*box.Lc) - 27.0*cos(2.0*ky*box.Lc) + 270.0*cos(ky*box.Lc) - 245.0)/(box.Lc*box.Lc);
+			//facty = 1.0/90.0*(2.0*cos(3.0*ky*box.Lc) - 27.0*cos(2.0*ky*box.Lc) + 270.0*cos(ky*box.Lc) - 245.0)/(box.Lc*box.Lc);
 	
 			for(k=0;k<box.nz2;k++){
 				kz = k*box.kl[2];
 				if(k == box.nd[2]/2) kz = -(fft_real)box.nd[2]/2.0*box.kl[2];
 
-				factz = 1.0/90.0*(2.0*cos(3.0*kz*box.Lc) - 27.0*cos(2.0*kz*box.Lc) + 270.0*cos(kz*box.Lc) - 245.0)/(box.Lc*box.Lc);
+				//factz = 1.0/90.0*(2.0*cos(3.0*kz*box.Lc) - 27.0*cos(2.0*kz*box.Lc) + 270.0*cos(kz*box.Lc) - 245.0)/(box.Lc*box.Lc);
 				kmod = sqrt(pow(kx, 2.0) + pow(ky, 2.0) + pow(kz, 2.0));
 
 				ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nz2 + (size_t)k;
 				if((kx != 0.0 || ky != 0.0 || kz != 0.0) && (kmod <= k_smooth)){
-					fact = factx + facty + factz;
+					fact = -pow(kmod, 2.0);//factx + facty + factz;
 
 					phik[ind][0] = phik[ind][0]/fact*box.Normk;
 					phik[ind][1] = phik[ind][1]/fact*box.Normk;
