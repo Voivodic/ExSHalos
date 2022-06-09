@@ -53,7 +53,7 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
     /*Compute the density grids for the first bin of k*/
     for(a=0;a<(int) Nk;a++){
         if(verbose == TRUE)
-            printf("a = %d of %d. %d Bispectra computed so far.", a+1, Nk, count_tri);
+            printf("a = %d of %d. %d Bispectra computed so far\n", a+1, Nk, count_tri);
 
         km1 = 0.0;
         countk1 = 0;
