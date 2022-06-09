@@ -242,7 +242,7 @@ static PyObject *bi_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     I = (long double *) malloc(Ntri*sizeof(long double));  
 
     /*Computes the bispectrum*/
-    Ntri = Bi_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, K1, K2, K3, B, I, KP, P, IP);
+    Ntri = Bi_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, K1, K2, K3, B, I, KP, P, IP, verbose);
 
     /*Prepare the PyObject arrays for the outputs*/
     npy_intp dims_B[] = {(npy_intp) NBs, (npy_intp) Ntri};

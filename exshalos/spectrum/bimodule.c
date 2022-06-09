@@ -1,7 +1,7 @@
 #include "bimodule.h"
 
 /*Compute all the cross bispectra*/
-int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_real R, int interlacing, int Nk, fft_real k_min, fft_real k_max, long double *K1, long double *K2, long double *K3, long double **B, long double *I, long double *KP, long double **P, long double *IP){
+int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_real R, int interlacing, int Nk, fft_real k_min, fft_real k_max, long double *K1, long double *K2, long double *K3, long double **B, long double *I, long double *KP, long double **P, long double *IP, int verbose){
     int i, j, k, l, a, b, c, f1, f2, f3, tmpc, count_tri, count_pk, ind, NPs, NBs, countk1, countk2, countk3;
     size_t tmp, ng;
     fft_real dk, kmod, kx, ky, kz, kn = 2*M_PI/L, km1, km2, km3;
@@ -52,6 +52,9 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
     /**************************/
     /*Compute the density grids for the first bin of k*/
     for(a=0;a<(int) Nk;a++){
+        if(verbose == TRUE)
+            printf("a = %d of %d. %d Bispectra computed so far.", a+1, Nk, count_tri);
+
         km1 = 0.0;
         countk1 = 0;
         #pragma omp parallel for private(i, j, k, l, kx, ky, kz, kmod, ind, tmp) reduction(+:km1,countk1)
