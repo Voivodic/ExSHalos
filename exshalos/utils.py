@@ -4,7 +4,7 @@ from scipy.optimize import minimize
 from scipy.interpolate import interp1d
 
 #Compute the gaussian density grid given the power spectrum
-def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, outk = False, seed = 12345, fixed = False, phase = 0.0, verbose = False, nthreads = 1):
+def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, outk = False, seed = 12345, fixed = False, phase = 0.0, k_smooth = 100000.0, verbose = False, nthreads = 1):
     """
     k: Wavenumbers of the power spectrum | 1D numpy array
     P: Power spectrum | 1D numpy array
@@ -27,12 +27,15 @@ def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = No
         R_max = np.float32(R_max)
         Lc = np.float32(Lc)
         phase = np.float32(phase)
+        k_smooth = np.float32(k_smooth)
     else:
         k = k.astype("float64")
         P = P.astype("float64")
         R_max = np.float64(R_max)
         Lc = np.float64(Lc)  
         phase = np.float64(phase)
+        k_smooth = np.float64(k_smooth)
+
 
     if(ndx is None):
         ndx = nd
@@ -41,7 +44,7 @@ def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = No
     if(ndz is None):
         ndz = nd   
 
-    x = exshalos.exshalos.exshalos.density_grid_compute(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(outk), np.int32(seed), np.int32(fixed), phase, np.int32(verbose), np.int32(nthreads)) 
+    x = exshalos.exshalos.exshalos.density_grid_compute(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(outk), np.int32(seed), np.int32(fixed), phase, k_smooth, np.int32(verbose), np.int32(nthreads)) 
 
     return x
 

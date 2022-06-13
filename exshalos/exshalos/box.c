@@ -15,7 +15,7 @@ size_t Generate_Halos_Box_from_Pk(fft_real *K, fft_real *P, int Nk, fft_real R_m
     check_memory(deltak, "deltak")
 
     /*Compute the density grids*/
-    Compute_Den(K, P, Nk, R_max, delta, deltak, fixed, phase);
+    Compute_Den(K, P, Nk, R_max, delta, deltak, fixed, phase, 100000.0);
 
     /*Find the halos in the density grid*/
     nh = Find_Halos(delta, K, P, Nk, flag, halos);

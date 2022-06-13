@@ -127,11 +127,11 @@ static PyObject *correlation_compute(PyObject *self, PyObject *args, PyObject *k
 /*Compute the Gaussian density grid*/
 static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     int ndx, ndy, ndz, outk, Nk, verbose, nthreads, seed, fixed;
-    fft_real Lc, R_max, *K, *P, *delta, phase;
+    fft_real Lc, R_max, *K, *P, *delta, phase, k_smooth;
     fft_complex *deltak;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"k", "P", "R_max", "Ndx", "Ndy", "Ndz", "Lc/Mc", "outk", "seed", "fixed", "phase", "verbose", "nthreads", NULL};
+	static char *kwlist[] = {"k", "P", "R_max", "Ndx", "Ndy", "Ndz", "Lc/Mc", "outk", "seed", "fixed", "phase", "k_smooth", "verbose", "nthreads", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
@@ -139,10 +139,10 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOdiiidiiidii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &outk, &seed, &fixed, &phase, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOdiiidiiiddii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &outk, &seed, &fixed, &phase, &k_smooth, &verbose, &nthreads))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOfiiifiiifii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &outk, &seed, &fixed, &phase, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOfiiifiiiffii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &outk, &seed, &fixed, &phase, &k_smooth, &verbose, &nthreads))
 			return NULL;
 	#endif
 
@@ -188,7 +188,7 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
     }
 
     /*Compute the density grids*/
-    Compute_Den(K, P, Nk, R_max, delta, deltak, fixed, phase);
+    Compute_Den(K, P, Nk, R_max, delta, deltak, fixed, phase, k_smooth);
 
     /*Put the arrays in the output dict*/
     PyObject *dict = PyDict_New();
