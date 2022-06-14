@@ -150,9 +150,6 @@ def Fit_Barrier(k, P, M, dndlnM, dn_err = None, grid = None, R_max = 100000.0, M
     return: The values of the parameters of the ellipsoidal barrier | 3 x float
     """
 
-    #Interpolate the given mass function
-    fdn = interp1d(np.log(M[M>0.0]), dndlnM[M>0.0])
-
     #Construct the gaussian density grid
     if(grid is None):
         grid = Generate_Density_Grid(k, P, R_max, nd = nd, Lc = Lc, seed = seed, verbose = verbose, nthreads = nthreads)
@@ -160,6 +157,10 @@ def Fit_Barrier(k, P, M, dndlnM, dn_err = None, grid = None, R_max = 100000.0, M
     #Check if the mass fucntion has a error
     if(dn_err is None):
         dn_err = np.zeros(Nm)
+
+    #Interpolate the given mass function
+    fdn = interp1d(np.log(M[M>0.0]), dndlnM[M>0.0], bounds_error = False, fill_value = 0.0)
+    fdn_err = interp1d(np.log(M[M>0.0]), dn_err[M>0.0], bounds_error = False, fill_value = 0.0)
 
     #Define the function to be minimized to find the best parameters of the barrier
     def Chi2(theta):
@@ -170,7 +171,7 @@ def Fit_Barrier(k, P, M, dndlnM, dn_err = None, grid = None, R_max = 100000.0, M
         dnh = exshalos.simulation.Compute_Abundance(x["Mh"], Mmin = Mmin, Mmax = Mmax, Nm = Nm, Lc = Lc, nd = nd, verbose = verbose)
 
         mask = dnh["dn"] > 0.0
-        chi2 = np.sum(np.power((dnh["dn"][mask] - fdn(np.log(dnh["Mh"][mask]))), 2.0)/(np.power(dnh["dn_err"][mask], 2.0) + np.power(dn_err, 2.0)))/(Nm - 4)
+        chi2 = np.sum(np.power((dnh["dn"][mask] - fdn(np.log(dnh["Mh"][mask]))), 2.0)/(np.power(dnh["dn_err"][mask], 2.0) + np.power(fdn_err(dnh["Mh"][mask]), 2.0)))/(Nm - 4)
         print("Current try: (%f, %f, %f) with chi2 = %f" %(a, beta, alpha, chi2))
 
         return chi2
@@ -180,7 +181,7 @@ def Fit_Barrier(k, P, M, dndlnM, dn_err = None, grid = None, R_max = 100000.0, M
         x0 = [0.55, 0.4, 0.7]#np.random.random(3)*[2.0, 1.0, 1.0]
 
     #Minimaze the Chi2 to get the best fit parameters
-    bounds = [[0.0, 2.0], [0.0, 1.0], [0.0, 1.0]]
+    bounds = [[0.1, 2.0], [0.0, 1.0], [0.0, 1.0]]
     x = minimize(Chi2, x0 = x0, bounds = bounds, method = "Nelder-Mead", options = {"maxiter" : Max_inter}, tol = tol)
 
     return x
