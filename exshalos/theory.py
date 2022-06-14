@@ -45,7 +45,7 @@ def Get_Dz(Om0 = 0.31, zmax = 1000, zmin = -0.5, nzs = 1000):
 	resp = {}
 
 	#Set the initial conditions
-	a = np.logspace(1.0/(zmax + 1.0), 1.0/(zmin + 1.0), nzs)
+	a = np.logspace(np.log10(1.0/(zmax + 1.0)), np.log10(1.0/(zmin + 1.0)), nzs)
 	resp['z'] = 1.0/a - 1.0
 	resp['a'] = a
 	d0 = a[0]
