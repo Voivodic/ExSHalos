@@ -151,7 +151,7 @@ def Fit_Barrier(k, P, M, dndlnM, grid = None, R_max = 100000.0, Mmin = -1.0, Mma
     """
 
     #Interpolate the given mass function
-    fdn = interp1d(np.log(M), dndlnM)
+    fdn = interp1d(np.log(M[M>0.0]), dndlnM[M>0.0])
 
     #Construct the gaussian density grid
     if(grid == None):
