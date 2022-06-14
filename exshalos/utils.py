@@ -154,11 +154,11 @@ def Fit_Barrier(k, P, M, dndlnM, dn_err = None, grid = None, R_max = 100000.0, M
     fdn = interp1d(np.log(M[M>0.0]), dndlnM[M>0.0])
 
     #Construct the gaussian density grid
-    if(grid == None):
+    if(grid is None):
         grid = Generate_Density_Grid(k, P, R_max, nd = nd, Lc = Lc, seed = seed, verbose = verbose, nthreads = nthreads)
 
     #Check if the mass fucntion has a error
-    if(dn_err == None):
+    if(dn_err is None):
         dn_err = np.zeros(Nm)
 
     #Define the function to be minimized to find the best parameters of the barrier
