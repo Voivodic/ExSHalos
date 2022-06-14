@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.integrate import simps
+from scipy.integrate import simps, odeint
 from scipy.special import binom
 
 #Get the mass of each cell given its size
@@ -11,16 +11,53 @@ def Get_Lc(Om0 = 0.31, Mcell = 8.5e+10):
 	return np.power(Mcell/(2.775e+11*Om0), 1.0/3.0)
 
 #Return the value of the matter overdensity in a given redshift
-def Get_Omz(Om0 = 0.31, z = 0.0):
+def Get_Omz(z = 0.0, Om0 = 0.31):
 	return Om0*pow(1.0 + z, 3.0)/(Om0*pow(1.0 + z, 3.0) + (1.0 - Om0))
 
 #Return the the value of deltac following a fit
-def Get_deltac(Omz = 0.31):
-	return 1.686*pow(Omz, 0.0055)
+def Get_deltac(z = 0.0, Om0 = 0.31):
+	return 1.686*pow(Get_Omz(z, Om0), 0.0055)
 
 #Return the Hubble function in units of 100*h
-def Get_Hz(Om0 = 0.31, z = 0.0):
+def Get_Hz(z = 0.0, Om0 = 0.31):
 	return np.sqrt(Om0*np.power(1.0 + z, 3.0) + (1.0 - Om0))
+
+#Return the Hubble function in units of 100*h
+def Get_Ha(a = 1.0, Om0 = 0.31):
+	return np.sqrt(Om0*np.power(a, -3.0) + (1.0 - Om0)) 
+
+#Return the derivative of the Hubble's function in units of 100*h
+def Get_dHa(a = 1.0, Om0 = 0.31):
+        return -1.5*Om0*np.power(a, -4.0)/Get_Ha(a, Om0)
+
+#Return the growth rate
+def Get_fz(z = 0.0, Om0 = 0.31):
+	return np.power(Get_Omz(z, Om0), 0.5454)
+
+#Define the system of differential equations used to compute the growth function
+def Growth_eq(y, a, Om0):
+        d, v = y
+
+        return np.array([v, -(3.0/a + Get_dHa(a, Om0)/Get_Ha(a, Om0))*v + 3.0/2.0*Om0/(np.power(Get_Ha(a, Om0), 2.0)*np.power(a, 5.0))*d])
+
+#Return the growth function
+def Get_Dz(Om0 = 0.31, zmax = 1000, zmin = -0.5, nzs = 1000):
+	resp = {}
+
+	#Set the initial conditions
+	a = np.logspace(1.0/(zmax + 1.0), 1.0/(zmin + 1.0), nzs)
+	resp['z'] = 1.0/a - 1.0
+	resp['a'] = a
+	d0 = a[0]
+	dd0 = 1.0
+	y0 = [d0, dd0]
+
+	#Solve the Growth function equation
+	sol = odeint(Growth_eq, y0, a, args=(Om0))
+	resp['Dz'] = sol[:,0]
+	resp['dDz'] = sol[:,1]
+
+	return resp
 
 #Window function in Fourier space
 def W(k, R):
