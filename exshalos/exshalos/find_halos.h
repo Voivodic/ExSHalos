@@ -24,11 +24,14 @@ size_t Count_Peaks(fft_real *delta);
 /*Save the positions and density of each peak*/
 void Find_Peaks(fft_real *delta, size_t np, PEAKS *peaks);
 
+/*function to swap elements*/
+void swap_peaks(PEAKS *a, PEAKS *b);
+
 /*Partition function for the quicksort*/
-size_t partition_peaks(PEAKS *a, size_t l, size_t r);
+long long partition_peaks(PEAKS *array, long long low, long long high);
 
 /*The quicksort algorithm to sort the peaks list*/
-void quickSort_peaks(PEAKS *a, size_t l, size_t r);
+void quickSort_peaks(PEAKS *array, long long low, long long high);
 
 /*Barrier used for the halo definition*/
 fft_real Barrier(fft_real S);

@@ -19,6 +19,7 @@ size_t Generate_Halos_Box_from_Pk(fft_real *K, fft_real *P, int Nk, fft_real R_m
 
     /*Find the halos in the density grid*/
     nh = Find_Halos(delta, K, P, Nk, flag, halos);
+
     if(out.OUT_DEN == FALSE)
         free(delta);
 

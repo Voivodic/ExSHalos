@@ -79,8 +79,10 @@ void Compute_nh(int model, int Nr, fft_real *R, double *M, double *Sig, gsl_spli
     Int[0] = 0.0;
 
     /*Compute the mass function*/
-    for(i=1;i<Nr;i++)
+    for(i=1;i<Nr;i++){
         Int[i] = Int[i-1] - (double) (log(Sig[i]) - log(Sig[i-1]))/2.0*(fh(Sig[i], model)/pow(R[i], 3.0) + fh(Sig[i-1], model)/pow(R[i-1], 3.0));
+        if(Int[i] == Int[i-1])  Int[i] = Int[i-1]*1.000001;
+    }
 
     /*Interpolate the integral of the mass function as function of mass and its inverse*/
     gsl_spline_init(spline_I, M, Int, Nr);
@@ -153,37 +155,45 @@ void Find_Peaks(fft_real *delta, size_t np, PEAKS *peaks){
     }
 }
 
-/*Partition function for the quicksort*/
-size_t partition_peaks(PEAKS *a, size_t l, size_t r){
-   	size_t i, j, k;
-	PEAKS pivot, t;
-  	pivot.den = a[l].den;
-	for(k=0;k<3;k++) pivot.x[k] = a[l].x[k];	
-   	i = l; j = r+1;
-		
-   	while(TRUE){
-   	do ++i; while( a[i].den >= pivot.den && i < r );
-   	do --j; while( a[j].den < pivot.den );
-   	if( i >= j ) break;
-   	t.den = a[i].den; a[i].den = a[j].den; a[j].den = t.den;
-	for(k=0;k<3;k++){ t.x[k] = a[i].x[k]; a[i].x[k] = a[j].x[k]; a[j].x[k] = t.x[k];}
-   	}
-   	t.den = a[l].den; a[l].den = a[j].den; a[j].den= t.den;
-	for(k=0;k<3;k++){ t.x[k] = a[l].x[k]; a[l].x[k] = a[j].x[k]; a[j].x[k] = t.x[k];}
+/*function to swap elements*/
+void swap_peaks(PEAKS *a, PEAKS *b){
+    int k;
+    PEAKS t;
 
-   	return j;
+    t.den = (*a).den;
+    (*a).den = (*b).den;
+    (*b).den = t.den;
+
+    for(k=0;k<3;k++){
+        t.x[k] = (*a).x[k];
+        (*a).x[k] = (*b).x[k];
+        (*b).x[k] = t.x[k];
+    }
+}
+
+/*Partition function for the quicksort*/
+long long partition_peaks(PEAKS *array, long long low, long long high){
+    fft_real pivot = array[high].den;
+    long long i = (low - 1);
+
+    for (long long j = low; j < high; j++){
+        if (array[j].den <= pivot){
+            i++;
+            swap_peaks(&array[i], &array[j]);
+        }
+    }
+    swap_peaks(&array[i + 1], &array[high]);
+  
+    return (i + 1);
 }
 
 /*The quicksort algorithm to sort the peaks list*/
-void quickSort_peaks(PEAKS *a, size_t l, size_t r){
-	size_t j;
-
-   	if( l < r ){
-   	// divide and conquer
-        j = partition_peaks( a, l, r);
-       	quickSort_peaks( a, l, j-1);
-      	quickSort_peaks( a, j+1, r);
-   	}	
+void quickSort_peaks(PEAKS *array, long long low, long long high){   
+    if (low < high) {
+        long long pi = partition_peaks(array, low, high);
+        quickSort_peaks(array, low, pi - 1);
+        quickSort_peaks(array, pi + 1, high);
+    }
 }
 
 /*Barrier used for the halo definition*/
@@ -209,7 +219,11 @@ size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, 
 
     /*Run over all peaks*/
     nh = 0;
-    for(l=0;l<np;l++){
+    for(l=np-1;l>0;l--){
+
+        /*If this peak (and the nexts) are below the minimum of the barrier stop finding halos*/
+        if(peaks[l].den < Barrier(Sig_Grid[Ncells - 1]))
+            break;
 
         /*If this peak is already in a halo jump to the next one*/
         if(flag[(size_t)(peaks[l].x[0]*box.nd[1] + peaks[l].x[1])*(size_t)box.nd[2] + (size_t)peaks[l].x[2]] != box.ng)
