@@ -53,7 +53,7 @@ def Get_Dz(Om0 = 0.31, zmax = 1000, zmin = -0.5, nzs = 1000):
 	y0 = [d0, dd0]
 
 	#Solve the Growth function equation
-	sol = odeint(Growth_eq, y0, a, args=(Om0))
+	sol = odeint(Growth_eq, y0, a, args=(Om0,))
 	resp['Dz'] = sol[:,0]
 	resp['dDz'] = sol[:,1]
 
