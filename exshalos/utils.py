@@ -128,7 +128,7 @@ def Displace_LPT(grid, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 10000.0, DO_2LP
     return x
 
 #Fit the parameters of the barrier given a mass function
-def Fit_Barrier(k, P, M, dndlnM, grid = None, R_max = 100000.0, Mmin = -1.0, Mmax = -1.0, Nm = 25, nd = 256, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = -1.0, Nmin = 10, seed = 12345, x0 = None, verbose = False, nthreads = 1, Max_inter = 100, tol = None):
+def Fit_Barrier(k, P, M, dndlnM, dn_err = None, grid = None, R_max = 100000.0, Mmin = -1.0, Mmax = -1.0, Nm = 25, nd = 256, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = -1.0, Nmin = 10, seed = 12345, x0 = None, verbose = False, nthreads = 1, Max_inter = 100, tol = None):
     """
     k: Wavenumbers of the power spectrum | 1D numpy array
     P: Power spectrum | 1D numpy array
@@ -157,6 +157,10 @@ def Fit_Barrier(k, P, M, dndlnM, grid = None, R_max = 100000.0, Mmin = -1.0, Mma
     if(grid == None):
         grid = Generate_Density_Grid(k, P, R_max, nd = nd, Lc = Lc, seed = seed, verbose = verbose, nthreads = nthreads)
 
+    #Check if the mass fucntion has a error
+    if(dn_err == None):
+        dn_err = np.zeros(Nm)
+
     #Define the function to be minimized to find the best parameters of the barrier
     def Chi2(theta):
         a, beta, alpha = theta
@@ -166,7 +170,7 @@ def Fit_Barrier(k, P, M, dndlnM, grid = None, R_max = 100000.0, Mmin = -1.0, Mma
         dnh = exshalos.simulation.Compute_Abundance(x["Mh"], Mmin = Mmin, Mmax = Mmax, Nm = Nm, Lc = Lc, nd = nd, verbose = verbose)
 
         mask = dnh["dn"] > 0.0
-        chi2 = np.sum(np.power((dnh["dn"][mask] - fdn(np.log(dnh["Mh"][mask])))/dnh["dn_err"][mask], 2.0))/(Nm - 4)
+        chi2 = np.sum(np.power((dnh["dn"][mask] - fdn(np.log(dnh["Mh"][mask]))), 2.0)/(np.power(dnh["dn_err"][mask], 2.0) + np.power(dn_err, 2.0)))/(Nm - 4)
         print("Current try: (%f, %f, %f) with chi2 = %f" %(a, beta, alpha, chi2))
 
         return chi2
