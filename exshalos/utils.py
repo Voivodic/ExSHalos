@@ -156,7 +156,7 @@ def Fit_Barrier(k, P, M, dndlnM, dn_err = None, grid = None, R_max = 100000.0, M
 
     #Check if the mass fucntion has a error
     if(dn_err is None):
-        dn_err = np.zeros(Nm)
+        dn_err = np.zeros(len(M))
 
     #Interpolate the given mass function
     fdn = interp1d(np.log(M[M>0.0]), dndlnM[M>0.0], bounds_error = False, fill_value = 0.0)
