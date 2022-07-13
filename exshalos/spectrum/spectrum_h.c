@@ -5,9 +5,10 @@ int mod(int x, int y, int nd){
 	int resp;
 
 	resp = x + y;
-
-	if(resp<0) resp += nd;
-	else if(resp>=nd) resp -= nd;
+    while(resp >= nd)
+        resp -= nd;
+    while(resp < 0)
+        resp += nd;
 
 	return resp;
 }
@@ -17,8 +18,10 @@ fft_real cysumf(fft_real x, fft_real y, fft_real L){
 	fft_real resp;
 
 	resp = x + y;
-	if(resp>=L)	resp -= L;
-	if(resp<0)	resp += L;
+    while(resp >= L)
+        resp -= L;
+    while(resp < 0.0)
+        resp += L;
 
 	return resp;
 }

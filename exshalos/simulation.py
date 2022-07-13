@@ -3,7 +3,7 @@ import exshalos
 import numpy as np
 
 #Compute the density grid
-def Compute_Density_Grid(pos, vel = None, mass = None, types = None, nd = 256, L = 1000.0, Om0 = 0.31, z = 0.0, direction = None, window = "CIC", R = 4.0, R_times = 5.0, interlacing = False, verbose = False, nthreads = 1):
+def Compute_Density_Grid(pos, vel = None, mass = None, types = None, nd = 256, L = 1000.0, Om0 = 0.31, z = 0.0, direction = None, window = "CIC", R = 4.0, R_times = 5.0, interlacing = False, folds = 1, verbose = False, nthreads = 1):
     """
     pos: Position of the tracers | 2D numpy array [number of tracers, 3]
     vel: Velocities of the particles in the given direction | 1D numpy array [number of tracers]
@@ -16,6 +16,7 @@ def Compute_Density_Grid(pos, vel = None, mass = None, types = None, nd = 256, L
     R: Smoothing lenght used in the spherical and exponential windows | float
     R_times: Scale considered to account for particles used in the exponential window in units of R | float
     interlacing: Use or do not use the interlacing technic | boolean
+    folds: Number of times that the box will be folded in each direction | int
     verbose: Output or do not output information in the c code | boolean
     nthreads: Number of threads used by openmp | int
 
@@ -85,7 +86,7 @@ def Compute_Density_Grid(pos, vel = None, mass = None, types = None, nd = 256, L
     elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
         window = 4
 
-    grid = exshalos.spectrum.spectrum.grid_compute(pos, vel, mass, np.int32(nmass), types, np.int32(ntypes), np.int32(nd), L, Om0, z, np.int32(direction), np.int32(window), R, R_times, np.int32(interlacing), np.int32(verbose), np.int32(nthreads))
+    grid = exshalos.spectrum.spectrum.grid_compute(pos, vel, mass, np.int32(nmass), types, np.int32(ntypes), np.int32(nd), L, Om0, z, np.int32(direction), np.int32(window), R, R_times, np.int32(interlacing), np.int32(folds), np.int32(verbose), np.int32(nthreads))
 
     if(interlacing == False and ntypes == 1):
         grid = grid.reshape([nd, nd, nd])
@@ -97,7 +98,7 @@ def Compute_Density_Grid(pos, vel = None, mass = None, types = None, nd = 256, L
     return grid
 
 #Compute the power spectrum given the density grid
-def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min = None, k_max = None, l_max = 0, direction = None,  verbose = False, nthreads = 1, ntypes = 1):
+def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min = None, k_max = None, l_max = 0, direction = None, folds = 1, verbose = False, nthreads = 1, ntypes = 1):
     """
     grid: Density grid for all tracers | 5D numpy array [1 if interlacing == False and 2 instead, number of types of tracer, nd, nd, nd]
     L: Size of the box in Mpc/h | float
@@ -129,6 +130,7 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
     elif(len(grid.shape) == 4 and ntypes > 1):
         interlacing = 0
     nd = grid.shape[-1]
+    L = L/folds
 
     if(k_min is None):
         k_min = 2.0*np.pi/L
@@ -150,7 +152,7 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
         k_max = np.float64(k_max)  
 
     #Set the window function to be de-convolved
-    if(window == "NO" or window == "no" or window == 0):
+    if(window == "NO" or window == "no" or window == "No" or window == 0):
         window = 0
     elif(window == "NGP" or window == "ngp" or window == 1):
         window = 1
@@ -184,7 +186,7 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
     return x
 
 #Compute the bispectrum given the density grid
-def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min = None, k_max = None, verbose = False, nthreads = 1, ntypes = 1):
+def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min = None, k_max = None, folds = 1, verbose = False, nthreads = 1, ntypes = 1):
     """
     grid: Density grid for all tracers | 5D numpy array [1 if interlacing == False and 2 instead, number of types of tracer, nd, nd, nd]
     L: Size of the box in Mpc/h | float
@@ -215,6 +217,7 @@ def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min
     elif(len(grid.shape) == 4 and ntypes > 1):
         interlacing = 0
     nd = grid.shape[-1]
+    L = L/folds
 
     if(k_min is None):
         k_min = 2.0*np.pi/L
@@ -255,7 +258,7 @@ def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min
     return x
 
 #Compute the trispectrum given the density grid
-def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min = None, k_max = None, verbose = False, nthreads = 1, ntypes = 1):
+def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min = None, k_max = None, folds = 1, verbose = False, nthreads = 1, ntypes = 1):
     """
     grid: Density grid for all tracers | 5D numpy array [1 if interlacing == False and 2 instead, number of types of tracer, nd, nd, nd]
     L: Size of the box in Mpc/h | float
@@ -286,6 +289,7 @@ def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_mi
     elif(len(grid.shape) == 4 and ntypes > 1):
         interlacing = 0
     nd = grid.shape[-1]
+    L = L/folds
 
     if(k_min is None):
         k_min = 2.0*np.pi/L

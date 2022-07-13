@@ -34,12 +34,12 @@ static PyObject *spectrum_check_precision(PyObject * self, PyObject * args){
 /*Function that computes the density grid for each tracer and outputs it in numpy format*/
 static PyObject *grid_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 	size_t np;
-	int nmass, ntype, nd, window, interlacing, *type, verbose, nthreads, direction;
+	int nmass, ntype, nd, window, interlacing, *type, verbose, nthreads, direction, folds;
 	fft_real *pos, *vel, *mass, *grid;
 	fft_real L, R, R_times, Om0, z;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"pos", "vel", "mass", "nmass", "type", "ntype", "nd", "L", "Om0", "z", "direction", "window", "R", "R_times", "interlacing", "verbose", "nthreads", NULL};
+	static char *kwlist[] = {"pos", "vel", "mass", "nmass", "type", "ntype", "nd", "L", "Om0", "z", "direction", "window", "R", "R_times", "interlacing", "folds", "verbose", "nthreads", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
@@ -47,10 +47,10 @@ static PyObject *grid_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOiOiifffiiffiii", kwlist, &pos_array,  &vel_array, &np, &mass_array, &nmass, &type_array, &ntype, &nd, &L, &Om0, &z, &direction, &window, &R, &R_times, &interlacing, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOiOiifffiiffiiii", kwlist, &pos_array,  &vel_array, &np, &mass_array, &nmass, &type_array, &ntype, &nd, &L, &Om0, &z, &direction, &window, &R, &R_times, &interlacing, &folds, &verbose, &nthreads))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOiOiifffiiffiii", kwlist, &pos_array, &vel_array, &mass_array, &nmass, &type_array, &ntype, &nd, &L, &Om0, &z, &direction, &window, &R, &R_times, &interlacing, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOiOiifffiiffiiii", kwlist, &pos_array, &vel_array, &mass_array, &nmass, &type_array, &ntype, &nd, &L, &Om0, &z, &direction, &window, &R, &R_times, &interlacing, &folds, &verbose, &nthreads))
 			return NULL;
 	#endif
 
@@ -90,7 +90,7 @@ static PyObject *grid_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 	grid = (fft_real *) np_grid->data;
 
 	/*Compute the grids for each tracer*/
-	Tracer_Grid(grid, nd, L, direction, pos, vel, np, mass, type, ntype, window, R, R_times, interlacing, Om0, z);
+	Tracer_Grid(grid, nd, L, direction, pos, vel, np, mass, type, ntype, window, R, R_times, interlacing, Om0, z, folds);
 
 	/*Returns the density grids*/
 	return PyArray_Return(np_grid);
@@ -113,7 +113,7 @@ static PyObject *power_compute(PyObject *self, PyObject *args, PyObject *kwargs)
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiididiiddiiii", kwlist, &grid_array &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &l_max, &direction, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiididiiddiiii", kwlist, &grid_array, &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &l_max, &direction, &verbose, &nthreads))
 			return NULL;
 	#else
 		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiififiiffiiii", kwlist, &grid_array, &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &l_max, &direction, &verbose, &nthreads))
@@ -201,7 +201,7 @@ static PyObject *bi_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiididiiddii", kwlist, &grid_array &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiididiiddii", kwlist, &grid_array, &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &verbose, &nthreads))
 			return NULL;
 	#else
 		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiififiiffii", kwlist, &grid_array, &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &verbose, &nthreads))
@@ -319,7 +319,7 @@ static PyObject *tri_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiididiiddii", kwlist, &grid_array &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiididiiddii", kwlist, &grid_array, &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &verbose, &nthreads))
 			return NULL;
 	#else
 		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oiififiiffii", kwlist, &grid_array, &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &verbose, &nthreads))
