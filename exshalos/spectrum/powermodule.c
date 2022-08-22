@@ -2,7 +2,7 @@
 
 /*Compute all the cross and auto spectra*/
 void Power_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_real R, int interlacing, int Nk, fft_real k_min, fft_real k_max, long double *Kmean, long double *P, long *count_k, int l_max, int direction){
-    int i, j, k, l, m, n, count, ind, NPs, ls;
+    int i, j, k, l, m, n, count, ind, NPs, ls, A;
     size_t tmp;
     fft_real dk, k_mod, kx, ky, kz, kn = 2*M_PI/L, mu;
     fft_complex **gridk;
@@ -47,8 +47,9 @@ void Power_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, f
                     if(2*k<nd) kz = k*kn;
                     else kz = (k-nd)*kn;
 
-                    if((kz==0.0 && ky<0.0) || (kz==0.0 && ky==0.0 && kx<0.0))
-                        continue;
+                    A = 2;
+                    if(k==0 || k==nd/2)
+                        A = 1;
 
                     k_mod = sqrt(kx*kx + ky*ky + kz*kz);
                     ind = Indice(k_mod, k_min, dk);
@@ -65,12 +66,12 @@ void Power_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, f
                         for(l=0;l<ntype;l++)
                             for(m=0;m<=l;m++){
                                 for(n=0;n<ls;n++)
-                                    P_private[(count*ls + n)*Nk + ind] += (long double) (gridk[l][tmp][0]*gridk[m][tmp][0] + gridk[l][tmp][1]*gridk[m][tmp][1])*gsl_sf_legendre_Pl(2*n, mu);
+                                    P_private[(count*ls + n)*Nk + ind] += (long double) A*(gridk[l][tmp][0]*gridk[m][tmp][0] + gridk[l][tmp][1]*gridk[m][tmp][1])*gsl_sf_legendre_Pl(2*n, mu);
                                 count++;
                             }
 
-                        k_private[ind] += (long double) k_mod;
-                        count_k_private[ind] += 1;
+                        k_private[ind] += (long double) A*k_mod;
+                        count_k_private[ind] += (long) A;
                     }
                 }
             }
@@ -103,6 +104,6 @@ void Power_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, f
                 for(k=0;k<ls;k++)
                     P[(j*ls + k)*Nk + i] = (4.0*k + 1.0)*P[(j*ls + k)*Nk + i]/count_k[i];
             Kmean[i] = Kmean[i]/count_k[i];	
-            count_k[i] = 2.0*count_k[i];
+            count_k[i] = count_k[i];
         }
 }
