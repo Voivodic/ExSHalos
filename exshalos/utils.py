@@ -118,7 +118,7 @@ def Displace_LPT(grid, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 10000.0, DO_2LP
         k_smooth = np.float32(k_smooth)
 
     else:
-        grid = grid.astype("float32")
+        grid = grid.astype("float64")
         Lc = np.float64(Lc)  
         z = np.float64(z)
         k_smooth = np.float64(k_smooth)
@@ -240,3 +240,75 @@ def Fit_HOD(k, P, nbar = None, posh = None, Mh = None, velh = None, Ch = None, n
     
 
     return x
+
+#Compute the Lagrangian operators up to a given order
+def Compute_Lagrangian_Operator(grid, order = 2, Galileons = False, Lc = 2.0, verbose = False, nthreads = 1):
+    """
+    grid: Lagrangian density grid | 3D array (ndx, ndy, ndz)
+    order: Order to be used to compute the operators | int
+    Galileons: Use the galileons operators or the ones written in terms of s_ij? | bollean
+    Lc: Size of each cell in Mpc/h | float
+    verbose: Output or do not output information in the c code | boolean
+    nthreads: Number of threads used by openmp | int
+
+    return: A dictionary with all fields (less the linear) up to the given order | python dict
+    """
+
+    #Define the parameters used in the case (or not) of Galileons the operators are:
+    #K2 = K^2 - params[0]*delta^2
+    #K3 = K_ij*K_jk*K_ki - params[1]*K^2*delta + params[2]*delta^3
+    if(Galileons == False):
+        params = np.array([1.0/3.0, 1.0, 2.0/9.0])
+    else:
+        params = np.array([1.0, 3.0/2.0, 1.0/2.0])
+
+    precision = exshalos.exshalos.exshalos.check_precision()
+
+    if(precision == 4):
+        grid = grid.astype("float32")
+        params = params.astype("float32")
+        Lc = np.float32(Lc)
+
+    else:
+        grid = grid.astype("float64")
+        params = params.astype("float64")
+        Lc = np.float64(Lc)  
+
+    x = exshalos.exshalos.exshalos.operators_compute(grid, np.int32(order), params, Lc, np.int32(nthreads), np.int32(verbose))
+
+    return x 
+
+#Smooth a given field (or fields) in a given scale
+def Smooth_Fields(grid, Lc = 2.0, k_smooth = 10000.0, Input_k = False, Nfields = 1, verbose = False, nthreads = 1):
+    """
+    grid: Lagrangian density grid | 3D array (ndx, ndy, ndz)
+    k_smooth: Scale used to smooth the fields | float
+    Lc: Size of each cell in Mpc/h | float
+    Inpute_k: The density grid is in real or Fourier space | boolean
+    Nfields: Number of fields | int
+    verbose: Output or do not output information in the c code | boolean
+    nthreads: Number of threads used by openmp | int
+
+    return: A dictionary with all fields (less the linear) up to the given order | python dict
+    """
+
+    precision = exshalos.exshalos.exshalos.check_precision()
+
+    if(precision == 4):
+        grid = grid.astype("float32")
+        Lc = np.float32(Lc)
+        k_smooth = np.float32(k_smooth)
+
+    else:
+        grid = grid.astype("float64")
+        Lc = np.float64(Lc)  
+        k_smooth = np.float32(k_smooth)
+
+    if(Nfields > 1):
+        x = []
+        for i in range(Nfields):
+            x.append(exshalos.exshalos.exshalos.smooth_field(grid[i,:], Lc, k_smooth, np.int32(Input_k), np.int32(nthreads), np.int32(verbose)))
+    else:
+        x = exshalos.exshalos.exshalos.smooth_field(grid, Lc, k_smooth, np.int32(Input_k), np.int32(nthreads), np.int32(verbose))
+
+    return np.array(x) 
