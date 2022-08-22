@@ -177,7 +177,7 @@ size_t Populate_total(size_t nh, fft_real *posh, fft_real *velh, fft_real *Massh
 		ind_h = floor((log10(Ch[i]) - log10(cmin))/(log10(cmax) - log10(cmin)));
 		if(ind_h == NCs)	ind_h = ind_h - 1;
 		w1 = Ch[i] - pow(10.0, log10(cmin) + (log10(cmax) - log10(cmin))*ind_h/(NCs - 1));
-		w2 = Ch[i] - pow(10.0, log10(cmin) + (log10(cmax) - log10(cmin))*(ind_h+1)/(NCs - 1));
+		w2 = pow(10.0, log10(cmin) + (log10(cmax) - log10(cmin))*(ind_h+1)/(NCs - 1)) - Ch[i];
 		Rv = w1 + w2;
 		w1 = w1/Rv;
 		w2 = w2/Rv;
