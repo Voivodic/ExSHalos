@@ -135,7 +135,7 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
     if(k_min is None):
         k_min = 2.0*np.pi/L
 
-    if(k_max is None or k_max > np.pi/L*nd):
+    if(k_max is None):
         k_max = np.pi/L*nd
 
     if(precision == 4):
