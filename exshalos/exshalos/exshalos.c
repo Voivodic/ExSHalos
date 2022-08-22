@@ -10,6 +10,8 @@
 static PyObject *exshalos_check_precision(PyObject * self, PyObject * args);
 static PyObject *correlation_compute(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *kwargs);
+static PyObject *operators_compute(PyObject *self, PyObject *args, PyObject *kwargs);
+static PyObject *smooth_field(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwargs);
@@ -20,6 +22,8 @@ static PyMethodDef exshalos_methods[] = {
     {"check_precision", exshalos_check_precision, METH_VARARGS, "Returns precision used by the estimators of the spectra"},
     {"correlation_compute", correlation_compute, METH_VARARGS | METH_KEYWORDS, "Computes the correlation function or the power spectrum"},
     {"density_grid_compute", density_grid_compute, METH_VARARGS | METH_KEYWORDS, "Generate the gaussian density grid"},
+    {"operators_compute", operators_compute, METH_VARARGS | METH_KEYWORDS, "Compute all operatos up to a given order"},
+    {"smooth_field", smooth_field, METH_VARARGS | METH_KEYWORDS, "Smooth a given fields in a given scale"},
     {"find_halos", find_halos, METH_VARARGS | METH_KEYWORDS, "Generate the halo catalogue from a given density grid" },
     {"lpt_compute", lpt_compute, METH_VARARGS | METH_KEYWORDS, "Compute the LPT displacements from a given density grid" },
     {"halos_box_from_pk", halos_box_from_pk, METH_VARARGS | METH_KEYWORDS, "Generate a halo catalogue from a linear power spectrum"},
@@ -202,6 +206,204 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
     return dict;       
 }
 
+/*Compute all possible scalar operator up to a given order*/
+static PyObject *operators_compute(PyObject *self, PyObject *args, PyObject *kwargs){
+    size_t ind;
+    int ndx, ndy, ndz, nthreads, verbose, order;
+    fft_real Lc, *delta, *params, *tidal;
+    fft_real *delta2, *K2, *delta3, *K3, *deltaK2;
+
+	/*Define the list of parameters*/
+	static char *kwlist[] = {"delta", "Order", "Params", "Lc", "nthreads", "verbose", NULL};
+	import_array();
+
+	/*Define the pyobject with the 3D position of the tracers*/
+	PyArrayObject *grid_array, *params_array;  
+
+	/*Read the input arguments*/
+	#ifdef DOUBLEPRECISION_FFTW
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OiOdii", kwlist, &grid_array, &order, &params_array, &Lc, &nthreads, &verbose))
+			return NULL;
+	#else
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OiOfii", kwlist, &grid_array, &order, &params_array, &Lc, &nthreads, &verbose))
+			return NULL;
+	#endif
+
+    /*Convert PyObjects to C arrays*/
+    ndx = (int) grid_array->dimensions[0];
+    ndy = (int) grid_array->dimensions[1];
+    ndz = (int) grid_array->dimensions[2];
+    delta = (fft_real *) grid_array->data;
+    params = (fft_real *) params_array->data;
+   
+    /*Set the box structure*/
+    set_box(ndx, ndy, ndz, Lc);
+
+    /*Initialize FFTW and openmp to run in parallel*/
+    omp_set_num_threads(nthreads);
+    FFTW(init_threads)();
+    FFTW(plan_with_nthreads)(nthreads);
+
+    /*Alloc and compute the tidal field*/
+    tidal = (fft_real *) malloc(6*(size_t)box.ng*sizeof(fft_real));
+    check_memory(tidal, "tidal")
+
+    Compute_Tidal(delta, NULL, tidal);
+
+    /*Define the variables for the output*/
+    npy_intp dims_grid[] = {(npy_intp) box.nd[0], (npy_intp) box.nd[1], (npy_intp) box.nd[2]};
+    PyObject *dict = PyDict_New();
+
+    /*Alloc and compute the second order operators*/
+    if(order >= 2){
+        PyArrayObject *np_delta2, *np_K2;
+        np_delta2 = (PyArrayObject *) PyArray_ZEROS(3, dims_grid, NP_OUT_TYPE, 0);
+        np_K2 = (PyArrayObject *) PyArray_ZEROS(3, dims_grid, NP_OUT_TYPE, 0);
+
+        delta2 = (fft_real *) np_delta2->data;
+        K2 = (fft_real *) np_K2->data;
+
+        /*delta^2*/
+        Compute_Den_to_n(delta, delta2, 2);
+        PyDict_SetItemString(dict, "delta2", PyArray_Return(np_delta2));
+
+        /*K^2*/
+        Compute_K2(delta, NULL, tidal, K2, params[0]);
+        PyDict_SetItemString(dict, "K2", PyArray_Return(np_K2));
+    }
+
+    /*Alloc and compute the third order operators*/
+    if(order >= 3){
+        PyArrayObject *np_delta3, *np_K3, *np_deltaK2;
+        np_delta3 = (PyArrayObject *) PyArray_ZEROS(3, dims_grid, NP_OUT_TYPE, 0);
+        np_K3 = (PyArrayObject *) PyArray_ZEROS(3, dims_grid, NP_OUT_TYPE, 0);
+        np_deltaK2 = (PyArrayObject *) PyArray_ZEROS(3, dims_grid, NP_OUT_TYPE, 0);
+
+        delta3 = (fft_real *) np_delta3->data;
+        K3 = (fft_real *) np_K3->data;
+        deltaK2 = (fft_real *) np_deltaK2->data;
+
+        /*delta^3*/
+        Compute_Den_to_n(delta, delta3, 3);
+        PyDict_SetItemString(dict, "delta3", PyArray_Return(np_delta3));
+
+        /*K^3*/
+        Compute_K3(delta, NULL, tidal, K3, params[1], params[2]);
+        PyDict_SetItemString(dict, "K3", PyArray_Return(np_K3));
+
+        /*delta*K^2*/
+        for(ind=0;ind<box.ng;ind++)
+            deltaK2[ind] = delta[ind]*K2[ind];
+        PyDict_SetItemString(dict, "deltaK2", PyArray_Return(np_deltaK2));
+    }   
+
+    /*Free the tidal array*/
+    free(tidal);
+
+    return dict;       
+}
+
+/*Compute all possible scalar operator up to a given order*/
+static PyObject *smooth_field(PyObject *self, PyObject *args, PyObject *kwargs){
+    size_t ind;
+    int ndx, ndy, ndz, nthreads, verbose, INk, i, j, k;
+    fft_real Lc, ksmooth, *delta, *delta_s, kmod, kvec[3];
+    fft_complex *deltak, *deltak_tmp;
+
+	/*Define the list of parameters*/
+	static char *kwlist[] = {"delta", "Lc", "ksmooth", "INk", "nthreads", "verbose", NULL};
+	import_array();
+
+	/*Define the pyobject with the 3D position of the tracers*/
+	PyArrayObject *grid_array;  
+
+	/*Read the input arguments*/
+	#ifdef DOUBLEPRECISION_FFTW
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oddiii", kwlist, &grid_array, &Lc, &ksmooth, &INk, &nthreads, &verbose))
+			return NULL;
+	#else
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Offiii", kwlist, &grid_array, &Lc, &ksmooth, &INk, &nthreads, &verbose))
+			return NULL;
+	#endif
+
+    /*Convert PyObjects to C arrays*/
+    ndx = (int) grid_array->dimensions[0];
+    ndy = (int) grid_array->dimensions[1];
+    ndz = (int) grid_array->dimensions[2];
+    if(INk == TRUE){
+        ndz = 2*(ndz - 1);
+        deltak = (fft_complex *) grid_array->data;
+    }
+    else
+        delta = (fft_real *) grid_array->data;
+   
+    /*Set the box structure*/
+    set_box(ndx, ndy, ndz, Lc);
+
+    /*Initialize FFTW and openmp to run in parallel*/
+    omp_set_num_threads(nthreads);
+    FFTW(init_threads)();
+    FFTW(plan_with_nthreads)(nthreads);
+
+    /*Compute the density grid in Fourier space, if needed*/
+    deltak_tmp = (fft_complex *) FFTW(malloc)(((size_t) box.nd[0])*((size_t) box.nd[1])*((size_t) box.nz2)*sizeof(fft_complex));
+    check_memory(deltak_tmp, "deltak_tmp")
+    if(INk == FALSE)
+        Compute_Denk(delta, deltak_tmp);
+    else
+        for(ind=0;ind<((size_t) box.nd[0])*((size_t) box.nd[1])*((size_t) box.nz2);ind++){
+            deltak_tmp[ind][0] = deltak[ind][0];      
+            deltak_tmp[ind][1] = deltak[ind][1];                
+        }
+
+    /*Set the modes larger than ksmooth to zero*/
+    for(i=0;i<box.nd[0];i++){
+        if(2*i<box.nd[0]) kvec[0] = i*box.kl[0];
+        else kvec[0] = (i-box.nd[0])*box.kl[0];
+    
+        for(j=0;j<box.nd[1];j++){
+            if(2*j<box.nd[1]) kvec[1] = j*box.kl[1];
+            else kvec[1] = (j-box.nd[1])*box.kl[1];
+    
+            for(k=0;k<box.nz2;k++){
+                kvec[2] = k*box.kl[2];
+                if(k == box.nd[2]/2) kvec[2] = -(fft_real)box.nd[2]/2.0*box.kl[2];
+
+                kmod = sqrt(pow(kvec[0], 2.0) + pow(kvec[1], 2.0) + pow(kvec[2], 2.0));
+                ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nz2 + (size_t)k;
+
+                if(kmod > ksmooth){
+                    deltak_tmp[ind][0] = 0.0;
+                    deltak_tmp[ind][1] = 0.0;
+                }
+            }
+        }
+    }
+
+    /*Define the variables for the output*/
+    npy_intp dims_grid[] = {(npy_intp) box.nd[0], (npy_intp) box.nd[1], (npy_intp) box.nd[2]};
+
+    PyArrayObject *np_delta_s;
+    np_delta_s = (PyArrayObject *) PyArray_ZEROS(3, dims_grid, NP_OUT_TYPE, 0);
+    delta_s = (fft_real *) np_delta_s->data;
+
+    /*Compute the grid in real space*/
+    FFTW(plan) p1;
+    p1 = FFTW(plan_dft_c2r_3d)(box.nd[0], box.nd[1], box.nd[2], deltak_tmp, delta_s, FFTW_ESTIMATE); 
+    FFTW(execute)(p1);
+    FFTW(destroy_plan)(p1);
+
+    /*Normalize phi*/
+    #pragma omp parallel for private(ind) 
+    for(ind=0;ind<box.ng;ind++)
+        delta_s[ind] = box.Normx*delta_s[ind];
+
+    /*Free memory*/
+    FFTW(free)(deltak_tmp);
+
+    PyArray_Return(np_delta_s);
+}
+
 /*Generate the halo catalogue from a given density grid*/
 static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     char DO_EB;
@@ -264,7 +466,6 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     npy_intp dims_pos[] = {(npy_intp) nh, (npy_intp) 3};
     npy_intp dims_Mh[] = {(npy_intp) nh};
     PyArrayObject *np_pos, *np_Mh;
-    PyObject *tupleresult;
 
     /*Alloc the PyObjects for the output*/
     np_pos = (PyArrayObject *) PyArray_ZEROS(2, dims_pos, NP_OUT_TYPE, 0);
