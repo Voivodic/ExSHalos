@@ -49,7 +49,7 @@ def Generate_Density_Grid(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = No
     return x
 
 #Generate a halo catalogue (in Lagrangian space) given an initial density grid
-def Find_Halos_from_Grid(grid, k, P, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = -1.0, Nmin = 10, a = 1.0, beta = 0.0, alpha = 0.0, verbose = False):
+def Find_Halos_from_Grid(grid, k, P, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = -1.0, Nmin = 10, a = 1.0, beta = 0.0, alpha = 0.0, OUT_FLAG = False, verbose = False):
     """
     grid: Density grid where the halos will be find | 3D numpy array (Ndx, Ndy, Ndz)
     k: Wavenumbers of the power spectrum | 1D numpy array
@@ -88,7 +88,7 @@ def Find_Halos_from_Grid(grid, k, P, Lc = 2.0, Om0 = 0.31, z = 0.0, delta_c = -1
         beta = np.float64(beta)
         alpha = np.float64(alpha)
 
-    x = exshalos.exshalos.exshalos.find_halos(grid, k, P, Lc, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, verbose)
+    x = exshalos.exshalos.exshalos.find_halos(grid, k, P, Lc, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, np.int32(OUT_FLAG), verbose)
 
     return x
 
