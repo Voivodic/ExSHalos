@@ -224,9 +224,9 @@ def Fit_HOD(k, P, nbar = None, posh = None, Mh = None, velh = None, Ch = None, n
         Pk = exshalos.simulation.Compute_Power_Spectrum(grid, L = nd*Lc, window = window, R = R, Nk = Nk, k_min = k_min, k_max = k_max, l_max = l_max, verbose = verbose, nthreads = nthreads, ntype = 1, direction = direction)
 
         if(nbar is None):
-            chi2 = (np.sum(np.power((Pk["Pk"] - fP(Pk["k"]))/(Pk["Pk"]/Pk["Nk"]), 2.0)))/(Nk - 6)
+            chi2 = (np.sum(np.power((Pk["Pk"] - fP(Pk["k"]))/(Pk["Pk"]/np.sqrt(Pk["Nk"])), 2.0)))/(Nk - 6)
         else:
-            chi2 = (np.sum(np.power((Pk["Pk"] - fP(Pk["k"]))/(Pk["Pk"]/Pk["Nk"]), 2.0)) + np.power((len(gals["posg"]) - nbar*(Lc*nd)**3)/len(gals["posg"]), 2.0))/(Nk - 6)            
+            chi2 = (np.sum(np.power((Pk["Pk"] - fP(Pk["k"]))/(Pk["Pk"]/np.sqrt(Pk["Nk"])), 2.0)) + np.power((len(gals["posg"]) - nbar*(Lc*nd)**3)/np.sqrt(len(gals["posg"])), 2.0))/(Nk - 5)            
 
         return chi2
 
@@ -237,7 +237,6 @@ def Fit_HOD(k, P, nbar = None, posh = None, Mh = None, velh = None, Ch = None, n
     #Minimaze the Chi2 to get the best fit parameters
     bounds = [[9.0, 15.0], [0.0, 1.0], [9.0, 15.0], [9.0, 15.0], [0.0, 2.0]]
     x = minimize(Chi2, x0 = x0, bounds = bounds, method = "Nelder-Mead", options = {"maxiter" : Max_inter}, tol = tol)
-    
 
     return x
 
