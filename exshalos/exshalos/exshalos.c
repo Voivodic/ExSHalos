@@ -407,7 +407,8 @@ static PyObject *smooth_field(PyObject *self, PyObject *args, PyObject *kwargs){
 /*Generate the halo catalogue from a given density grid*/
 static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     char DO_EB;
-    size_t nh, ind, *flag;
+    size_t nh, ind;
+    long *flag;
     int i, j, ndx, ndy, ndz, Nk, Nmin, verbose, OUT_FLAG;
     fft_real Om0, redshift, dc, Lc, a, beta, alpha, *K, *P, *delta, *Mh, *posh;
     HALOS *halos;
@@ -453,18 +454,18 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     /*Alloc the flag array*/
     PyArrayObject *np_flag;
     if(OUT_FLAG == TRUE){
-        npy_intp dims_flag[] = {(npy_intp) box.ng};
-        np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_flag, PyArray_LONG, 0);
-        flag = (size_t *) np_flag->data;
+        npy_intp dims_flag[] = {(npy_intp) box.nd, (npy_intp) box.nd, (npy_intp) box.nd};
+        np_flag = (PyArrayObject *) PyArray_ZEROS(3, dims_flag, PyArray_LONG, 0);
+        flag = (long *) np_flag->data;
     }
     else{
-        flag = (size_t *) malloc(box.ng*sizeof(size_t));
+        flag = (long *) malloc(box.ng*sizeof(long));
         check_memory(flag, "flag")
     }
 
 	/*Initialize the flag array*/
 	for(ind=0;ind<box.ng;ind++)
-		flag[ind] = box.ng;
+		flag[ind] = (long) box.ng;
 
     /*Find the halos in the density grid*/
     nh = Find_Halos(delta, K, P, Nk, flag, &halos);
@@ -606,7 +607,8 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 
 /*Generate the halo catalogue from a given linear power spectrum*/
 static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwargs){
-    size_t *flag, nh, ind;
+    size_t nh, ind;
+    long *flag;
     int i, j, ndx, ndy, ndz, Nk, verbose, nthreads, seed, OUT_DEN, OUT_LPT, Nmin, DO_EB, OUT_VEL, DO_2LPT, OUT_FLAG, fixed;
     fft_real Lc, R_max, k_smooth, *K, *P, *delta, *S, *V, Om0, redshift, dc, a, beta, alpha, *posh, *velh, *posh_out, *velh_out, *Mh, phase;
     HALOS *halos;
@@ -653,7 +655,7 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
     /*Alloc some arrays for the cases of outputing intermediate results*/
     npy_intp dims_grid[] = {(npy_intp) box.nd[0], (npy_intp) box.nd[1], (npy_intp) box.nd[2]};
     npy_intp dims_S[] = {(npy_intp) box.ng, (npy_intp) 3};
-    npy_intp dims_flag[] = {(npy_intp) box.ng};
+    npy_intp dims_flag[] = {(npy_intp) box.nd, (npy_intp) box.nd, (npy_intp) box.nd};
     PyArrayObject *np_grid, *np_S, *np_V, *np_flag;
 
     /*Alloc the density grid*/
@@ -682,17 +684,17 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
 
     /*Alloc the flag array*/
     if(OUT_FLAG == TRUE){
-        np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_flag, PyArray_LONG, 0);
-        flag = (size_t *) np_flag->data;
+        np_flag = (PyArrayObject *) PyArray_ZEROS(3, dims_flag, PyArray_LONG, 0);
+        flag = (long *) np_flag->data;
     }
     else{
-        flag = (size_t *) malloc(box.ng*sizeof(size_t));
+        flag = (long *) malloc(box.ng*sizeof(long));
         check_memory(flag, "flag")
     }
     
     /*Initialize the flag array*/
 	for(ind=0;ind<box.ng;ind++)
-		flag[ind] = box.ng;
+		flag[ind] = (long) box.ng;
 
     /*Generate the halo catalogue from the linear power spectrum*/
     nh = Generate_Halos_Box_from_Pk(K, P, Nk, R_max, k_smooth, &halos, &posh, &velh, flag, delta, S, V, fixed, phase);
@@ -794,7 +796,8 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
 
 /*Generate the halo catalogue from a given linear power spectrum*/
 static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *kwargs){
-    size_t *flag, nh, ind;
+    size_t nh, ind;
+    long *flag;
     int i, j, ndx, ndy, ndz, Nk, verbose, nthreads, OUT_LPT, Nmin, DO_EB, OUT_VEL, DO_2LPT, OUT_FLAG, IN_disp;
     fft_real Lc, k_smooth, *K, *P, *delta, *S, *V, Om0, redshift, dc, a, beta, alpha, *posh, *velh, *posh_out, *velh_out, *Mh;
     HALOS *halos;
@@ -846,7 +849,7 @@ static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *k
 
     /*Alloc some arrays for the cases of outputing intermediate results*/
     npy_intp dims_S[] = {(npy_intp) box.ng, (npy_intp) 3};
-    npy_intp dims_flag[] = {(npy_intp) box.ng};
+    npy_intp dims_flag[] = {(npy_intp) box.nd, (npy_intp) box.nd, (npy_intp) box.nd};
     PyArrayObject *np_S, *np_V, *np_flag;
 
     /*Alloc the displacements and velocities of the particles*/
@@ -867,17 +870,17 @@ static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *k
 
     /*Alloc the flag array*/
     if(OUT_FLAG == TRUE){
-        np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_flag, PyArray_LONG, 0);
-        flag = (size_t *) np_flag->data;
+        np_flag = (PyArrayObject *) PyArray_ZEROS(3, dims_flag, PyArray_LONG, 0);
+        flag = (long *) np_flag->data;
     }
     else{
-        flag = (size_t *) malloc(box.ng*sizeof(size_t));
+        flag = (long *) malloc(box.ng*sizeof(long));
         check_memory(flag, "flag")
     }
     
     /*Initialize the flag array*/
 	for(ind=0;ind<box.ng;ind++)
-		flag[ind] = box.ng;
+		flag[ind] = (long) box.ng;
 
     /*Generate the halo catalogue from the linear power spectrum*/
     nh = Generate_Halos_Box_from_Grid(K, P, Nk, k_smooth, &halos, &posh, &velh, flag, delta, S, V, IN_disp);

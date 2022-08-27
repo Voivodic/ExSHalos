@@ -4,10 +4,10 @@
 #include "exshalos_h.h"
 
 /*Compute the first order displacements*/
-void Compute_1LPT(fft_complex *deltak, fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, size_t *flag, fft_real k_smooth);
+void Compute_1LPT(fft_complex *deltak, fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, long *flag, fft_real k_smooth);
 
 /*Compute the second order displacements*/
-void Compute_2LPT(fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, size_t *flag, fft_real k_smooth);
+void Compute_2LPT(fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, long *flag, fft_real k_smooth);
 
 /*Compute the final position of each particle*/
 void Compute_Pos(fft_real *S);

@@ -37,7 +37,7 @@ void quickSort_peaks(PEAKS *array, long long low, long long high);
 fft_real Barrier(fft_real S);
 
 /*It grows the spheres around the peaks to create the halos*/
-size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, PEAKS *peaks, HALOS *halos);
+size_t Grow_Halos(size_t np, long *flag, fft_real *Sig_Grid, fft_real *delta, PEAKS *peaks, HALOS *halos);
 
 /*Compute the number of grid cells inside each possible sphere*/
 void Compute_Spheres(int Ncells, char *spheresfile);
@@ -52,6 +52,6 @@ int Next_Count(int *spheres, int Ncells, int count);
 void Compute_Mass(size_t nh, int *sphere, HALOS *halos, gsl_interp_accel *acc, gsl_spline *spline_I, gsl_spline *spline_InvI);
 
 /*Find halos from a density grid*/
-size_t Find_Halos(fft_real *delta, fft_real *K, fft_real *P, int Nk, size_t *flag, HALOS **halos);
+size_t Find_Halos(fft_real *delta, fft_real *K, fft_real *P, int Nk, long *flag, HALOS **halos);
 
 #endif

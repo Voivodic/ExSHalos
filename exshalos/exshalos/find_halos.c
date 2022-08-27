@@ -212,7 +212,7 @@ fft_real Barrier(fft_real S){
 }
 
 /*It grows the spheres around the peaks to create the halos*/
-size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, PEAKS *peaks, HALOS *halos){
+size_t Grow_Halos(size_t np, long *flag, fft_real *Sig_Grid, fft_real *delta, PEAKS *peaks, HALOS *halos){
     int i, j, k, m, count, count_tmp, grows, grows_tmp, tmp, Ncells = floor(M_max/box.Mcell);
     size_t l, nh, ind;
     fft_real dist, Rmax, cost, den, den_tmp, Pos[3];
@@ -226,7 +226,7 @@ size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, 
             break;
 
         /*If this peak is already in a halo jump to the next one*/
-        if(flag[(size_t)(peaks[l].x[0]*box.nd[1] + peaks[l].x[1])*(size_t)box.nd[2] + (size_t)peaks[l].x[2]] != box.ng)
+        if(flag[(size_t)(peaks[l].x[0]*box.nd[1] + peaks[l].x[1])*(size_t)box.nd[2] + (size_t)peaks[l].x[2]] != (long) box.ng)
             continue;
 
         /*Check if this peak is near to the slice used to construct the light cone*/
@@ -283,7 +283,7 @@ size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, 
                         if(dist2(i, j, k) == (size_t) grows_tmp){
                             ind = (size_t)(cysum(peaks[l].x[0], i, box.nd[0])*box.nd[1] + cysum(peaks[l].x[1], j, box.nd[1]))*(size_t)box.nd[2] + (size_t)cysum(peaks[l].x[2], k, box.nd[2]);
 
-                            if(flag[ind] != box.ng)
+                            if(flag[ind] != (long) box.ng)
                                 den_tmp += -box.Mtot;
                             else
                                 den_tmp += delta[ind];
@@ -305,7 +305,7 @@ size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, 
                 for(j=-tmp;j<=tmp;j++)
                     for(k=-tmp;k<=tmp;k++)
                         if(dist2(i, j, k) == grows){
-                            size_t ind = (size_t)(cysum(peaks[l].x[0], i, box.nd[0])*box.nd[1] + cysum(peaks[l].x[1], j, box.nd[1]))*(size_t)box.nd[2] + (size_t)cysum(peaks[l].x[2], k, box.nd[2]);
+                            ind = (size_t)(cysum(peaks[l].x[0], i, box.nd[0])*box.nd[1] + cysum(peaks[l].x[1], j, box.nd[1]))*(size_t)box.nd[2] + (size_t)cysum(peaks[l].x[2], k, box.nd[2]);
 
                             den -= delta[ind];
                             count --;						
@@ -326,13 +326,17 @@ size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, 
             for(j=-tmp;j<=tmp;j++)
                 for(k=-tmp;k<=tmp;k++)
                     if(dist2(i, j, k) < (size_t) grows_tmp){
-                        size_t ind = (size_t)(cysum(peaks[l].x[0], i, box.nd[0])*box.nd[1] + cysum(peaks[l].x[1], j, box.nd[1]))*(size_t)box.nd[2] + (size_t)cysum(peaks[l].x[2], k, box.nd[2]);
+                        ind = (size_t)(cysum(peaks[l].x[0], i, box.nd[0])*box.nd[1] + cysum(peaks[l].x[1], j, box.nd[1]))*(size_t)box.nd[2] + (size_t)cysum(peaks[l].x[2], k, box.nd[2]);
 
-                        if(flag[ind] != box.ng)
+                        if(flag[ind] != (long) box.ng)
                             printf("(1): This flag != -1! Flag = %ld and the new one is %ld\n", flag[ind], nh);		
 
-                        flag[ind] = nh;
+                        flag[ind] = (long) nh;
                     }
+
+        /*Put a negative flag for the central cell*/
+        ind = ((size_t) (peaks[l].x[0]*box.nd[1] + peaks[l].x[1]))*((size_t) box.nd[2]) + (size_t) peaks[l].x[2];
+        flag[ind] = (long) -nh;
 
         /*Save the halo information*/
         if(count >= barrier.Nmin){
@@ -347,7 +351,7 @@ size_t Grow_Halos(size_t np, size_t *flag, fft_real *Sig_Grid, fft_real *delta, 
                     for(k=-tmp;k<=tmp;k++)
                         if(dist2(i, j, k) < (size_t) grows_tmp){
                             size_t ind = (size_t)(cysum(peaks[l].x[0], i, box.nd[0])*box.nd[1] + cysum(peaks[l].x[1], j, box.nd[1]))*(size_t)box.nd[2] + (size_t)cysum(peaks[l].x[2], k, box.nd[2]);
-                            flag[ind] = box.ng + 1;
+                            flag[ind] = (long) box.ng + 1;
                         }
         }
     }
@@ -453,7 +457,7 @@ void Compute_Mass(size_t nh, int *sphere, HALOS *halos, gsl_interp_accel *acc, g
 }
 
 /*Find halos from a density grid*/
-size_t Find_Halos(fft_real *delta, fft_real *K, fft_real *P, int Nk, size_t *flag, HALOS **halos){
+size_t Find_Halos(fft_real *delta, fft_real *K, fft_real *P, int Nk, long *flag, HALOS **halos){
     int Nr, Ncells, *spheres;
     fft_real *R, *Sig_grid;
     double *M, *Sig;

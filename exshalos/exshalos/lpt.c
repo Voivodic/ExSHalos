@@ -1,7 +1,7 @@
 #include "lpt.h"
 
 /*Compute the first order displacements*/
-void Compute_1LPT(fft_complex *deltak, fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, size_t *flag, fft_real k_smooth){
+void Compute_1LPT(fft_complex *deltak, fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, long *flag, fft_real k_smooth){
     int i, j, k;
     size_t ind, tmp;
     fft_real kx, ky, kz, factx, facty, factz, fact, kmod;
@@ -57,7 +57,7 @@ void Compute_1LPT(fft_complex *deltak, fft_real *posh, fft_real *velh, fft_real 
 		for(j=0;j<box.nd[1];j++)
 			for(k=0;k<box.nd[2];k++){
 				ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k;
-				if(out.OUT_HALOS != FALSE) tmp = flag[ind];
+				if(out.OUT_HALOS != FALSE) tmp = (size_t) flag[ind];
 
 				if(tmp >= box.ng && out.OUT_LPT == FALSE && out.DO_2LPT == FALSE)	continue;
 	
@@ -96,7 +96,7 @@ void Compute_1LPT(fft_complex *deltak, fft_real *posh, fft_real *velh, fft_real 
 }
 
 /*Compute the second order displacements*/
-void Compute_2LPT(fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, size_t *flag, fft_real k_smooth){
+void Compute_2LPT(fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, long *flag, fft_real k_smooth){
     int i, j, k;
     size_t ind, tmp;
     fft_real kx, ky, kz, kmod, factx, facty, factz, fact, phixx, phixy, phixz, phiyy, phiyz, phizz;
@@ -183,7 +183,7 @@ void Compute_2LPT(fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, size
 		for(j=0;j<box.nd[1];j++)
 			for(k=0;k<box.nd[2];k++){
 				ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k;
-				if(out.OUT_HALOS != FALSE) tmp = flag[ind];
+				if(out.OUT_HALOS != FALSE) tmp = (size_t) flag[ind];
 
 				if(tmp >= box.ng && out.OUT_LPT == FALSE)	continue;
 
