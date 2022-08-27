@@ -408,12 +408,12 @@ static PyObject *smooth_field(PyObject *self, PyObject *args, PyObject *kwargs){
 static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     char DO_EB;
     size_t nh, ind, *flag;
-    int i, j, ndx, ndy, ndz, Nk, Nmin, verbose;
+    int i, j, ndx, ndy, ndz, Nk, Nmin, verbose, OUT_FLAG;
     fft_real Om0, redshift, dc, Lc, a, beta, alpha, *K, *P, *delta, *Mh, *posh;
     HALOS *halos;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"delta", "k", "P", "Lc", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "verbose", NULL};
+	static char *kwlist[] = {"delta", "k", "P", "Lc", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "OUT_FLAG" "verbose", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
@@ -421,10 +421,10 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOddddidddi", kwlist, &grid_array, &K_array, &P_array, &Lc, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &verbose))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOddddidddii", kwlist, &grid_array, &K_array, &P_array, &Lc, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_FLAG, &verbose))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOffffifffi", kwlist, &grid_array, &K_array, &P_array, &Lc, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &verbose))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOffffifffii", kwlist, &grid_array, &K_array, &P_array, &Lc, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_FLAG, &verbose))
 			return NULL;
 	#endif
 
@@ -451,8 +451,16 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     set_out(0, 1, 0, 0, 0, DO_EB, 0, (char) verbose);
 
     /*Alloc the flag array*/
-	flag = (size_t *)malloc(((size_t)box.nd[0])*((size_t)box.nd[1])*((size_t)box.nd[2])*sizeof(size_t));
-	check_memory(flag, "flag")
+    PyArrayObject *np_flag;
+    if(OUT_FLAG == TRUE){
+        npy_intp dims_flag[] = {(npy_intp) box.ng};
+        np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_flag, PyArray_LONG, 0);
+        flag = (size_t *) np_flag->data;
+    }
+    else{
+        flag = (size_t *) malloc(box.ng*sizeof(size_t));
+        check_memory(flag, "flag")
+    }
 
 	/*Initialize the flag array*/
 	for(ind=0;ind<box.ng;ind++)
@@ -460,7 +468,8 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
 
     /*Find the halos in the density grid*/
     nh = Find_Halos(delta, K, P, Nk, flag, &halos);
-    free(flag);
+    if(OUT_FLAG == FALSE)
+        free(flag);
 
     /*Define the variables for the output*/
     npy_intp dims_pos[] = {(npy_intp) nh, (npy_intp) 3};
@@ -485,8 +494,15 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     /*Put the arrays in the output dict*/
     PyObject *dict = PyDict_New();
     
-    PyDict_SetItemString(dict, "posh", PyArray_Return(np_pos));
-    PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+    if(OUT_FLAG == FALSE){
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_pos));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+    }
+    else{
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_pos));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh)); 
+        PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
+    }
 
     return dict;       
 }
@@ -640,6 +656,7 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
     npy_intp dims_flag[] = {(npy_intp) box.ng};
     PyArrayObject *np_grid, *np_S, *np_V, *np_flag;
 
+    /*Alloc the density grid*/
     if(out.OUT_DEN == TRUE){
         np_grid = (PyArrayObject *) PyArray_ZEROS(3, dims_grid, NP_OUT_TYPE, 0);
         delta = (fft_real *) np_grid->data;
@@ -647,6 +664,7 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
     else
         delta = NULL;
 
+    /*Alloc the displacements and velocities of the particles*/
     if(out.OUT_LPT == TRUE){
         np_S = (PyArrayObject *) PyArray_ZEROS(2, dims_S, NP_OUT_TYPE, 0);
         S = (fft_real *) np_S->data;
@@ -662,6 +680,7 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
         V = NULL;
     }
 
+    /*Alloc the flag array*/
     if(OUT_FLAG == TRUE){
         np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_flag, PyArray_LONG, 0);
         flag = (size_t *) np_flag->data;
@@ -830,6 +849,7 @@ static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *k
     npy_intp dims_flag[] = {(npy_intp) box.ng};
     PyArrayObject *np_S, *np_V, *np_flag;
 
+    /*Alloc the displacements and velocities of the particles*/
     if(out.OUT_LPT == TRUE && IN_disp == FALSE){
         np_S = (PyArrayObject *) PyArray_ZEROS(2, dims_S, NP_OUT_TYPE, 0);
         S = (fft_real *) np_S->data;
@@ -845,6 +865,7 @@ static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *k
         V = NULL;
     }
 
+    /*Alloc the flag array*/
     if(OUT_FLAG == TRUE){
         np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_flag, PyArray_LONG, 0);
         flag = (size_t *) np_flag->data;
