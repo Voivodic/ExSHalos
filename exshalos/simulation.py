@@ -238,7 +238,7 @@ def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min
         k_min = np.float64(k_min)
         k_max = np.float64(k_max)  
 
-    if(window == "NO" or window == "no" or window == 0):
+    if(window == "NO" or window == "no" or window == "No" or window == 0):
         window = 0
     elif(window == "NGP" or window == "ngp" or window == 1):
         window = 1
@@ -310,7 +310,7 @@ def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_mi
         k_min = np.float64(k_min)
         k_max = np.float64(k_max)  
 
-    if(window == "NO" or window == "no" or window == 0):
+    if(window == "NO" or window == "no" or window == "No" or window == 0):
         window = 0
     elif(window == "NGP" or window == "ngp" or window == 1):
         window = 1
