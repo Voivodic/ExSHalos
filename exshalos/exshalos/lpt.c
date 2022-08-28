@@ -57,7 +57,7 @@ void Compute_1LPT(fft_complex *deltak, fft_real *posh, fft_real *velh, fft_real 
 		for(j=0;j<box.nd[1];j++)
 			for(k=0;k<box.nd[2];k++){
 				ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k;
-				if(out.OUT_HALOS != FALSE) tmp = (size_t) flag[ind];
+				if(out.OUT_HALOS != FALSE) tmp = (size_t) labs(flag[ind]);
 
 				if(tmp >= box.ng && out.OUT_LPT == FALSE && out.DO_2LPT == FALSE)	continue;
 	
@@ -183,7 +183,7 @@ void Compute_2LPT(fft_real *posh, fft_real *velh, fft_real *S, fft_real *V, long
 		for(j=0;j<box.nd[1];j++)
 			for(k=0;k<box.nd[2];k++){
 				ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nd[2] + (size_t)k;
-				if(out.OUT_HALOS != FALSE) tmp = (size_t) flag[ind];
+				if(out.OUT_HALOS != FALSE) tmp = (size_t) labs(flag[ind]);
 
 				if(tmp >= box.ng && out.OUT_LPT == FALSE)	continue;
 

@@ -88,7 +88,7 @@ lpt = exshalos.utils.Displace_LPT(grid["grid"], Lc = Lc, k_smooth = 0.4, DO_2LPT
 
 pl.clf()
 #pl.plot(ks, Ps, "o", label = "Gaussian")
-k_smooth = [0.1, 0.5, 2.0]
+'''k_smooth = [0.1, 0.5, 2.0]
 cores = ["blue", "red", "darkgreen", "purple", "black"]
 for ks, cor in zip(k_smooth, cores):
     print(ks)
@@ -113,7 +113,7 @@ pl.ylim(-0.5, 0.25)
 pl.xlim(0.0, 1.0)
 pl.legend(loc = "best")
 pl.savefig("Power_LPT.pdf")
-
+'''
 #Generate a halo catalogue from a given power spectrum
 print("Generating the halo catalogue")
 '''

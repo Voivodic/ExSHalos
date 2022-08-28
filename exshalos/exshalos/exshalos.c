@@ -414,7 +414,7 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     HALOS *halos;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"delta", "k", "P", "Lc", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "OUT_FLAG" "verbose", NULL};
+	static char *kwlist[] = {"delta", "k", "P", "Lc", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "OUT_FLAG", "verbose", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
