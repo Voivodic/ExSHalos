@@ -6,6 +6,7 @@
 #include "bimodule.h"
 #include "trimodule.h"
 #include "abundance.h"
+#include "bias.h"
 
 /*This declares the compute function*/
 static PyObject *spectrum_check_precision(PyObject * self, PyObject * args);
@@ -14,6 +15,7 @@ static PyObject *power_compute(PyObject * self, PyObject * args, PyObject *kwarg
 static PyObject *bi_compute(PyObject * self, PyObject * args, PyObject *kwargs);
 static PyObject *tri_compute(PyObject * self, PyObject * args, PyObject *kwargs);
 static PyObject *abundance_compute(PyObject * self, PyObject * args, PyObject *kwargs);
+static PyObject *histogram_compute(PyObject *self, PyObject *args, PyObject *kwargs);
 
 /*This tells Python what methods this module has. See the Python-C API for more information.*/
 static PyMethodDef spectrum_methods[] = {
@@ -23,6 +25,7 @@ static PyMethodDef spectrum_methods[] = {
     {"bi_compute", bi_compute, METH_VARARGS | METH_KEYWORDS, "Computes the BiSpectrum of a given density grid"},
     {"tri_compute", tri_compute, METH_VARARGS | METH_KEYWORDS, "Computes the TriSpectrum of a given density grid"},
     {"abundance_compute", abundance_compute, METH_VARARGS | METH_KEYWORDS, "Computes the differential abundance of halos"},
+    {"histogram_compute", histogram_compute, METH_VARARGS | METH_KEYWORDS, "Computed the (un)masked histogram of delta"},
     {NULL, NULL, 0, NULL}
 };
 
@@ -495,6 +498,95 @@ static PyObject *abundance_compute(PyObject *self, PyObject *args, PyObject *kwa
     PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mmean));
     PyDict_SetItemString(dict, "dn", PyArray_Return(np_dn));
     PyDict_SetItemString(dict, "dn_err", PyArray_Return(np_dn_err));
+
+    return dict;
+}
+
+/*Fucntion that computes the the histogram of the delta field and the mask histogram given a halo catalogue*/
+static PyObject *histogram_compute(PyObject *self, PyObject *args, PyObject *kwargs){
+    int i, Nm, Nbins, Central;
+    size_t ndx, ndy, ndz, ng, nh;
+    long *flag, *hist_unmasked, *hist_masked;
+    fft_real *delta, *Mh, Mmin, Mmax, dmin, dmax, *Mmean, *delta_mean, dlnM, ddelta;
+
+	/*Define the list of parameters*/
+	static char *kwlist[] = {"delta", "Mh", "flag", "Mmin", "Mmax", "Nm", "dmin", "dmax", "Nbins", "Central", NULL};
+	import_array();
+
+	/*Define the pyobject with the 3D position of the tracers*/
+	PyArrayObject *delta_array, *Mh_array, *flag_array;  
+
+	/*Read the input arguments*/
+	#ifdef DOUBLEPRECISION_FFTW
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOddiddii", kwlist, &delta_array, &Mh_array, &flag_array, &Mmin, &Mmax, &Nm, &dmin, &dmax, &Nbins, &Central))
+			return NULL;
+	#else
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOffiffii", kwlist, &delta_array, &Mh_array, &flag_array, &Mmin, &Mmax, &Nm, &dmin, &dmax, &Nbins, &Central))
+			return NULL;
+	#endif
+
+    /*Convert the PyObjects to C arrays*/
+    nh = (size_t) Mh_array->dimensions[0];
+    ndx = (size_t) delta_array->dimensions[0];
+    ndy = (size_t) delta_array->dimensions[1];
+    ndz = (size_t) delta_array->dimensions[2];
+    ng = ndx*ndy*ndz;
+    delta = (fft_real *) delta_array->data;
+    Mh = (fft_real *) Mh_array->data;
+    flag = (long *) flag_array->data;
+
+    /*Find Mmin and Mmax, if they were not given*/
+    if(Mmin < 0.0){
+        Mmin = 1e+20;
+        for(i=0;i<nh;i++)
+            if(Mh[i] < Mmin)
+                Mmin = Mh[i];
+        Mmin = Mmin*0.9999;
+    }
+    if(Mmax < 0.0){
+        Mmax = 0.0;
+        for(i=0;i<nh;i++)
+            if(Mh[i] > Mmax)
+                Mmax = Mh[i];
+        Mmax = Mmax*1.0001;
+    }
+
+    /*Prepare the PyObject arrays for the outputs*/
+    npy_intp dims_hist_unmasked[] = {(npy_intp) Nbins};
+    npy_intp dims_hist_masked[] = {(npy_intp) Nm, (npy_intp) Nbins};
+    npy_intp dims_Mmean[] = {(npy_intp) Nm};
+
+	/*Alloc the PyObjects for the output*/
+    PyArrayObject *np_hist_unmasked = (PyArrayObject *) PyArray_ZEROS(1, dims_hist_unmasked, PyArray_LONG, 0);
+    PyArrayObject *np_hist_masked = (PyArrayObject *) PyArray_ZEROS(2, dims_hist_masked, PyArray_LONG, 0);
+    PyArrayObject *np_Mmean = (PyArrayObject *) PyArray_ZEROS(1, dims_Mmean, NP_OUT_TYPE, 0);
+    PyArrayObject *np_delta_mean = (PyArrayObject *) PyArray_ZEROS(1, dims_hist_unmasked, NP_OUT_TYPE, 0);
+
+    hist_unmasked = (long *) np_hist_unmasked->data;
+    hist_masked = (long *) np_hist_masked->data;
+    Mmean = (fft_real *) np_Mmean->data;
+    delta_mean = (fft_real *) np_delta_mean->data;
+
+    /*Find the size of both bins*/
+    dlnM = (log10(Mmax) - log10(Mmin))/Nm;
+    ddelta = (dmax - dmin)/Nbins;
+
+    /*Compute the central point in the mass and delta bin*/
+    for(i=0;i<Nm;i++)
+        Mmean[i] = pow(10.0, log10(Mmin) + (i + 0.5)*dlnM);
+    for(i=0;i<Nbins;i++)
+        delta_mean[i] = dmin + (i + 0.5)*ddelta;
+
+    /*Compute the histograms*/
+    Measure_Histogram(delta, Mh, flag, Mmin, Mmax, Nm, dmin, dmax, Nbins, ng, nh, hist_unmasked, hist_masked, Central);
+
+    /*Construct the output tuple for each case*/
+    PyObject *dict = PyDict_New();
+
+    PyDict_SetItemString(dict, "delta", PyArray_Return(np_delta_mean));
+    PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mmean)); 
+    PyDict_SetItemString(dict, "Unmasked", PyArray_Return(np_hist_unmasked));
+    PyDict_SetItemString(dict, "Masked", PyArray_Return(np_hist_masked));
 
     return dict;
 }

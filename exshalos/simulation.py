@@ -395,3 +395,59 @@ def Compute_Abundance(Mh, Mmin = -1.0, Mmax = -1.0, Nm = 25, Lc = 2.0, nd = 256,
     x = exshalos.spectrum.spectrum.abundance_compute(Mh, Mmin, Mmax, np.int32(Nm), Lc, np.int32(ndx), np.int32(ndy), np.int32(ndz), np.int32(verbose))
 
     return x
+
+#Measure the b_n bias parameters uising Jens' technic
+def Compute_Bias_Jens(grid, Mh, flag, Mmin = -1.0, Mmax = -1.0, Nm = 20, dmin = -1.0, dmax = 1.0, Nbins = 200, Lambda = -1.0, Lc = 2.0, Central = True, Normalized = False):
+    """
+    grid: Liniar (initial) density grid | 3D numpy array (Nd, Nd, Nd)
+    Mh: Mass of all halos | 1D numpy array (Nh)
+    flag: Flag of all grid cell as being part of a halo or not | 3D numpy array (Nd, Nd, Nd)
+    Mmin: Minimum halo mass to be considered | float
+    Mmax: Maximum halo mass to be considered | float
+    Nm: Number of bins in mass | int
+    dmin: Minimum density to be used in the construction of the histograms int delta | float
+    dmax: Maximum density to be used in the construction of the histograms int delta | float
+    Nbins: Number of bins to be used in the construction of the histograms int delta | int
+    Lambda: Scale used to smooth the density field | float
+    Lc: Size of the cells of the grid | float
+    Central: Use only the central particle of the halo or all particles | boolean
+    Normalized: Output the normalized pdf or not | boolean
+
+    return: The histogram of the delta field unmasked and the histograms of the delta field masked for all halo mass bins | Python dictionary with Nm + 1 keys: "delta" 1D numpy array, "Mbin%d" 1D array where %d is in [0, Nm-1]
+    """
+
+    #Smooth the density field
+    if(Lambda > 0.0):
+        delta = exshalos.utils.Smooth_Fields(np.copy(grid), Lc = Lc, k_smooth = Lambda, Input_k = False, Nfields = 1, verbose = False, nthreads = 1)
+    else:
+        delta = np.copy(grid)
+
+    #Convert the type of the floats
+    precision = exshalos.spectrum.spectrum.check_precision()
+
+    if(precision == 4):
+        delta = np.float32(delta)
+        Mh = np.float32(Mh)
+        Mmin = np.float32(Mmin)
+        Mmax = np.float32(Mmax)
+        dmin = np.float32(dmin)
+        dmax = np.float32(dmax)
+    else:
+        delta = np.float64(delta)
+        Mh = np.float64(Mh)
+        Mmin = np.float64(Mmin)
+        Mmax = np.float64(Mmax)
+        dmin = np.float64(dmin)
+        dmax = np.float64(dmax)
+
+    #Run the C code that does the job
+    x = exshalos.spectrum.spectrum.histogram_compute(delta, Mh, np.int64(flag), Mmin, Mmax, np.int32(Nm), dmin, dmax, np.int32(Nbins), np.int32(Central))
+    x["sigma2"] = np.mean(delta**2)
+    del(delta)
+
+    #Normalize the histograms
+    if(Normalized == True):
+        x["Unmasked"] = x["Unmasked"]/np.sum(x["Unmasked"])
+        x["Masked"] = x["Masked"]/np.sum(x["Masked"], axis = 1).reshape([Nm, 1])
+
+    return x
