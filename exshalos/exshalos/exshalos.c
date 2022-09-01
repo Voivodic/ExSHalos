@@ -655,7 +655,7 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
     /*Alloc some arrays for the cases of outputing intermediate results*/
     npy_intp dims_grid[] = {(npy_intp) box.nd[0], (npy_intp) box.nd[1], (npy_intp) box.nd[2]};
     npy_intp dims_S[] = {(npy_intp) box.ng, (npy_intp) 3};
-    npy_intp dims_flag[] = {(npy_intp) box.nd, (npy_intp) box.nd, (npy_intp) box.nd};
+    npy_intp dims_flag[] = {(npy_intp) box.nd[0], (npy_intp) box.nd[1], (npy_intp) box.nd[2]};
     PyArrayObject *np_grid, *np_S, *np_V, *np_flag;
 
     /*Alloc the density grid*/
@@ -790,6 +790,17 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
         PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
         PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
     }
+    else if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
+    }
+    else if(OUT_DEN == TRUE && OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
+        PyDict_SetItemString(dict, "grid", PyArray_Return(np_grid));
+    } 
 
     return dict; 
 }
@@ -849,7 +860,7 @@ static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *k
 
     /*Alloc some arrays for the cases of outputing intermediate results*/
     npy_intp dims_S[] = {(npy_intp) box.ng, (npy_intp) 3};
-    npy_intp dims_flag[] = {(npy_intp) box.nd, (npy_intp) box.nd, (npy_intp) box.nd};
+    npy_intp dims_flag[] = {(npy_intp) box.nd[0], (npy_intp) box.nd[1], (npy_intp) box.nd[2]};
     PyArrayObject *np_S, *np_V, *np_flag;
 
     /*Alloc the displacements and velocities of the particles*/
@@ -948,6 +959,11 @@ static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *k
         PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
         PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
     } 
+    else if(OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
+        PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
+    }   
 
     return dict; 
 }
