@@ -132,12 +132,12 @@ typedef struct HOD{
 } HOD;
 
 /*Define the global structure variables*/
-COSMO cosmo;
-BARRIER barrier;
-BOX box;
-OUTPUT out;
-LIGHTCONE lightcone;
-HOD hod;
+extern COSMO cosmo;
+extern BARRIER barrier;
+extern BOX box;
+extern OUTPUT out;
+extern LIGHTCONE lightcone;
+extern HOD hod;
 
 /*Define the distance between two cells*/
 size_t dist2(size_t i, size_t j, size_t k);

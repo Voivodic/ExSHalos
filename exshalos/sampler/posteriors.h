@@ -4,8 +4,8 @@
 #include "sampler_h.h"
 
 /*Define some global variables*/
-int MODEL;      //Variable with the model to be used in the sampling
-int Prior_type; //Variable with the type of prior: Flat (0) or Gaussian (1)
+extern int MODEL;      //Variable with the model to be used in the sampling
+extern int Prior_type; //Variable with the type of prior: Flat (0) or Gaussian (1)
 
 /*Compute the theoretical prediction for Pgg and its derivative*/
 void Pgg_theory(double *k, double *P_theory, double **dP_theory, double *params, double *P_terms, int Nk, int NO);

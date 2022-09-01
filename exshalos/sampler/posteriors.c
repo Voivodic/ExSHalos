@@ -1,5 +1,9 @@
 #include "posteriors.h"
 
+/*Defining the global variables*/
+int MODEL;      
+int Prior_type; 
+
 /*Compute the theoretical prediction for Pgg and its derivative*/
 void Pgg_theory(double *k, double *P_theory, double **dP_theory, double *params, double *P_terms, int Nk, int NO){
     int i, j, l, count;

@@ -121,3 +121,11 @@ void set_out(char OUT_DEN, char OUT_HALOS, char OUT_LPT, char OUT_VEL, char DO_2
 void set_lightcone(){
 
 }
+
+/*Defining the global variables*/
+COSMO cosmo;
+BARRIER barrier;
+BOX box;
+OUTPUT out;
+LIGHTCONE lightcone;
+HOD hod;

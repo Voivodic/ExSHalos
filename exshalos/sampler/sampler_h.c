@@ -16,3 +16,6 @@ gsl_matrix *invert_matrix(gsl_matrix *matrix, int size){
 
     return inv;
 }
+
+/*Defining the global variables*/
+int seed;

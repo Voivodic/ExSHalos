@@ -116,3 +116,11 @@ void set_out(char OUT_VEL, char DO_HOD, char IN_C, char VERBOSE){
 	out.IN_C = IN_C;			//There were concentrations given
 	out.VERBOSE = VERBOSE;		//Print the information about the current state of the catalogue generation: yes (1) or no (0)?
 }
+
+/*Defining the global variables*/
+COSMO cosmo;
+BOX box;
+HOD hodp;
+SPLIT split;
+OUTPUT out;
+int seed;

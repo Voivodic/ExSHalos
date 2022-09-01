@@ -106,12 +106,12 @@ typedef struct Output{
 } OUTPUT;
 
 /*Define the global structure variables*/
-COSMO cosmo;
-BOX box;
-HOD hodp;
-SPLIT split;
-OUTPUT out;
-int seed;
+extern COSMO cosmo;
+extern BOX box;
+extern HOD hodp;
+extern SPLIT split;
+extern OUTPUT out;
+extern int seed;
 
 /*Define the cyclic sum for floats*/
 fft_real cysumf(fft_real x, fft_real y, fft_real L);

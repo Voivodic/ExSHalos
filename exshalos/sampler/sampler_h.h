@@ -46,7 +46,7 @@
 #define check_memory(p, name) if(p == NULL){printf("Problems to alloc %s.\n", name); exit(0);} //Check the memory allocation
 
 /*Define the global structure variables*/
-int seed;
+extern int seed;
 
 /*Invert a given matrix using GSL*/
 gsl_matrix *invert_matrix(gsl_matrix *matrix, int size);
