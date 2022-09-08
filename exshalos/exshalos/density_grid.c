@@ -49,14 +49,14 @@ void Inter_Power(fft_real *K, fft_real *P, int Nk, fft_real R_max, gsl_spline *s
         P_tmp[i] = (double) P[i];
     }
   
-    /*Compute the Power spectrum in the box
+    /*Compute the Power spectrum in the box*/
     if(R_max < 100000.0){
         pk2xi(Nk, K_tmp, P_tmp, R_xi, Xi);
         for(i=0;i<Nk;i++)
             if(R_xi[i] > R_max)	
                 Xi[i] = 0.0;
         xi2pk(Nk, R_xi, Xi, K_tmp, P_tmp);
-    }*/
+    }
 
 	/*Interpolate the power spectrum*/
 	gsl_spline_init(spline, K_tmp, P_tmp, Nk);
