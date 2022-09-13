@@ -151,21 +151,18 @@ void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *del
 	
 				kmod = (fft_real) sqrt(kx*kx + ky*ky + kz*kz);	
 
+                /*Compute the amplitude of the field*/
                 if(kmod <= k_smooth){
                     if(kmod > 0.0){
-                        std = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc));
+                        A = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc));
                         if(fixed == FALSE)
-                            A = (fft_real) gsl_ran_gaussian(rng_ptr, (double) std);
-                        else
-                            A = std;                
+                            A = A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0));               
                     }
                     else if(kmod == 0.0 && R_max < 100000.0){
                         kmod = (fft_real) pow(box.kl[0]*box.kl[1]*box.kl[2], 1.0/3.0)/4.0;
-                        std = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc));
+                        A = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc));
                         if(fixed == FALSE)
-                            A = (fft_real) gsl_ran_gaussian(rng_ptr, (double) std);
-                        else
-                            A = std;
+                            A = A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0));
                     }
                     else
                         A = 0.0;
