@@ -409,12 +409,12 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     char DO_EB;
     size_t nh, ind;
     long *flag;
-    int i, j, ndx, ndy, ndz, Nk, Nmin, verbose, OUT_FLAG;
+    int i, j, ndx, ndy, ndz, Nk, Nmin, verbose, OUT_FLAG, OUT_PROF;
     fft_real Om0, redshift, dc, Lc, a, beta, alpha, *K, *P, *delta, *Mh, *posh;
     HALOS *halos;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"delta", "k", "P", "Lc", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "OUT_FLAG", "verbose", NULL};
+	static char *kwlist[] = {"delta", "k", "P", "Lc", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "OUT_FLAG", "OUT_PROF", "verbose", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
@@ -422,10 +422,10 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOddddidddii", kwlist, &grid_array, &K_array, &P_array, &Lc, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_FLAG, &verbose))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOddddidddiii", kwlist, &grid_array, &K_array, &P_array, &Lc, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_FLAG, &OUT_PROF, &verbose))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOffffifffii", kwlist, &grid_array, &K_array, &P_array, &Lc, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_FLAG, &verbose))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOffffifffiii", kwlist, &grid_array, &K_array, &P_array, &Lc, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_FLAG, &OUT_PROF, &verbose))
 			return NULL;
 	#endif
 
@@ -449,7 +449,7 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     set_cosmology(Om0, redshift, dc);  
     set_box(ndx, ndy, ndz, Lc);
     set_barrier(Nmin, a, beta, alpha, 12345);
-    set_out(0, 1, 0, 0, 0, DO_EB, 0, (char) verbose);
+    set_out(0, 1, 0, 0, 0, DO_EB, 0, (char) OUT_PROF, (char) verbose);
 
     /*Alloc the flag array*/
     PyArrayObject *np_flag;
@@ -544,7 +544,7 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     /*Set the box structure*/
     set_cosmology(Om0, redshift, -1.0);  
     set_box(ndx, ndy, ndz, Lc);
-    set_out(0, 0, 1, (char) OUT_VEL, (char) DO_2LPT, 0, 0, (char) verbose);
+    set_out(0, 0, 1, (char) OUT_VEL, (char) DO_2LPT, 0, 0, 0, (char) verbose);
 
     /*Compute the density grid in Fourier space, if needed*/
     if(INk == FALSE){
@@ -607,14 +607,14 @@ static PyObject *lpt_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 
 /*Generate the halo catalogue from a given linear power spectrum*/
 static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwargs){
-    size_t nh, ind;
+    size_t i, nh, ind;
     long *flag;
-    int i, j, ndx, ndy, ndz, Nk, verbose, nthreads, seed, OUT_DEN, OUT_LPT, Nmin, DO_EB, OUT_VEL, DO_2LPT, OUT_FLAG, fixed;
-    fft_real Lc, R_max, k_smooth, *K, *P, *delta, *S, *V, Om0, redshift, dc, a, beta, alpha, *posh, *velh, *posh_out, *velh_out, *Mh, phase;
+    int j, ndx, ndy, ndz, Nk, verbose, nthreads, seed, OUT_DEN, OUT_LPT, OUT_PROF, Nmin, DO_EB, OUT_VEL, DO_2LPT, OUT_FLAG, fixed, Nbins;
+    fft_real Lc, R_max, k_smooth, *K, *P, *delta, *S, *V, Om0, redshift, dc, a, beta, alpha, *posh, *velh, *posh_out, *velh_out, *prof_out, *profM_out, *Mh, phase;
     HALOS *halos;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"k", "P", "R_max", "Ndx", "Ndy", "Ndz", "Lc/Mc", "seed", "k_smooth", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "fixed", "phase", "OUT_DEN", "OUT_LPT", "OUT_VEL", "DO_2LPT", "OUT_FLAG", "verbose", "nthreads", NULL};
+	static char *kwlist[] = {"k", "P", "R_max", "Ndx", "Ndy", "Ndz", "Lc/Mc", "seed", "k_smooth", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "fixed", "phase", "OUT_DEN", "OUT_LPT", "OUT_VEL", "DO_2LPT", "OUT_FLAG", "OUT_PROF", "verbose", "nthreads", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
@@ -622,10 +622,10 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOdiiididdddidddidiiiiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &seed, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &fixed, &phase, &OUT_DEN, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOdiiididdddidddidiiiiiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &seed, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &fixed, &phase, &OUT_DEN, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &OUT_PROF, &verbose, &nthreads))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOfiiififfffifffifiiiiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &seed, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &fixed, &phase, &OUT_DEN, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOfiiififfffifffifiiiiiiii", kwlist, &K_array, &P_array, &R_max, &ndx, &ndy, &ndz, &Lc, &seed, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &fixed, &phase, &OUT_DEN, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &OUT_PROF, &verbose, &nthreads))
 			return NULL;
 	#endif
 
@@ -640,7 +640,7 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
     set_cosmology(Om0, redshift, dc);   
     set_box(ndx, ndy, ndz, Lc);
     set_barrier(Nmin, a, beta, alpha, seed);
-    set_out((char) OUT_DEN, 1, (char) OUT_LPT, (char) OUT_VEL, (char) DO_2LPT, (char) DO_EB, 0, (char) verbose);
+    set_out((char) OUT_DEN, 1, (char) OUT_LPT, (char) OUT_VEL, (char) DO_2LPT, (char) DO_EB, 0, (char) OUT_PROF, (char) verbose);
 
 	/*Convert the PyObjects to C arrays*/
     Nk = (int) K_array->dimensions[0];
@@ -702,9 +702,12 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
         free(flag);
 
     /*Alloc the output arrays*/
+    Nbins = 1000;//(int) floor(pow(M_max/box.Mcell, 1.0/3.0));     //Number of bins for the Lagrangian profiles
     npy_intp dims_posh[] = {(npy_intp) nh, (npy_intp) 3};
     npy_intp dims_Mh[] = {(npy_intp) nh};
-    PyArrayObject *np_posh, *np_velh, *np_Mh;
+    npy_intp dims_prof[] = {(npy_intp) nh, (npy_intp) Nbins};
+    npy_intp dims_profM[] = {(npy_intp) Nbins};
+    PyArrayObject *np_posh, *np_velh, *np_Mh, *np_prof, *np_profM;
 
     np_Mh = (PyArrayObject *) PyArray_ZEROS(1, dims_Mh, NP_OUT_TYPE, 0);
     np_posh = (PyArrayObject *) PyArray_ZEROS(2, dims_posh, NP_OUT_TYPE, 0);
@@ -713,6 +716,13 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
     if(out.OUT_VEL == TRUE){
         np_velh = (PyArrayObject *) PyArray_ZEROS(2, dims_posh, NP_OUT_TYPE, 0);
         velh_out = (fft_real *) np_velh->data;       
+    }
+    if(out.OUT_PROF == TRUE){
+        np_prof = (PyArrayObject *) PyArray_ZEROS(2, dims_prof, NP_OUT_TYPE, 0);
+        np_profM = (PyArrayObject *) PyArray_ZEROS(1, dims_profM, NP_OUT_TYPE, 0);
+
+        prof_out = (fft_real *) np_prof->data;
+        profM_out = (fft_real *) np_profM->data;
     }
 
     /*Put the values in the output arrays*/
@@ -724,6 +734,23 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
             if(out.OUT_VEL == TRUE)
                 velh_out[ind] = velh[ind];
         }
+        if(out.OUT_PROF == TRUE){
+            ind = (size_t) Nbins*i;
+            for(j=0;j<Nbins;j++)
+                prof_out[ind + j] = halos[i].Prof[j];
+        }
+    }
+
+    /*Compute the mass of each shere of the mean Lagrangian profile*/
+    int *spheres;
+    char spheresfile[1000];
+    if(out.OUT_PROF == TRUE){
+        /*Read the number of grid cells inside each possible sphere*/
+        strcpy(spheresfile,  SPHERES_DIRC);
+        strcat(spheresfile, "Spheres.dat");
+        Read_Spheres(&spheres, spheresfile);
+        for(i=0;i<Nbins;i++)
+            profM_out[i] = spheres[i]*box.Mcell;
     }
 
     /*Free the original arrays with the halo information*/
@@ -734,21 +761,27 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
     /*Construct the output tuple for each case*/
     PyObject *dict = PyDict_New();
 
-    if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
+    if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == FALSE && OUT_PROF == FALSE){
         PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
         PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));       
     }
-    else if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == TRUE && OUT_FLAG == FALSE){
+    if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == FALSE && OUT_PROF == TRUE){
+        PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
+        PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));    
+        PyDict_SetItemString(dict, "Prof", PyArray_Return(np_prof));          
+        PyDict_SetItemString(dict, "ProfM", PyArray_Return(np_profM));          
+    }
+    else if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == TRUE && OUT_FLAG == FALSE && OUT_PROF == FALSE){
         PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
         PyDict_SetItemString(dict, "velh", PyArray_Return(np_velh));
         PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
     }
-    else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
+    else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == FALSE && OUT_PROF == FALSE){
         PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
         PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
         PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
     }
-    else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == TRUE && OUT_FLAG == TRUE){
+    else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == TRUE && OUT_FLAG == TRUE && OUT_PROF == FALSE){
         PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
         PyDict_SetItemString(dict, "velh", PyArray_Return(np_velh));
         PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
@@ -756,7 +789,7 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
         PyDict_SetItemString(dict, "vel", PyArray_Return(np_V));
         PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
     }   
-    else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == TRUE && OUT_FLAG == TRUE){
+    else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == TRUE && OUT_FLAG == TRUE && OUT_PROF == FALSE){
         PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
         PyDict_SetItemString(dict, "velh", PyArray_Return(np_velh));
         PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
@@ -765,37 +798,37 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
         PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
         PyDict_SetItemString(dict, "grid", PyArray_Return(np_grid));
     }  
-    else if(OUT_DEN == TRUE && OUT_LPT == FALSE && OUT_VEL == TRUE && OUT_FLAG == FALSE){
+    else if(OUT_DEN == TRUE && OUT_LPT == FALSE && OUT_VEL == TRUE && OUT_FLAG == FALSE && OUT_PROF == FALSE){
         PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
         PyDict_SetItemString(dict, "velh", PyArray_Return(np_velh));
         PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
         PyDict_SetItemString(dict, "grid", PyArray_Return(np_grid));
     } 
-    else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == FALSE){
+    else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == FALSE && OUT_PROF == FALSE){
         PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
         PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
         PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
         PyDict_SetItemString(dict, "grid", PyArray_Return(np_grid));
     } 
-    else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
+    else if(OUT_DEN == TRUE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == TRUE && OUT_PROF == FALSE){
         PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
         PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
         PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
         PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
         PyDict_SetItemString(dict, "grid", PyArray_Return(np_grid));
     } 
-    else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
+    else if(OUT_DEN == FALSE && OUT_LPT == TRUE && OUT_VEL == FALSE && OUT_FLAG == TRUE && OUT_PROF == FALSE){
         PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
         PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
         PyDict_SetItemString(dict, "pos", PyArray_Return(np_S));
         PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
     }
-    else if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
+    else if(OUT_DEN == FALSE && OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == TRUE && OUT_PROF == FALSE){
         PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
         PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
         PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
     }
-    else if(OUT_DEN == TRUE && OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == TRUE){
+    else if(OUT_DEN == TRUE && OUT_LPT == FALSE && OUT_VEL == FALSE && OUT_FLAG == TRUE && OUT_PROF == FALSE){
         PyDict_SetItemString(dict, "posh", PyArray_Return(np_posh));
         PyDict_SetItemString(dict, "Mh", PyArray_Return(np_Mh));
         PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));
@@ -807,14 +840,14 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
 
 /*Generate the halo catalogue from a given linear power spectrum*/
 static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *kwargs){
-    size_t nh, ind;
+    size_t i, nh, ind;
     long *flag;
-    int i, j, ndx, ndy, ndz, Nk, verbose, nthreads, OUT_LPT, Nmin, DO_EB, OUT_VEL, DO_2LPT, OUT_FLAG, IN_disp;
+    int j, ndx, ndy, ndz, Nk, verbose, nthreads, OUT_LPT, Nmin, DO_EB, OUT_VEL, DO_2LPT, OUT_FLAG, IN_disp, OUT_PROF;
     fft_real Lc, k_smooth, *K, *P, *delta, *S, *V, Om0, redshift, dc, a, beta, alpha, *posh, *velh, *posh_out, *velh_out, *Mh;
     HALOS *halos;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"k", "P", "grid", "S", "V", "Lc/Mc", "k_smooth", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "OUT_LPT", "OUT_VEL", "DO_2LPT", "OUT_FLAG", "IN_disp", "verbose", "nthreads", NULL};
+	static char *kwlist[] = {"k", "P", "grid", "S", "V", "Lc/Mc", "k_smooth", "Om0", "redshift", "dc", "Nmin", "a", "beta", "alpha", "OUT_LPT", "OUT_VEL", "DO_2LPT", "OUT_FLAG", "IN_disp", "OUT_PROF", "verbose", "nthreads", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
@@ -822,10 +855,10 @@ static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *k
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOOdddddidddiiiiiii", kwlist, &K_array, &P_array, &grid_array, &S_array, &V_array, &Lc, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &IN_disp, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOOdddddidddiiiiiiii", kwlist, &K_array, &P_array, &grid_array, &S_array, &V_array, &Lc, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &IN_disp, &OUT_PROF, &verbose, &nthreads))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOOfffffifffiiiiiii", kwlist, &K_array, &P_array, &grid_array, &S_array, &V_array,  &Lc, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &IN_disp, &verbose, &nthreads))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOOfffffifffiiiiiiii", kwlist, &K_array, &P_array, &grid_array, &S_array, &V_array,  &Lc, &k_smooth, &Om0, &redshift, &dc, &Nmin, &a, &beta, &alpha, &OUT_LPT, &OUT_VEL, &DO_2LPT, &OUT_FLAG, &IN_disp, &OUT_PROF, &verbose, &nthreads))
 			return NULL;
 	#endif
 
@@ -851,7 +884,7 @@ static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *k
     set_cosmology(Om0, redshift, dc);   
     set_box(ndx, ndy, ndz, Lc);
     set_barrier(Nmin, a, beta, alpha, 1234);
-    set_out(0, 1, (char) OUT_LPT, (char) OUT_VEL, (char) DO_2LPT, (char) DO_EB, 0, (char) verbose);
+    set_out(0, 1, (char) OUT_LPT, (char) OUT_VEL, (char) DO_2LPT, (char) DO_EB, 0, (char) OUT_PROF, (char) verbose);
 
     /*Initialize FFTW and openmp to run in parallel*/
     omp_set_num_threads(nthreads);

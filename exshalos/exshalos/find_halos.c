@@ -213,9 +213,13 @@ fft_real Barrier(fft_real S){
 
 /*It grows the spheres around the peaks to create the halos*/
 size_t Grow_Halos(size_t np, long *flag, fft_real *Sig_Grid, fft_real *delta, PEAKS *peaks, HALOS *halos){
-    int i, j, k, m, count, count_tmp, grows, grows_tmp, tmp, Ncells = floor(M_max/box.Mcell);
+    int i, j, k, m, count, count_tmp, count_prof, grows, grows_tmp, tmp, Nbins, Ncells = floor(M_max/box.Mcell);
     size_t l, nh, ind;
-    fft_real dist, Rmax, cost, den, den_tmp, Pos[3];
+    fft_real dist, Rmax, cost, Pos[3];
+    double den, den_tmp;
+
+    /*Number of bins used to storage the Lagrangian density profile*/
+    Nbins = 1000;//(int) floor(pow(M_max/box.Mcell, 1.0/3.0));
 
     /*Run over all peaks*/
     nh = 0;
@@ -261,11 +265,22 @@ size_t Grow_Halos(size_t np, long *flag, fft_real *Sig_Grid, fft_real *delta, PE
                 continue;
         }
 
-        den = peaks[l].den;
-        den_tmp = peaks[l].den;
+        /*Allocate the array with the Lagrangian density profiles*/
+        if(out.OUT_PROF == TRUE){
+            for(i=0;i<Nbins;i++)
+                halos[nh].Prof[i] = 0.0;
+        }
+
+        /*Initialize the variables used in the growth of spheres*/
+        den = (double) peaks[l].den;
+        den_tmp = (double) peaks[l].den;
         count = 0;
         count_tmp = 1;
         grows_tmp = 0;
+        if(out.OUT_PROF == TRUE){
+            halos[nh].Prof[0] = (fft_real) den_tmp;
+            count_prof = 1;
+        }
 
         /*Grows the shells up to the minimum of the barrier*/
         while(den_tmp >= Barrier(Sig_Grid[Ncells - 1])){
@@ -273,7 +288,7 @@ size_t Grow_Halos(size_t np, long *flag, fft_real *Sig_Grid, fft_real *delta, PE
             grows_tmp ++;
             den = den_tmp;
             count = count_tmp;
-            den_tmp = den*(fft_real)count;
+            den_tmp = den*((double) count);
             tmp = floor(sqrt((double) grows_tmp));
             if(tmp > box.nmin/2)	tmp = box.nmin/2;
 
@@ -284,20 +299,24 @@ size_t Grow_Halos(size_t np, long *flag, fft_real *Sig_Grid, fft_real *delta, PE
                             ind = (size_t)(cysum(peaks[l].x[0], i, box.nd[0])*box.nd[1] + cysum(peaks[l].x[1], j, box.nd[1]))*(size_t)box.nd[2] + (size_t)cysum(peaks[l].x[2], k, box.nd[2]);
 
                             if(flag[ind] != (long) box.ng)
-                                den_tmp += -box.Mtot;
+                                den_tmp += (double) -box.Mtot;
                             else
-                                den_tmp += delta[ind];
+                                den_tmp += (double) delta[ind];
                             count_tmp ++;						
                         }
 
-            den_tmp = den_tmp/(fft_real)count_tmp;
+            den_tmp = den_tmp/((double) count_tmp);
+            if(out.OUT_PROF == TRUE && count < count_tmp){
+                halos[nh].Prof[count_prof] = (fft_real) den_tmp;
+                count_prof ++;
+            }
         }
 
         /*Decrease the shells up to the correct value of the barrier*/
         while(den < Barrier(Sig_Grid[count]) && count > 0){
             den_tmp = den;
             count_tmp = count;
-            den = den*(fft_real)count;
+            den = den*((double) count);
             tmp = floor(sqrt((double) grows));
             if(tmp > box.nmin/2)	tmp = box.nmin/2;
 
@@ -307,11 +326,11 @@ size_t Grow_Halos(size_t np, long *flag, fft_real *Sig_Grid, fft_real *delta, PE
                         if(dist2(i, j, k) == grows){
                             ind = (size_t)(cysum(peaks[l].x[0], i, box.nd[0])*box.nd[1] + cysum(peaks[l].x[1], j, box.nd[1]))*(size_t)box.nd[2] + (size_t)cysum(peaks[l].x[2], k, box.nd[2]);
 
-                            den -= delta[ind];
+                            den -= (double) delta[ind];
                             count --;						
                         }
 
-            if(count > 0)	den = den/(fft_real)count;
+            if(count > 0)	den = den/((double) count);
             if(count < count_tmp)	grows_tmp = grows;
 
             grows --;
@@ -435,7 +454,7 @@ int Next_Count(int *spheres, int Ncells, int count){
 /*Compute the mass of each halo*/
 void Compute_Mass(size_t nh, int *sphere, HALOS *halos, gsl_interp_accel *acc, gsl_spline *spline_I, gsl_spline *spline_InvI){
     size_t i;
-    int Ncells, cont;
+    int Ncells, count;
     fft_real den_tmp;
 
     /*Maximum number of cells*/
@@ -448,9 +467,9 @@ void Compute_Mass(size_t nh, int *sphere, HALOS *halos, gsl_interp_accel *acc, g
 
     /*Compute the mass of each halo*/
 	for(i=0;i<nh;i++){
-        cont = Next_Count(sphere, Ncells, halos[i].count);
+        count = Next_Count(sphere, Ncells, halos[i].count);
 
-		den_tmp = gsl_spline_eval(spline_I, halos[i].count*box.Mcell, acc) + (gsl_spline_eval(spline_I, sphere[cont]*box.Mcell, acc) - gsl_spline_eval(spline_I, halos[i].count*box.Mcell, acc))*gsl_rng_uniform(rng_ptr);
+		den_tmp = gsl_spline_eval(spline_I, halos[i].count*box.Mcell, acc) + (gsl_spline_eval(spline_I, sphere[count]*box.Mcell, acc) - gsl_spline_eval(spline_I, halos[i].count*box.Mcell, acc))*gsl_rng_uniform(rng_ptr);
 
 		halos[i].Mh = gsl_spline_eval(spline_InvI, den_tmp, acc);
 	}

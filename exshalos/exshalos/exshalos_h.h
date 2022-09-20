@@ -45,13 +45,13 @@
 #define check_memory(p, name) if(p == NULL){printf("Problems to alloc %s.\n", name); exit(0);} //Check the memory allocation
 #define Lc_MAX	1.0e+2  //Maximum size of a cell
 #define Mc_MIN	1.0e+5  //Minimum mass of a cell
-#define M_max 	1e+16 //Maximum mass of a halo
+#define M_max 	1e+16 	//Maximum mass of a halo
 #define nbar_max 1.0e-2	//Maximum number density for the galaxies
 
 /*Structure for the peaks in the density field*/
 typedef struct Halos_centers{
 	int x[3];		/*Index of the halo center*/
-	fft_real den;		/*Density of the halo's central cell*/
+	fft_real den;	/*Density of the halo's central cell*/
 } PEAKS;
 
 /*Structure for the final halos*/
@@ -59,6 +59,7 @@ typedef struct Halos{
 	int x[3];		/*Index of central cell of teh halo*/
 	int count;		/*Number of cells in the halo*/
 	fft_real Mh; 	/*Mass of the halo*/
+	fft_real Prof[1000];	/*Density profile of the halo in Lagrangian space*/
 } HALOS;
 
 /*Structure with cosmology*/
@@ -107,6 +108,7 @@ typedef struct Output{
 	char DO_EB;			//Parameter with the information about the utilization (or not) of the EB
 	char DO_HOD;      	//Populate the halos with no galaxies (0), one type of galaxy (1) or multiple types (2)?
 	char DO_2LPT;  		//Parameter with the information about the use (or not) of second order lagrangian perturbation theory
+	char OUT_PROF;		//Output the profile of the halos in Lagrangian space?
 	char VERBOSE; 		//Print the information about the current state of the catalogue generation: yes (1) or no (0)?
 } OUTPUT;
 
@@ -161,7 +163,7 @@ void set_cosmology(fft_real Om0, fft_real redshift, fft_real dc);
 void set_barrier(int Nmin, fft_real a, fft_real beta, fft_real alpha, int seed);
 
 /*Set the parameters of the outputs*/
-void set_out(char OUT_DEN, char OUT_HALOS, char OUT_LPT, char OUT_VEL, char DO_2LPT, char DO_EB, char DO_HOD, char VERBOSE);
+void set_out(char OUT_DEN, char OUT_HALOS, char OUT_LPT, char OUT_VEL, char DO_2LPT, char DO_EB, char DO_HOD, char OUT_PROF, char VERBOSE);
 
 /*Set the parameters of the lightcone*/
 void set_lightcone();

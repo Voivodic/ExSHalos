@@ -106,7 +106,7 @@ void set_box(int ndx, int ndy, int ndz, fft_real Lc){
 }
 
 /*Set the parameters of the outputs*/
-void set_out(char OUT_DEN, char OUT_HALOS, char OUT_LPT, char OUT_VEL, char DO_2LPT, char DO_EB, char DO_HOD, char VERBOSE){
+void set_out(char OUT_DEN, char OUT_HALOS, char OUT_LPT, char OUT_VEL, char DO_2LPT, char DO_EB, char DO_HOD, char OUT_PROF, char VERBOSE){
 	out.OUT_DEN = OUT_DEN;		//Output the density grid?
 	out.OUT_HALOS = OUT_HALOS;	//OUTPUT the halo in the box or lightcone
 	out.OUT_LPT = OUT_LPT;		//Output the displacements?
@@ -115,6 +115,7 @@ void set_out(char OUT_DEN, char OUT_HALOS, char OUT_LPT, char OUT_VEL, char DO_2
 	out.DO_EB = DO_EB;			//Parameter with the information about the utilization (or not) of the EB
 	out.DO_HOD = DO_HOD;      	//Populate the halos with no galaxies (0), one type of galaxy (1) or multiple types (2)?
 	out.VERBOSE = VERBOSE;		//Print the information about the current state of the catalogue generation: yes (1) or no (0)?
+	out.OUT_PROF = OUT_PROF;	//Output the profile of the halos in Lagrangian space?
 }
 
 /*Set the parameters of the lightcone*/
