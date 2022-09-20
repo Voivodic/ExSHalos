@@ -70,7 +70,10 @@ def Compute_sigma(k, P, R = None, M = None, Om0 = 0.31, z = 0.0):
 
 	#Compute R(M)
 	if(R is None):
-		R = np.power(3.0*M/(4.0*np.pi*2.775e+11*Om0*np.power(1+z, 3.0)), 1.0/3.0)
+		if(M is None):
+			raise ValueError("You have to give the mass or radius array!")
+		else:
+			R = np.power(3.0*M/(4.0*np.pi*2.775e+11*Om0*np.power(1+z, 3.0)), 1.0/3.0)
 
 	#Evaluate sigma
 	Nr = len(R)
