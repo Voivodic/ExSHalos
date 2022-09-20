@@ -47,9 +47,8 @@ void Power_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, f
                     if(2*k<nd) kz = k*kn;
                     else kz = (k-nd)*kn;
 
-                    A = 2;
-                    if(k==0 || k==nd/2)
-                        A = 1;
+                    if((k == 0 || k == nd/2) && ((i > nd/2 && j > nd/2) || (i == 0 || i == nd/2) || (j == 0 || j == nd/2) || (i > nd/2 && j < nd/2)))
+                        continue;
 
                     k_mod = sqrt(kx*kx + ky*ky + kz*kz);
                     ind = Indice(k_mod, k_min, dk);
@@ -66,12 +65,12 @@ void Power_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, f
                         for(l=0;l<ntype;l++)
                             for(m=0;m<=l;m++){
                                 for(n=0;n<ls;n++)
-                                    P_private[(count*ls + n)*Nk + ind] += (long double) A*(gridk[l][tmp][0]*gridk[m][tmp][0] + gridk[l][tmp][1]*gridk[m][tmp][1])*gsl_sf_legendre_Pl(2*n, mu);
+                                    P_private[(count*ls + n)*Nk + ind] += (long double) (gridk[l][tmp][0]*gridk[m][tmp][0] + gridk[l][tmp][1]*gridk[m][tmp][1])*gsl_sf_legendre_Pl(2*n, mu);
                                 count++;
                             }
 
-                        k_private[ind] += (long double) A*k_mod;
-                        count_k_private[ind] += (long) A;
+                        k_private[ind] += (long double) k_mod;
+                        count_k_private[ind] += (long) 1;
                     }
                 }
             }

@@ -2,7 +2,7 @@ import exshalos
 import numpy as np
 
 #Generate a halo catalogue from a linear power spectrum
-def Generate_Halos_Box_from_Pk(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 10000.0, delta_c = -1.0, Nmin = 10, a = 1.0, beta = 0.0, alpha = 0.0, seed = 12345, fixed = False, phase = 0.0, OUT_DEN = False, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False, verbose = False, nthreads = 1):
+def Generate_Halos_Box_from_Pk(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy = None, ndz = None, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 10000.0, delta_c = -1.0, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, seed = None, fixed = False, phase = 0.0, OUT_DEN = False, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False, verbose = False, nthreads = 1):
     """
     k: Wavenumbers of the power spectrum | 1D numpy array
     P: Power spectrum | 1D numpy array
@@ -68,13 +68,17 @@ def Generate_Halos_Box_from_Pk(k, P, R_max = 100000.0, nd = 256, ndx = None, ndy
     if(ndz is None):
         ndz = nd     
 
+    #Define the seed
+    if(seed is None):
+        seed = np.random.randint(1e+9)
+
     #Run the .C program to generate the halo catalogue
     x = exshalos.exshalos.exshalos.halos_box_from_pk(k, P, R_max, np.int32(ndx), np.int32(ndy), np.int32(ndz), Lc, np.int32(seed), k_smooth, Om0, z, delta_c, np.int32(Nmin), a, beta, alpha, np.int32(fixed), phase, np.int32(OUT_DEN), np.int32(OUT_LPT), np.int32(OUT_VEL), np.int32(DO_2LPT), np.int32(OUT_FLAG), np.int32(verbose), np.int32(nthreads))
 
     return x
 
 #Generate a halo catalogue from a density grid
-def Generate_Halos_Box_from_Grid(grid,  k, P, S = None, V = None, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 10000.0, delta_c = -1.0, Nmin = 10, a = 1.0, beta = 0.0, alpha = 0.0, seed = 12345, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False, verbose = False, nthreads = 1):
+def Generate_Halos_Box_from_Grid(grid, k, P, S = None, V = None, Lc = 2.0, Om0 = 0.31, z = 0.0, k_smooth = 10000.0, delta_c = -1.0, Nmin = 1, a = 1.0, beta = 0.0, alpha = 0.0, OUT_LPT = False, OUT_VEL = False, DO_2LPT = False, OUT_FLAG = False, verbose = False, nthreads = 1):
     """
     grid: Density grid used to generate the halos | 3D numpy array (ndx, ndy, ndz)
     S: Displacements of the particles in the grid | 2D numpy array (np, 3)
@@ -90,7 +94,6 @@ def Generate_Halos_Box_from_Grid(grid,  k, P, S = None, V = None, Lc = 2.0, Om0 
     a: a parameter of the ellipsoidal barrier | float
     beta: beta parameter of the ellipsoidal barrier | float
     alpha: alpha parameter of the ellipsoidal barrier | float
-    seed: Seed used to generate the density field | int
     OUT_LPT: Output the dispaced particles | boolean
     OUT_VEL: Output the velocities of halos and particles | boolean
     DO_2LPT: Use the second order LPT to displace the halos and particles | boolean
