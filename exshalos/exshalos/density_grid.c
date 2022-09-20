@@ -49,14 +49,14 @@ void Inter_Power(fft_real *K, fft_real *P, int Nk, fft_real R_max, gsl_spline *s
         P_tmp[i] = (double) P[i];
     }
   
-    /*Compute the Power spectrum in the box
+    /*Compute the Power spectrum in the box*/
     if(R_max < 100000.0){
         pk2xi(Nk, K_tmp, P_tmp, R_xi, Xi);
         for(i=0;i<Nk;i++)
             if(R_xi[i] > R_max)	
                 Xi[i] = 0.0;
         xi2pk(Nk, R_xi, Xi, K_tmp, P_tmp);
-    }*/
+    }
 
 	/*Interpolate the power spectrum*/
 	gsl_spline_init(spline, K_tmp, P_tmp, Nk);
@@ -151,21 +151,18 @@ void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *del
 	
 				kmod = (fft_real) sqrt(kx*kx + ky*ky + kz*kz);	
 
+                /*Compute the amplitude of the field*/
                 if(kmod <= k_smooth){
                     if(kmod > 0.0){
-                        std = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc));
+                        A = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc));
                         if(fixed == FALSE)
-                            A = (fft_real) gsl_ran_gaussian(rng_ptr, (double) std);
-                        else
-                            A = std;                
+                            A = A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0));               
                     }
                     else if(kmod == 0.0 && R_max < 100000.0){
                         kmod = (fft_real) pow(box.kl[0]*box.kl[1]*box.kl[2], 1.0/3.0)/4.0;
-                        std = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc));
+                        A = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc));
                         if(fixed == FALSE)
-                            A = (fft_real) gsl_ran_gaussian(rng_ptr, (double) std);
-                        else
-                            A = std;
+                            A = A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0));
                     }
                     else
                         A = 0.0;
