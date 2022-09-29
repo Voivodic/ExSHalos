@@ -1,4 +1,3 @@
-from dbm import ndbm
 import exshalos
 import numpy as np
 
@@ -327,34 +326,6 @@ def Compute_TriSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_mi
         x["Pk"] = x["Pk"].reshape([Nk])
         x["Tk"] = x["Tk"].reshape([len(x["Nsq"])])
         x["Tuk"] = x["Tuk"].reshape([len(x["Nsq"])])
-
-    return x
-
-#Compute the correlation function given the power spectrum or the power spectrum given the correlation function
-def Compute_Correlation(k, P, direction = 1, verbose = False):
-    """
-    k: Wavebumber of the power spectrum or the distance of the correlation function | 1D numpy array
-    P: Power spectrum or the correlation function | 1D numpy array
-    direction: Direction to compute the fftlog: 1 to compute the correlation and -1 to compute the power spectrum | int
-    verbose: Output or do not output information in the c code | boolean
-
-    return: The correlation function (direction == 1) or the power spectrum (direction == -1) | Dictonaty with 2 arrays. "R" 1D array (Number of radial bins), "Xi" 1D array (Number of radial bins) 
-    """
-
-    precision = exshalos.exshalos.exshalos.check_precision()
-
-    if(precision == 4):
-        k = k.astype("float32")
-        P = P.astype("float32")
-    else:
-        k = k.astype("float64")
-        P = P.astype("float64")     
-
-    if(direction != 1 and direction != -1):
-        print("Wrong direction gave! It must be 1 or -1 NOT %d!" %(direction))  
-        return None
-
-    x = exshalos.exshalos.exshalos.correlation_compute(k, P, np.int32(direction), np.int32(verbose))
 
     return x
 

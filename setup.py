@@ -95,6 +95,11 @@ if(recompile_c_modules(double_precision)):
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/sampler", "hmc.c"))
     touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/sampler", "minimization.c"))
 
+    touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/analytical", "analytical_h.c"))
+    touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/analytical", "fftlog.c")) 
+    touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/analytical", "analytical.c"))
+    touch(os.path.join(os.path.dirname(os.path.abspath(__file__)), "exshalos/analytical", "clpt.c"))
+
 #Add the environmental path to FFTW3 and GSL
 append_from_env("FFTW_HOME", include_dirs, "include")
 append_from_env("GSL_HOME", include_dirs, "include")
@@ -137,14 +142,22 @@ sampler = Extension("exshalos.sampler.sampler",
                           library_dirs = library_dirs,
                           libraries = libraries)  
 
-ext_modules = [spectrum, exshalos, hod, sampler]
+analytical = Extension("exshalos.analytical.analytical",
+                          sources = ["exshalos/analytical/analytical.c", "exshalos/analytical/fftlog.c", "exshalos/analytical/analytical_h.c", "exshalos/analytical/clpt.c"],
+                          extra_compile_args = extra_compile_args,
+                          extra_link_args=['-lgomp'],
+                          include_dirs = include_dirs,
+                          library_dirs = library_dirs,
+                          libraries = [*libraries, 'fftw3']) 
+
+ext_modules = [spectrum, exshalos, hod, sampler, analytical]
 
 #Define the setup to be run
 setup(
     name = 'ExSHalos',
-    packages = ['exshalos/', 'exshalos/spectrum/', 'exshalos/exshalos/', 'exshalos/hod/', 'exshalos/sampler'],
+    packages = ['exshalos/', 'exshalos/spectrum/', 'exshalos/exshalos/', 'exshalos/hod/', 'exshalos/sampler', 'exshalos/analytical'],
     version = '0.1',
-    description = 'Cosmology',
+    description = 'Library for cosmology',
     author = 'Rodrigo Voivodic',
     author_email = 'rodrigo.voivodic@usp.br',
     ext_modules = ext_modules,

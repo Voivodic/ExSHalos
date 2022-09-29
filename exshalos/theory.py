@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import simps, odeint
 from scipy.special import binom
+import exshalos
 
 #Get the mass of each cell given its size
 def Get_Mcell(Om0 = 0.31, Lc = 2.0):
@@ -245,3 +246,21 @@ def bh(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0, 
 		resp = np.ones(len(s)) + resp/tmp
 
 	return resp
+
+#Compute the power spectra using CLPT at first order
+def CLPT_Powers(k, P, Lambda = 0.7, kmax = 0.7, nmin = 5, nmax = 10, verbose = False):
+    """
+    k: Wavebumber of the power spectrum | 1D numpy array
+    P: Linear power spectrum | 1D numpy array
+	Lambda: Scale to be used to smooth the power spectrum | float
+	kmax: Maximum wavenumber of the outputs | float
+	nmin: Maximum order used in the full computation of the terms of the expansion | int
+	nmax: Maximum order used in the Limber approximation of the terms of the expansion | int
+    verbose: Output or do not output information in the c code | boolean
+
+    return: The power spectra of the operators | Dictonaty with 3 arrays. "k": wavenumbers, "Plin": linear power spectrum used as input, "P11": Result for the 11 power spectrum
+   	"""
+
+    x = exshalos.analytical.analytical.clpt_compute(k.astype("float64"), P.astype("float64"), np.float64(Lambda), np.float64(kmax), np.int32(nmin), np.int32(nmax), np.int32(verbose))
+
+    return x
