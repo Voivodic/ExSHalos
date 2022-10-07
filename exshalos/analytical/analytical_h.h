@@ -10,10 +10,15 @@
 #include <math.h>
 #include <omp.h>
 #include <fftw3.h>
+#include "fftlog.h"
 
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_integration.h>
-#include "fftlog.h"
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_filter.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_vector.h>
 
 //#define DOUBLEPRECISION_FFTW
 #define CONCAT(prefix, name) prefix ## name

@@ -25,7 +25,7 @@ double func(double x, void *p){
 /*Compute the matter-matter power spectrum for 1LPT*/
 void CLPT_P11(double *k, double *Plin, int N, double *P11, int nmin, int nmax, double kmax){
     int i, j, n;
-    double I0, I0err, *I1, *I2, *I3, *A1, *A2, *r, *Intr, *Intk;
+    double I0, I0err, *xi1m1, *xi0p0, *xi0p2, *A1, *A2, *r, *Intr, *Intk;
 
     /*Alloc the array with the real space positions*/
     r = (double *)malloc(N*sizeof(double));
@@ -50,15 +50,15 @@ void CLPT_P11(double *k, double *Plin, int N, double *P11, int nmin, int nmax, d
     gsl_interp_accel_free(facc);
 
     /*Compute the scalar functions used to compute the final spectrum*/
-    I1 = (double *)malloc(N*sizeof(double));
-    I2 = (double *)malloc(N*sizeof(double));
-    I3 = (double *)malloc(N*sizeof(double));
+    xi1m1 = (double *)malloc(N*sizeof(double));
+    xi0p0 = (double *)malloc(N*sizeof(double));
+    xi0p2 = (double *)malloc(N*sizeof(double));
 
-    fftlog_ComputeXiLM(1, -1, N, k, Plin, r, I1);
+    fftlog_ComputeXiLM(1, -1, N, k, Plin, r, xi1m1);
     for(i=0;i<N;i++)
-        I1[i] = I1[i]/r[i];       
-    fftlog_ComputeXiLM(0, 0, N, k, Plin, r, I2);
-    fftlog_ComputeXiLM(0, 2, N, k, Plin, r, I3);
+        xi1m1[i] = xi1m1[i]/r[i];       
+    fftlog_ComputeXiLM(0, 0, N, k, Plin, r, xi0p0);
+    fftlog_ComputeXiLM(0, 2, N, k, Plin, r, xi0p2);
 
     /*Compute the two functions that enter in the final spectrum*/
     A1 = (double *)malloc(N*sizeof(double));
