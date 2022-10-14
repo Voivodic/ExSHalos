@@ -264,3 +264,24 @@ def CLPT_Powers(k, P, Lambda = 0.7, kmax = 0.7, nmin = 5, nmax = 10, verbose = F
     x = exshalos.analytical.analytical.clpt_compute(k.astype("float64"), P.astype("float64"), np.float64(Lambda), np.float64(kmax), np.int32(nmin), np.int32(nmax), np.int32(verbose))
 
     return x
+
+#Compute the generalized corraletion functions (Xi_lm)
+def Xi_lm(r, k, P, Lambda = 0.7, l = 0, mk = 2, mr = 0, K = 11, alpha = 4.0, Rmax = 1.0, verbose = False):
+	"""
+	r: Radial distances for the output | 1D numpy array
+    k: Wavebumber of the power spectrum | 1D numpy array
+    P: Linear power spectrum | 1D numpy array
+	Lambda: Scale to be used to smooth the power spectrum | float
+	l: Order of the spherical Bessel's function | int
+	mk: Power of k in the integral | int
+	mr: Power of r in the integral | int
+	K: Number of points used by the Gaussian smooth | int
+	alpha: Value of alpha used by the Gaussian smooth | float
+	verbose: Output or do not output information in the c code | boolean
+	
+	return: The generalized correlation function xi_lm = \int dk k^mk r^mr P(k) j_l(kr) | 1D numpy array
+	"""
+
+	x = exshalos.analytical.analytical.xilm_compute(r.astype("float64"), k.astype("float64"), P.astype("float64"), np.float64(Lambda), np.int32(l), np.int32(mk), np.int32(mr), np.int32(K), np.float64(alpha), np.float64(Rmax), np.int32(verbose))
+
+	return x

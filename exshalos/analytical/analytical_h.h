@@ -45,9 +45,15 @@
 #define TRUE 1
 
 /*Structure for the interpolation used in the integrals*/
-struct func_params{ 
-    gsl_interp_accel *facc; 
-    gsl_spline *fspline; 
+struct finterp_params{ 
+  gsl_interp_accel *facc; 
+  gsl_spline *fspline; 
 };
+
+/*Supress the linear power spectrum on small scales*/
+void P_smooth(double *k, double *Plin, double *P, int N, double Lambda);
+
+/*Define the generic function to be integrated*/
+double finterp(double x, void *p);
 
 #endif

@@ -6,12 +6,14 @@
 /*This declares the compute function*/
 static PyObject *analytical_check_precision(PyObject * self, PyObject * args);
 static PyObject *correlation_compute(PyObject *self, PyObject *args, PyObject *kwargs);
+static PyObject *xilm_compute(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject *clpt_compute(PyObject *self, PyObject *args, PyObject *kwargs);
 
 /*This tells Python what methods this module has. See the Python-C API for more information.*/
 static PyMethodDef analytical_methods[] = {
     {"check_precision", analytical_check_precision, METH_VARARGS, "Returns precision used by the analytical module"},
     {"correlation_compute", correlation_compute, METH_VARARGS | METH_KEYWORDS, "Computes the correlation function or the power spectrum"},
+    {"xilm_compute", xilm_compute, METH_VARARGS | METH_KEYWORDS, "Computes the generalized correlation functions with fftlog"},
     {"clpt_compute", clpt_compute, METH_VARARGS | METH_KEYWORDS, "Computes the power spectra using CLPT"},
     {NULL, NULL, 0, NULL}
 };
@@ -111,6 +113,49 @@ static PyObject *correlation_compute(PyObject *self, PyObject *args, PyObject *k
     }
 
     return dict;
+}
+
+/*Computes the generalized correlation functions with fftlog*/
+static PyObject *xilm_compute(PyObject *self, PyObject *args, PyObject *kwargs){
+	int i, l, mk, mr, K, Nk, Nr, verbose;
+    double *k, *P, *Plin, *r, *xilm, Rmax;
+    double Lambda, alpha;
+
+	/*Define the list of parameters*/
+	static char *kwlist[] = {"r", "k", "Pk", "Lambda", "l", "mk", "mr", "K", "alpha", "Rmax", "verbose", NULL};
+	import_array();
+
+	/*Define the pyobject with the 3D position of the tracers*/
+	PyArrayObject *r_array, *k_array, *P_array;  
+
+	/*Read the input arguments*/
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOdiiiiddi", kwlist, &r_array, &k_array, &P_array, &Lambda, &l, &mk, &mr, &K, &alpha, &Rmax, &verbose))
+		return NULL;
+
+    /*Get the data from the arrays*/
+    r = (double *) r_array->data;
+    Nr = (int) r_array->dimensions[0];
+    k = (double *) k_array->data;
+    Plin = (double *) P_array->data;
+    Nk = (int) k_array->dimensions[0];
+
+    /*Prepare the PyObject arrays for the outputs*/
+	npy_intp dims_r[] = {(npy_intp) Nr};
+
+	/*Alloc the PyObjects for the output*/
+    PyArrayObject *np_xilm = (PyArrayObject *) PyArray_ZEROS(1, dims_r, PyArray_FLOAT64, 0);
+    xilm = (double *) np_xilm->data;
+
+    /*Smooth the input power spectrum*/
+    P = (double *)malloc(Nk*sizeof(double));
+    P_smooth(k, Plin, P, Nk, Lambda);
+
+    /*Compute Xi_lm*/
+    Xi_lm(k, P, Nk, r, xilm, Nr, l, mk, mr, K, alpha, Rmax);
+    free(P);
+
+    /*Output the computations in PyObject format*/
+    return PyArray_Return(np_xilm);
 }
 
 /*Computes the power spectra using CLPT*/

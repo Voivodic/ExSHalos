@@ -3,11 +3,8 @@
 
 #include "analytical_h.h"
 
-/*Supress the linear power spectrum on small scales*/
-void P_smooth(double *k, double *Plin, double *P, int N, double Lambda);
-
-/*Define the generic function to be integrated*/
-double func(double x, void *p);
+/*Compute xi_l,m for a given power spectrum using a gaussian smoothing and the interpolation in the r->0 limit*/
+void Xi_lm(double *k, double *P, int Nk, double *rlm, double *xilm, int Nr, int l, int mk, int mr, int K, double alpha, double Rmax);
 
 /*Compute the matter-matter power spectrum for 1LPT*/
 void CLPT_P11(double *k, double *Plin, int N, double *P11, int nmin, int nmax, double kmax);

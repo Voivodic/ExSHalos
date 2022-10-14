@@ -24,21 +24,25 @@ nmax = 10
 
 #Open the linear power spectrum
 kl, Pl = np.loadtxt("MDPL2_z00_matterpower.dat", unpack = True)
+fPl = interp1d(kl, Pl, bounds_error = False, fill_value = 0.0)
+print(kl[0], kl[-1])
 
-k = kl#[(kl>kmin)*(kl<kmax)]
-P = Pl#[(kl>kmin)*(kl<kmax)]
+k = kl#np.logspace(-4, 3, 2000)
+P = Pl#fPl(k)
+
+print(len(kl), len(k))
 
 P[k>Lambda] = 0.0
 fP = splrep(k, P, s=0)
 
-print(len(k), len(k[(k>1.0/400.0)*(k<1.0)]))
 Nk = int(len(k))
 #k = np.logspace(np.log10(k[0]), np.log10(k[-1]), Nk)
 #P = splev(k, fP, der=0)
 
 #Compute P11
 print("Computing P11")
-#Pclpt = exshalos.theory.CLPT_Powers(k, P, Lambda = Lambda, kmax = kmax, nmin = nmin, nmax = nmax, verbose = False)
+#rexs = np.logspace(-2, 2, 400)
+#x = exshalos.theory.Xi_lm(r = rexs, k = k, P = P, Lambda = Lambda, l = 0, mk = 2, mr = 0, K = 5, alpha = 10.0, Rmax = 1.0, verbose = False)
 
 #Compute with pyfftlog
 ksi = fftlog(k, P, 2.0, 0.0)[1]
@@ -53,7 +57,7 @@ psiT = fftlog(k, P, -1.0, 1.0)[1]/r
 psiB2 = fftlog(k, P, 1.0, 3.0)[1]
 
 A4 = simps(P, k)/3.0
-print(A4)
+
 #Compute the correlation function
 Xi = exshalos.utils.Compute_Correlation(k, P, direction = 1, verbose = False)
 
@@ -81,62 +85,81 @@ pl.plot(r[mask], ksi2[mask], color = "blue")
 #pl.plot(Xi["R"][mask], Xi["Xi"][mask], color = "black")
 pl.xscale("log")
 pl.yscale("log")
-pl.ylabel(r"$\xi _{2,0}$", fontsize = 15)
+pl.ylabel(r"$\xi _{2,0}$", fontsize =   5)
 pl.grid(True)
-#pl.xlim(0.01, 400)
+pl.xlim(0.01, 1e+4)
+
+R = np.fabs(zeta[mask]/gaussian_filter1d(zeta, 2)[mask] - 1.0)
+rmax = r[R>1.0][-1]
 
 pl.subplot(322)
 pl.plot(r[mask], zeta[mask], color = "red")
 pl.plot(r[mask], gaussian_filter1d(zeta[mask], 2), color = "blue")
+pl.plot(np.hstack([[0.0], r[mask][r>rmax]]), np.hstack([[0.0], gaussian_filter1d(zeta[mask], 2)[r>rmax]]), color = "yellow")
 pl.xscale("log")
 pl.yscale("log")
-pl.ylabel(r"$\xi _{1,1}$", fontsize = 15)
+pl.ylabel(r"$\xi _{1,1}$", fontsize = 5)
 pl.grid(True)
-#pl.xlim(0.01, 400)
+pl.xlim(0.01, 1e+4)
+
+R = np.fabs(psiR[mask]/gaussian_filter1d(psiR, 2)[mask] - 1.0)
+rmax = r[R>1.0][-1]
 
 pl.subplot(323)
 pl.plot(r[mask], psiR[mask], color = "red")
 pl.plot(r[mask], gaussian_filter1d(psiR[mask], 2), color = "blue")
+pl.plot(np.hstack([[0.0], r[mask][r>rmax]]), np.hstack([[A4*3], gaussian_filter1d(psiR[mask], 2)[r>rmax]]), color = "yellow")
 pl.xscale("log")
 pl.yscale("log")
-pl.ylabel(r"$\xi _{0,0}$", fontsize = 15)
+pl.ylabel(r"$\xi _{0,0}$", fontsize = 5)
 pl.grid(True)
-#pl.xlim(0.01, 400)
+pl.xlim(0.01, 1e+4)
+
+R = np.fabs(psiT[mask]/gaussian_filter1d(psiT, 2)[mask] - 1.0)
+rmax = r[R>1.0][-1]
 
 pl.subplot(324)
 pl.plot(r[mask], psiT[mask], color = "red")
 pl.plot(r[mask], gaussian_filter1d(psiT, 2)[mask], color = "blue")
-pl.plot(np.hstack([[0.0], r[mask][r[mask] > 2]]), np.hstack([[A4], gaussian_filter1d(psiT[mask], 2)[r[mask] > 2]]), color = "yellow")
+pl.plot(np.hstack([[0.0], r[mask][r>rmax]]), np.hstack([[A4], gaussian_filter1d(psiT[mask], 2)[r>rmax]]), color = "yellow")
 pl.xscale("log")
-pl.yscale("linear")
-pl.ylim(0.0, 200.0)
-pl.ylabel(r"$\xi _{-1,1}$", fontsize = 15)
+pl.yscale("log")
+#pl.ylim(0.0, 200.0)
+pl.ylabel(r"$\xi _{-1,1}$", fontsize = 5)
 pl.grid(True)
-#pl.xlim(0.01, 400)
+pl.xlim(0.01, 1e+4)
+
+
 
 pl.subplot(325)
 pl.plot(r[mask], psiB2[mask], color = "red")
 pl.plot(r[mask], gaussian_filter1d(psiB2, 2)[mask], color = "blue")
 pl.xscale("log")
 pl.yscale("log")
-pl.ylabel(r"$\xi _{1,3}$", fontsize = 15)
+pl.ylabel(r"$\xi _{1,3}$", fontsize = 5)
 pl.grid(True)
-#pl.xlim(0.01, 400)
+pl.xlim(0.01, 1e+4)
 
 pl.tight_layout()
 pl.savefig("P11.pdf")
-pl.show()
-'''
+#pl.show()
+
 pl.clf()
 
-mask = psiT > 0.0
+rexs = np.logspace(-2, 2, 400)
+x = exshalos.theory.Xi_lm(r = rexs, k = k, P = P, Lambda = Lambda, l = 1, mk = 1, mr = 0, K = 11, alpha = 4.0, Rmax = 1.0, verbose = False)
+fpsiT = interp1d(r, zeta)
+fpsiTs = interp1d(r, gaussian_filter1d(zeta, 2))
 
-pl.plot(r[mask], np.exp(-psiT[mask]), color = "red")
-pl.plot(r[mask], np.exp(-gaussian_filter1d(psiT, 2)[mask]), color = "blue")
-
+pl.plot(rexs, x, color = "purple")
+#pl.plot(rexs, fpsiT(rexs), color = "red")
+pl.plot(rexs, fpsiTs(rexs), color = "blue")
 pl.xscale("log")
 pl.yscale("log")
+#pl.ylim(0.0, 200.0)
+pl.ylabel(r"$\xi _{-1,1}$", fontsize = 5)
 pl.grid(True)
-#pl.xlim(0.01, 400)
+pl.xlim(1e-2, 1e+2)
+#pl.ylim(100, 300)
 
-pl.show()'''
+pl.savefig("Test.pdf")
