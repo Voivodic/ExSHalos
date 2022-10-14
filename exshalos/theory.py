@@ -99,7 +99,7 @@ def dlnsdlnm(M, sigma):
 	return resp
 
 #Multiplicity function
-def f(s, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0):
+def fh(s, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0):
 	if(delta_c < 0.0):
 		delta_c = Get_deltac(Get_Omz(Om0 = Om0, z = z))
 	nu = delta_c/s
@@ -179,10 +179,10 @@ def dlnndlnm(M, sigma = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31,
 	if(sigma is None):
 		sigma = Compute_sigma(k, P, M = M, Om0 = Om0, z = z)
 
-	return -f(sigma, model, theta, delta_c, Om0, z)*rhom/M*dlnsdlnm(M, sigma)
+	return -fh(sigma, model, theta, delta_c, Om0, z)*rhom/M*dlnsdlnm(M, sigma)
 
-#Halo bias
-def bh(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0, k = None, P = None):
+#Halo bias of first order
+def bh1(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0, k = None, P = None, Lagrangian = False):
 	if(s is None):
 		s = Compute_sigma(k, P, M = M, Om0 = Om0, z = z)
 
@@ -244,6 +244,86 @@ def bh(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0, 
 			tmp += (n*np.pi/(dt*dt))*np.sin(n*np.pi*delta_c/dt)*np.exp(-n*n*np.pi*np.pi*s*s*(1.0+D)/(2.0*dt*dt))
 
 		resp = np.ones(len(s)) + resp/tmp
+
+	#COnvert to the Lagrangian bias
+	if(Lagrangian == True):
+		resp -= 1.0
+
+	return resp
+
+#Halo bias of second order
+def bh2(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0, k = None, P = None, Lagrangian = False):
+	if(s is None):
+		s = Compute_sigma(k, P, M = M, Om0 = Om0, z = z)
+
+	if(delta_c < 0.0):
+		delta_c = Get_deltac(Get_Omz(Om0 = Om0, z = z))
+	nu = delta_c/s
+	S = s**2
+	resp = np.zeros(len(s))
+
+	#Press-Schechter
+	if(model == 0 or model == "ps" or model == "PS" or model == "1SB"):	
+		resp = np.power(nu*nu/delta_c, 2.0) - 3.0*np.power(nu/delta_c, 2.0)
+
+	#Sheth-Tormen
+	elif(model == 1 or model == "ST" or model == "st" or model == "elliptical"):
+		if(theta != None):
+			a, b, p = theta
+		else:
+			a, b, p = np.array([0.7, 0.4, 0.6])
+
+		A = 0.0
+		for i in range(6):
+			A += np.power(-1, i)*binom(p, i)
+
+		B = np.sqrt(a)*delta_c*(1.0 + b*np.power(a*nu*nu, -p))
+		BP = np.sqrt(a)*delta_c*(1.0 + A*np.power(a*nu*nu, -p))
+
+		resp = np.power(B/S, 2.0) - 1.0/S - 2.0*B/(S*BP)
+
+	if(Lagrangian == False):
+		b1 = bh1(M, s = s, model = model, theta = theta, delta_c = delta_c, Om0 = Om0, z = z, k = k, P = P, Lagrangian = True)
+
+		resp = 4.0/21.0*b1 + 1.0/2.0*resp
+
+	return resp
+
+#Halo bias of third order
+def bh3(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0, k = None, P = None, Lagrangian = False, bs2 = 0.0):
+	if(s is None):
+		s = Compute_sigma(k, P, M = M, Om0 = Om0, z = z)
+
+	if(delta_c < 0.0):
+		delta_c = Get_deltac(Get_Omz(Om0 = Om0, z = z))
+	nu = delta_c/s
+	S = s**2
+	resp = np.zeros(len(s))
+
+	#Press-Schechter
+	if(model == 0 or model == "ps" or model == "PS" or model == "1SB"):	
+		resp = np.power(delta_c/S, 3.0) - 6.0*delta_c/np.power(S, 2.0)  + 3.0/S/delta_c
+
+	#Sheth-Tormen
+	elif(model == 1 or model == "ST" or model == "st" or model == "elliptical"):
+		if(theta != None):
+			a, b, p = theta
+		else:
+			a, b, p = np.array([0.7, 0.4, 0.6])
+
+		A = 0.0
+		for i in range(6):
+			A += np.power(-1, i)*binom(p, i)
+
+		B = np.sqrt(a)*delta_c*(1.0 + b*np.power(a*nu*nu, -p))
+		BP = np.sqrt(a)*delta_c*(1.0 + A*np.power(a*nu*nu, -p))
+
+		resp = np.power(B/S, 3.0) - 3.0*B/np.power(S, 2.0) - 3.0*B*B/(S*S*BP) + 3.0/(S*BP)
+
+	if(Lagrangian == False):
+		b2 = bh2(M, s = s, model = model, theta = theta, delta_c = delta_c, Om0 = Om0, z = z, k = k, P = P, Lagrangian = True)
+
+		resp = - 1.0/2.0*b2 + 1.0/6.0*resp - 2.0/3.0*bs2 
 
 	return resp
 
