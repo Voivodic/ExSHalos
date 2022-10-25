@@ -1,3 +1,4 @@
+from tkinter.messagebox import NO
 import numpy as np
 from scipy.integrate import simps, odeint
 from scipy.special import binom
@@ -365,3 +366,121 @@ def Xi_lm(r, k, P, Lambda = 0.7, l = 0, mk = 2, mr = 0, K = 11, alpha = 4.0, Rma
 	x = exshalos.analytical.analytical.xilm_compute(r.astype("float64"), k.astype("float64"), P.astype("float64"), np.float64(Lambda), np.int32(l), np.int32(mk), np.int32(mr), np.int32(K), np.float64(alpha), np.float64(Rmax), np.int32(verbose))
 
 	return x
+
+#Compute the 1-loop matter or galaxy power spectrum using classPT
+def Pgg_EFTofLSS(k = None, parameters = None, b = None, cs = None, c = None, IR_resummation = True, cb = True, RSD = True, AP = True, Om_fid = 0.31, z = 0.0, ls = [0, 2, 4], pk_mult = None, fz = None):
+	"""
+	parameters: Cosmological parameters used by class | dictionary
+	b: Values of the bias parameters (b1, b2, bG2, bGamma3, b4)| 1D or 2D (multitracers) array
+	IR_resummation: Option to do the IR resummation of the spectrum | boolean
+	cb: Option to add baryions | boolean
+	RSD: Option to give the power spectrum in redshift space | boolean
+	AP: Optino to use the AP | boolean
+	Om_fid: Omega matter fiducial for the AP correction | float
+	z: Redshift of the power spectrum | float
+	ls: The multipoles to be computed [0, 2, 4] | list or int
+
+	return:
+	"""
+
+	#Compute the power spectra using classPT
+	if(pk_mult == None):
+		from classy import Class
+
+		#Set the parameters
+		M = Class()
+		M.set({'A_s':2.089e-9, 'n_s':0.9649, 'tau_reio':0.052, 'omega_b':0.02237, 'omega_cdm':0.12, 'h':0.6736, 'YHe':0.2425, 'N_eff':3.046, 'N_ur':2.0328, 'N_ncdm':1, 'm_ncdm':0.06})
+		M.set(parameters)
+		M.set({'z_pk':z})
+		if(IR_resummation == True):
+			IR_resummation = "Yes"
+		else:
+			IR_resummation = "No"
+		if(cb == True):
+			cb = "Yes"
+		else:
+			cb = "No"
+		if(RSD == True):
+			RSD = "Yes"
+		else:
+			RSD = "No"
+		if(AP == True):
+			AP = "Yes"
+		else:
+			AP = "No"
+		M.set({'output':'mPk', 'non linear':'PT', 'IR resummation':IR_resummation, 'Bias tracers':'Yes', 'cb':cb, 'RSD':RSD, 'AP':AP,'Omfid':Om_fid})
+		M.compute()
+
+		#Compute the spectra of the basis
+		if(k is None):
+			raise TypeError("You have to give an array of k where to compute the power spectrum")
+		h = M.h()
+		kh = k*h
+		M_mult = M.get_pk_mult(kh, z, len(kh))
+       
+		#Save a dictionary with the spectra
+		pk_mult = {}
+		spectra_label = ["Id2d2", "Id2", "IG2", "Id2G2", "IG2G2", "IFG2", "ctr", "lin", "1loop",]
+		spectra_ind = [1, 2, 3, 4, 5, 6, 10, 14, 0]
+		for i in range(len(spectra_label)):
+			pk_mult[spectra_label[i]] = M_mult[spectra_ind[i]]
+		if(RSD == True):
+			spectra_label = ["IFG2_0b1", "IFG2_0", "IFG2_2", "ctr_0", "ctr_2", "ctr_4"]
+			spectra_ind = [7, 8 , 9, 11, 12, 13]
+			for i in range(len(spectra_label)):
+				pk_mult[spectra_label[i]] = M_mult[spectra_ind[i]]	
+			spectra_label = ["lin_0_vv", "lin_0_vd", "lin_0_dd", "lin_2_vv", "lin_2_vd", "lin_4_vv", "1loop_0_vv", "1loop_0_vd", "1loop_0_dd", "1loop_2_vv", "1loop_2_vd", "1loop_2_dd", "1loop_4_vv", "1loop_4_vd", "1loop_4_dd", "Idd2_0", "Id2_0", "IdG2_0", "IG2_0", "Idd2_2", "Id2_2", "IdG2_2", "IG2_2", "Id2_4", "IG2_4"]
+			for i in range(len(spectra_label)):
+				pk_mult[spectra_label[i]] = M_mult[15+i]	
+
+	else:
+		h = 1
+		if(fz == None):
+			fz = pow((Om_fid*pow(1+z, 3.0))/(Om_fid*pow(1+z, 3.0) + 1.0 - Om_fid), 0.5454)
+		if(RSD == True and len(pk_mult.keys()) < 10):
+			raise ValueError("There are not all spectra needed for the computations in redshift space")
+
+	#Get the number of tracers
+	if(b is not list or b is not np.ndarray):
+		raise TypeError("You have to give an array with the values of the bias parameters")
+	if(len(b.shape) == 1):
+		Ntracers = 1
+	else: 
+		Ntracers = b.shape[0]
+
+	#Set all combinations of the bias parameters 
+	#(b1, b1^2, b2^2, b1*b2, b2, b1*bG2, bG2, b2*bG2, bG^2, b1*bGamma3, bGamma3, b4, b1*b4, b1^2*b4)
+	if(RSD == True):
+		bias = np.zeros([int(Ntracers*(Ntracers+1)/2), 14])
+		count = 0
+		for i in range(Ntracers):
+			for j in range(Ntracers+1):
+				bias[count, :] = np.array([(b[i,0] + b[j,0])/2.0, b[i,0]*b[j,0], b[i,1]*b[j,1], (b[i,0]*b[j,1] + b[i,1]*b[j,0])/2.0, (b[i,1] + b[j,1])/2.0, (b[i,0]*b[j,2] + b[i,2]*b[j,0])/2.0, (b[i,2] + b[j,2])/2.0, (b[i,1]*b[j,2] + b[i,2]*b[j,1])/2.0, b[i,2]*b[j,2], (b[i,0]*b[j,3] + b[i,3]*b[j,0])/2.0, (b[i,3] + b[j,3])/2.0, (b[i,4] + b[j,4])/2.0, (b[i,0]*b[j,4] + b[i,4]*b[j,0])/2.0, (b[i,0]**2*b[j,4] + b[i,4]*b[j,0]**2)/2.0])
+				count += 1
+	#(b1^2, b1*b2, b1*bG2, b1*bGamma3, b2^2, bG2^2, b2*bG2)
+	else:
+		bias = np.zeros([int(Ntracers*(Ntracers+1)/2), 7])
+		count = 0
+		for i in range(Ntracers):
+			for j in range(Ntracers+1):
+				bias[count, :] = np.array([b[i,0]*b[j,0], (b[i,0]*b[j,1] + b[i,1]*b[j,0])/2.0, (b[i,0]*b[j,2] + b[i,2]*b[j,0])/2.0, (b[i,0]*b[j,3] + b[i,3]*b[j,0])/2.0, b[i,1]*b[j,1], b[i,2]*b[j,2], (b[i,1]*b[j,2] + b[i,2]*b[j,1])/2.0])
+				count += 1
+				
+	#Define the functions to compute each power spectra
+	#Compute Pgg_l0
+	def Pgg_l0():
+		return pk_mult[15] +self.pk_mult[21]+ b1*self.pk_mult[16] + b1*self.pk_mult[22] + b1**2.*self.pk_mult[17] + b1**2.*self.pk_mult[23] + 0.25*b2**2.*self.pk_mult[1] + b1*b2*self.pk_mult[30]+ b2*self.pk_mult[31] + b1*bG2*self.pk_mult[32] + bG2*self.pk_mult[33]+ b2*bG2*self.pk_mult[4]+ bG2**2.*self.pk_mult[5] + 2.*cs0*self.pk_mult[11]/h**2.
+			+ (2.*bG2+0.8*bGamma3)*(b1*self.pk_mult[7]+self.pk_mult[8]))*h**3.+ Pshot + self.fz**2.*b4*(self.kh/h)**2.*(self.fz**2./9. + 2.*self.fz*b1/7. + b1**2./5)*(35./8.)*self.pk_mult[13]*h
+
+
+
+	#Compute the galaxy-galaxy power spectrum
+	if(type(ls) == list or type(ls) == np.ndarray):
+		for l in ls:
+
+(self.pk_mult[15] +self.pk_mult[21]+ b1*self.pk_mult[16] + b1*self.pk_mult[22] + b1**2.*self.pk_mult[17] + b1**2.*self.pk_mult[23] + 0.25*b2**2.*self.pk_mult[1] + b1*b2*self.pk_mult[30]+ b2*self.pk_mult[31] + b1*bG2*self.pk_mult[32] + bG2*self.pk_mult[33]+ b2*bG2*self.pk_mult[4]+ bG2**2.*self.pk_mult[5] + 2.*cs0*self.pk_mult[11]/h**2.
+			+ (2.*bG2+0.8*bGamma3)*(b1*self.pk_mult[7]+self.pk_mult[8]))*h**3.+ Pshot + self.fz**2.*b4*(self.kh/h)**2.*(self.fz**2./9. + 2.*self.fz*b1/7. + b1**2./5)*(35./8.)*self.pk_mult[13]*h
+
+(self.pk_mult[18] +self.pk_mult[24]+b1*self.pk_mult[19] +b1*self.pk_mult[25] +b1**2.*self.pk_mult[26] +b1*b2*self.pk_mult[34]+b2*self.pk_mult[35] +b1*bG2*self.pk_mult[36]+bG2*self.pk_mult[37]+2.*cs2*self.pk_mult[12]/h**2. +(2.*bG2+0.8*bGamma3)*self.pk_mult[9])*h**3. +self.fz**2.*b4*(self.kh/h)**2.*((self.fz**2.*70. + 165.*self.fz*b1+99.*b1**2.)*4./693.)*(35./8.)*self.pk_mult[13]*h
+
+(self.pk_mult[20] +self.pk_mult[27]+b1*self.pk_mult[28] +b1**2.*self.pk_mult[29] +b2*self.pk_mult[38] +bG2*self.pk_mult[39] +2.*cs4*self.pk_mult[13]/h**2.)*h**3.+self.fz**2.*b4*(self.kh/h)**2.*((self.fz**2.*210. + 390.*self.fz*b1+143.*b1**2.)*8./5005.)*(35./8.)*self.pk_mult[13]*h
