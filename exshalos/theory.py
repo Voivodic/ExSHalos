@@ -253,7 +253,7 @@ def bh1(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0,
 	return resp
 
 #Halo bias of second order
-def bh2(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0, k = None, P = None, Lagrangian = False):
+def bh2(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0, k = None, P = None, Lagrangian = False, b1 = None):
 	if(s is None):
 		s = Compute_sigma(k, P, M = M, Om0 = Om0, z = z)
 
@@ -283,9 +283,22 @@ def bh2(M, s = None, model = 0, theta = None, delta_c = -1, Om0 = 0.31, z = 0.0,
 
 		resp = np.power(B/S, 2.0) - 1.0/S - 2.0*B/(S*BP)
 
-	if(Lagrangian == False):
-		b1 = bh1(M, s = s, model = model, theta = theta, delta_c = delta_c, Om0 = Om0, z = z, k = k, P = P, Lagrangian = True)
+	#Matteo
+	elif(model == 2 or model == "matteo" or model == "Matteo"):
+		if(b1 is None):
+			b1 = bh1(M, s = s, model = 2, theta = 330, delta_c = delta_c, Om0 = Om0, z = z, k = k, P = P, Lagrangian = True)
+		resp = -0.09143*b1**3 + 0.7093*b1**2 - 0.2607*b1 - 0.3469
 
+	#Lazeyras
+	elif(model == 3 or model == "Lazeyras" or model == "lazeyras"):
+		if(b1 is None):
+			b1 = bh1(M, s = s, model = 2, theta = 330, delta_c = delta_c, Om0 = Om0, z = z, k = k, P = P, Lagrangian = True)
+		resp = 0.412 - 2.143*b1 + 0.929*b1**2 + 0.008*b1**3
+		#resp = 2.0*resp - 4.0/21.0*b1 	
+
+	if(Lagrangian == False):
+		if(b1 is None):
+			b1 = bh1(M, s = s, model = model, theta = theta, delta_c = delta_c, Om0 = Om0, z = z, k = k, P = P, Lagrangian = True)
 		resp = 4.0/21.0*b1 + 1.0/2.0*resp
 
 	return resp
