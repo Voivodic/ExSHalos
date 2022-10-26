@@ -381,7 +381,7 @@ def Xi_lm(r, k, P, Lambda = 0.7, l = 0, mk = 2, mr = 0, K = 11, alpha = 4.0, Rma
 	return x
 
 #Compute the 1-loop matter or galaxy power spectrum using classPT
-def Pgg_EFTofLSS(k = None, parameters = {}, b = None, cs = None, c = None, IR_resummation = True, cb = True, RSD = True, AP = False, Om_fid = 0.31, z = 0.0, ls = [0, 2, 4], pk_mult = None, fz = None, OUT_MULT = False):
+def Pgg_EFTofLSS(k = None, parameters = {}, b = None, cs = None, c = None, IR_resummation = True, cb = True, RSD = True, AP = False, Om_fid = 0.31, z = 0.0, ls = [0, 2, 4], pk_mult = None, fz = None, OUT_MULT = False, h_units = True):
 	"""
 	parameters: Cosmological parameters used by class | dictionary
 	b: Values of the bias parameters (b1, b2, bG2, bGamma3, b4)| 1D or 2D (multitracers) array
@@ -411,7 +411,6 @@ def Pgg_EFTofLSS(k = None, parameters = {}, b = None, cs = None, c = None, IR_re
 			cb = "Yes"
 		else:
 			cb = "No"
-
 		if(AP == True):
 			AP = "Yes"
 		else:
@@ -504,7 +503,7 @@ def Pgg_EFTofLSS(k = None, parameters = {}, b = None, cs = None, c = None, IR_re
 	#Define the functions to compute each power spectra
 	#Compute Pgg in real space
 	def Pgg(ind):
-		resp = (bias[ind,0]*(pk_mult["lin"] + pk_mult["1loop"]) + bias[ind,1]*pk_mult["Id2"] + 2.0*bias[ind,2]*pk_mult["IG2"] + 2.0*bias[ind, 2]*pk_mult["FG2"] + 0.8*bias[ind, 3]*pk_mult["FG2"] + 0.25*bias[ind, 4]*pk_mult["Id2d2"] + bias[ind, 5]*pk_mult["IG2G2"] + bias[ind, 6]*pk_mult["Id2G2"])*h**3 + 2.0*ctrs[ind]*pk_mult["ctr"]*h
+		resp = (bias[ind,0]*(pk_mult["lin"] + pk_mult["1loop"]) + bias[ind,1]*pk_mult["Id2"] + 2.0*bias[ind,2]*pk_mult["IG2"] + 2.0*bias[ind, 2]*pk_mult["FG2"] + 0.8*bias[ind, 3]*pk_mult["FG2"] + 0.25*bias[ind, 4]*pk_mult["Id2d2"] + bias[ind, 5]*pk_mult["IG2G2"] + bias[ind, 6]*pk_mult["Id2G2"])*pow(h, 3.0*h_units) + 2.0*ctrs[ind]*pk_mult["ctr"]*pow(h, h_units)
 		for i in range(len(c[ind,:])):
 			resp += c[ind,i]*np.power(k, 2*i)
 
@@ -512,7 +511,7 @@ def Pgg_EFTofLSS(k = None, parameters = {}, b = None, cs = None, c = None, IR_re
 
 	#Compute the monopole of the power spectrum
 	def Pgg_l0(ind):
-		resp =  (pk_mult["lin_0_vv"] + pk_mult["1loop_0_vv"] + bias[ind,0]*(pk_mult["lin_0_vd"] + pk_mult["1loop_0_vd"]) + bias[ind,1]*(pk_mult["lin_0_dd"] + pk_mult["1loop_0_dd"]) + 0.25*bias[ind,2]*pk_mult["Id2d2"] + bias[ind,3]*pk_mult["Idd2_0"] + bias[ind,4]*pk_mult["Id2_0"] + bias[ind,5]*pk_mult["IdG2_0"] + bias[ind,6]*pk_mult["IG2_0"] + bias[ind,7]*pk_mult["Id2G2"] + bias[ind,8]*pk_mult["IG2G2"] + 2.0*bias[ind,5]*pk_mult["FG2_0b1"] + 2.0*bias[ind,6]*pk_mult["FG2_0"] + 0.8*bias[ind,9]*pk_mult["FG2_0b1"] + 0.8*bias[ind,10]*pk_mult["FG2_0"])*h**3 + 2.0*ctrs[ind,0]*pk_mult["ctr_0"]*h + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(1.0/9.0*bias[ind,11]*fz**2 + 2.0/7.0*fz*bias[ind,12] + 1.0/5.0*bias[ind,13])*h
+		resp =  (pk_mult["lin_0_vv"] + pk_mult["1loop_0_vv"] + bias[ind,0]*(pk_mult["lin_0_vd"] + pk_mult["1loop_0_vd"]) + bias[ind,1]*(pk_mult["lin_0_dd"] + pk_mult["1loop_0_dd"]) + 0.25*bias[ind,2]*pk_mult["Id2d2"] + bias[ind,3]*pk_mult["Idd2_0"] + bias[ind,4]*pk_mult["Id2_0"] + bias[ind,5]*pk_mult["IdG2_0"] + bias[ind,6]*pk_mult["IG2_0"] + bias[ind,7]*pk_mult["Id2G2"] + bias[ind,8]*pk_mult["IG2G2"] + 2.0*bias[ind,5]*pk_mult["FG2_0b1"] + 2.0*bias[ind,6]*pk_mult["FG2_0"] + 0.8*bias[ind,9]*pk_mult["FG2_0b1"] + 0.8*bias[ind,10]*pk_mult["FG2_0"])*pow(h, 3.0*h_units) + 2.0*ctrs[ind,0]*pk_mult["ctr_0"]*pow(h, h_units) + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(1.0/9.0*bias[ind,11]*fz**2 + 2.0/7.0*fz*bias[ind,12] + 1.0/5.0*bias[ind,13])*pow(h, h_units)
 		for i in range(len(c[ind,:,0])):
 			resp += c[ind,i,0]*np.power(k, 2*i)
 
@@ -520,7 +519,7 @@ def Pgg_EFTofLSS(k = None, parameters = {}, b = None, cs = None, c = None, IR_re
 
 	#Compute the quadrupole of the power spectrum
 	def Pgg_l2(ind):
-		resp = (pk_mult["lin_2_vv"] + pk_mult["1loop_2_vv"] + bias[ind,0]*(pk_mult["lin_2_vd"] + pk_mult["1loop_2_vd"]) + bias[ind,1]*pk_mult["1loop_2_dd"] + bias[ind,3]*pk_mult["Idd2_2"] + bias[ind,4]*pk_mult["Id2_2"] + bias[ind,5]*pk_mult["IdG2_2"] + bias[ind,6]*pk_mult["IG2_2"] + (2.0*bias[ind,6] + 0.8*bias[ind,10])*pk_mult["FG2_2"])*h**3 + 2.0*ctrs[ind,1]*pk_mult["ctr_2"]*h + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(70.0*bias[ind,11]*fz**2 + 165.0*fz*bias[ind,12] + 99.0*bias[ind,13])*(4.0/693.0)*h + c[ind,0,1] + c[ind,1,1]*np.power(k, 2.0)
+		resp = (pk_mult["lin_2_vv"] + pk_mult["1loop_2_vv"] + bias[ind,0]*(pk_mult["lin_2_vd"] + pk_mult["1loop_2_vd"]) + bias[ind,1]*pk_mult["1loop_2_dd"] + bias[ind,3]*pk_mult["Idd2_2"] + bias[ind,4]*pk_mult["Id2_2"] + bias[ind,5]*pk_mult["IdG2_2"] + bias[ind,6]*pk_mult["IG2_2"] + (2.0*bias[ind,6] + 0.8*bias[ind,10])*pk_mult["FG2_2"])*pow(h, 3.0*h_units) + 2.0*ctrs[ind,1]*pk_mult["ctr_2"]*pow(h, h_units) + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(70.0*bias[ind,11]*fz**2 + 165.0*fz*bias[ind,12] + 99.0*bias[ind,13])*(4.0/693.0)*pow(h, h_units) + c[ind,0,1] + c[ind,1,1]*np.power(k, 2.0)
 		for i in range(len(c[ind,:,1])):
 			resp += c[ind,i,1]*np.power(k, 2*i)
 
@@ -528,7 +527,7 @@ def Pgg_EFTofLSS(k = None, parameters = {}, b = None, cs = None, c = None, IR_re
 
 	#Compute the hexadecapole of the power spectrum
 	def Pgg_l4(ind):
-		resp = (pk_mult["lin_4_vv"] + pk_mult["1loop_4_vv"] + bias[ind,0]*pk_mult["1loop_4_vd"] + bias[ind,1]*pk_mult["1loop_4_dd"] + bias[ind,4]*pk_mult["Id2_4"] + bias[ind,6]*pk_mult["IG2_4"])*h**3 + 2.0*ctrs[ind,2]*pk_mult["ctr_4"]*h + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(210.0*bias[ind,11]*fz**2 + 390.0*fz*bias[ind,12] + 143.0*bias[ind,13])*(8.0/5005.0)*h
+		resp = (pk_mult["lin_4_vv"] + pk_mult["1loop_4_vv"] + bias[ind,0]*pk_mult["1loop_4_vd"] + bias[ind,1]*pk_mult["1loop_4_dd"] + bias[ind,4]*pk_mult["Id2_4"] + bias[ind,6]*pk_mult["IG2_4"])*pow(h, 3.0*h_units) + 2.0*ctrs[ind,2]*pk_mult["ctr_4"]*pow(h, h_units) + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(210.0*bias[ind,11]*fz**2 + 390.0*fz*bias[ind,12] + 143.0*bias[ind,13])*(8.0/5005.0)*pow(h, h_units)
 		for i in range(len(c[ind,:,2])):
 			resp += c[ind,i,2]*np.power(k, 2*i)
 
@@ -574,8 +573,8 @@ def Pgg_EFTofLSS(k = None, parameters = {}, b = None, cs = None, c = None, IR_re
 	if(OUT_MULT == True):
 		for key in pk_mult.keys():
 			if(key == "ctr" or key == "ctr_0" or key == "ctr_2" or key == "ctr_4"):
-				x[key] = pk_mult[key]*h
+				x[key] = pk_mult[key]*pow(h, h_units)
 			else:
-				x[key] = pk_mult[key]*h**3
+				x[key] = pk_mult[key]*pow(h, 3.0*h_units)
 
 	return x
