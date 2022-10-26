@@ -381,7 +381,7 @@ def Xi_lm(r, k, P, Lambda = 0.7, l = 0, mk = 2, mr = 0, K = 11, alpha = 4.0, Rma
 	return x
 
 #Compute the 1-loop matter or galaxy power spectrum using classPT
-def Pgg_EFTofLSS(k = None, parameters = None, b = None, cs = None, c = None, IR_resummation = True, cb = True, RSD = True, AP = True, Om_fid = 0.31, z = 0.0, ls = [0, 2, 4], pk_mult = None, fz = None):
+def Pgg_EFTofLSS(k = None, parameters = {}, b = None, cs = None, c = None, IR_resummation = True, cb = True, RSD = True, AP = False, Om_fid = 0.31, z = 0.0, ls = [0, 2, 4], pk_mult = None, fz = None, OUT_MULT = False):
 	"""
 	parameters: Cosmological parameters used by class | dictionary
 	b: Values of the bias parameters (b1, b2, bG2, bGamma3, b4)| 1D or 2D (multitracers) array
@@ -402,26 +402,28 @@ def Pgg_EFTofLSS(k = None, parameters = None, b = None, cs = None, c = None, IR_
 
 		#Set the parameters
 		M = Class()
-		M.set({'A_s':2.089e-9, 'n_s':0.9649, 'tau_reio':0.052, 'omega_b':0.02237, 'omega_cdm':0.12, 'h':0.6736, 'YHe':0.2425, 'N_eff':3.046, 'N_ur':2.0328, 'N_ncdm':1, 'm_ncdm':0.06})
-		M.set(parameters)
-		M.set({'z_pk':z})
-		if(IR_resummation == True):
-			IR_resummation = "Yes"
-		else:
-			IR_resummation = "No"
+		params = {'A_s':2.089e-9, 'n_s':0.9649, 'tau_reio':0.052, 'omega_b':0.02237, 'omega_cdm':0.12, 'h':0.6736, 'YHe':0.2425, 'N_ur':2.0328, 'N_ncdm':1, 'm_ncdm':0.06}
+		for key in parameters.keys():
+			params[key] = parameters[key]
+		params['z_pk'] = z
+		M.set(params)
 		if(cb == True):
 			cb = "Yes"
 		else:
 			cb = "No"
-		if(RSD == True):
-			RSD = "Yes"
-		else:
-			RSD = "No"
+
 		if(AP == True):
 			AP = "Yes"
 		else:
 			AP = "No"
-		M.set({'output':'mPk', 'non linear':'PT', 'IR resummation':IR_resummation, 'Bias tracers':'Yes', 'cb':cb, 'RSD':RSD, 'AP':AP,'Omfid':Om_fid})
+		if(IR_resummation == True):
+			IR_resummation = "Yes"
+		else:
+			IR_resummation = "No"
+		if(RSD == True):
+			M.set({'output':'mPk', 'non linear':'PT', 'IR resummation':IR_resummation, 'Bias tracers':'Yes', 'cb':cb, 'RSD':'Yes', 'AP':AP, 'Omfid':Om_fid})
+		else:
+			M.set({'output':'mPk', 'non linear':'PT', 'IR resummation':IR_resummation, 'Bias tracers':'Yes', 'cb':cb, 'RSD':'No'})
 		M.compute()
 
 		#Compute the spectra of the basis
@@ -429,16 +431,17 @@ def Pgg_EFTofLSS(k = None, parameters = None, b = None, cs = None, c = None, IR_
 			raise TypeError("You have to give an array of k where to compute the power spectrum")
 		h = M.h()
 		kh = k*h
+		fz = M.scale_independent_growth_factor_f(z)
 		M_mult = M.get_pk_mult(kh, z, len(kh))
        
 		#Save a dictionary with the spectra
 		pk_mult = {}
-		spectra_label = ["Id2d2", "Id2", "IG2", "Id2G2", "IG2G2", "IFG2", "ctr", "lin", "1loop",]
+		spectra_label = ["Id2d2", "Id2", "IG2", "Id2G2", "IG2G2", "FG2", "ctr", "lin", "1loop",]
 		spectra_ind = [1, 2, 3, 4, 5, 6, 10, 14, 0]
 		for i in range(len(spectra_label)):
 			pk_mult[spectra_label[i]] = M_mult[spectra_ind[i]]
 		if(RSD == True):
-			spectra_label = ["IFG2_0b1", "IFG2_0", "IFG2_2", "ctr_0", "ctr_2", "ctr_4"]
+			spectra_label = ["FG2_0b1", "FG2_0", "FG2_2", "ctr_0", "ctr_2", "ctr_4"]
 			spectra_ind = [7, 8 , 9, 11, 12, 13]
 			for i in range(len(spectra_label)):
 				pk_mult[spectra_label[i]] = M_mult[spectra_ind[i]]	
@@ -454,10 +457,16 @@ def Pgg_EFTofLSS(k = None, parameters = None, b = None, cs = None, c = None, IR_
 			raise ValueError("There are not all spectra needed for the computations in redshift space")
 
 	#Get the number of tracers
-	if(b is not list or b is not np.ndarray):
+	if(b is None):
 		raise TypeError("You have to give an array with the values of the bias parameters")
 	if(len(b.shape) == 1):
 		Ntracers = 1
+		b = np.array(b).reshape([1, len(b)])
+		cs = np.array([cs])
+		if(RSD == True):
+			c = np.array(c).reshape([1, c.shape[0], c.shape[1]])
+		else:
+			c = np.array(c).reshape([1, c.shape[0]])
 	else: 
 		Ntracers = b.shape[0]
 
@@ -465,35 +474,108 @@ def Pgg_EFTofLSS(k = None, parameters = None, b = None, cs = None, c = None, IR_
 	#(b1, b1^2, b2^2, b1*b2, b2, b1*bG2, bG2, b2*bG2, bG^2, b1*bGamma3, bGamma3, b4, b1*b4, b1^2*b4)
 	if(RSD == True):
 		bias = np.zeros([int(Ntracers*(Ntracers+1)/2), 14])
+		ctrs = np.zeros([int(Ntracers*(Ntracers+1)/2), 3])
 		count = 0
 		for i in range(Ntracers):
-			for j in range(Ntracers+1):
+			for j in range(i):
 				bias[count, :] = np.array([(b[i,0] + b[j,0])/2.0, b[i,0]*b[j,0], b[i,1]*b[j,1], (b[i,0]*b[j,1] + b[i,1]*b[j,0])/2.0, (b[i,1] + b[j,1])/2.0, (b[i,0]*b[j,2] + b[i,2]*b[j,0])/2.0, (b[i,2] + b[j,2])/2.0, (b[i,1]*b[j,2] + b[i,2]*b[j,1])/2.0, b[i,2]*b[j,2], (b[i,0]*b[j,3] + b[i,3]*b[j,0])/2.0, (b[i,3] + b[j,3])/2.0, (b[i,4] + b[j,4])/2.0, (b[i,0]*b[j,4] + b[i,4]*b[j,0])/2.0, (b[i,0]**2*b[j,4] + b[i,4]*b[j,0]**2)/2.0])
+				for l in range(3):
+					ctrs[count, l] = (cs[i, l]*b[j,0] + cs[j, l]*b[i,0])/2.0
 				count += 1
+			bias[count, :] = np.array([b[i,0], b[i,0]**2, b[i,1]**2, b[i,0]*b[i,1], b[i,1], b[i,0]*b[i,2], b[i,2], b[i,1]*b[i,2], b[i,2]**2, b[i,0]*b[i,3], b[i,3], b[i,4], b[i,0]*b[i,4], b[i,0]**2*b[i,4]])
+			for l in range(3):
+				ctrs[count, l] = cs[i, l]*b[i,0]
+			count += 1		
 	#(b1^2, b1*b2, b1*bG2, b1*bGamma3, b2^2, bG2^2, b2*bG2)
 	else:
 		bias = np.zeros([int(Ntracers*(Ntracers+1)/2), 7])
+		ctrs = np.zeros(int(Ntracers*(Ntracers+1)/2))
 		count = 0
 		for i in range(Ntracers):
-			for j in range(Ntracers+1):
+			for j in range(i):
 				bias[count, :] = np.array([b[i,0]*b[j,0], (b[i,0]*b[j,1] + b[i,1]*b[j,0])/2.0, (b[i,0]*b[j,2] + b[i,2]*b[j,0])/2.0, (b[i,0]*b[j,3] + b[i,3]*b[j,0])/2.0, b[i,1]*b[j,1], b[i,2]*b[j,2], (b[i,1]*b[j,2] + b[i,2]*b[j,1])/2.0])
+				ctrs[count] = (cs[i]*b[j,0] + cs[j]*b[i,0])/2.0
 				count += 1
+			bias[count, :] = np.array([b[i,0]**2, b[i,0]*b[i,1], b[i,0]*b[i,2], b[i,0]*b[i,3], b[i,1]**2, b[i,2]**2, b[i,1]*b[i,2]])
+			ctrs[count] = cs[i]*b[i,0]
+			count += 1
+
 				
 	#Define the functions to compute each power spectra
-	#Compute Pgg_l0
-	def Pgg_l0():
-		return pk_mult[15] +self.pk_mult[21]+ b1*self.pk_mult[16] + b1*self.pk_mult[22] + b1**2.*self.pk_mult[17] + b1**2.*self.pk_mult[23] + 0.25*b2**2.*self.pk_mult[1] + b1*b2*self.pk_mult[30]+ b2*self.pk_mult[31] + b1*bG2*self.pk_mult[32] + bG2*self.pk_mult[33]+ b2*bG2*self.pk_mult[4]+ bG2**2.*self.pk_mult[5] + 2.*cs0*self.pk_mult[11]/h**2.
-			+ (2.*bG2+0.8*bGamma3)*(b1*self.pk_mult[7]+self.pk_mult[8]))*h**3.+ Pshot + self.fz**2.*b4*(self.kh/h)**2.*(self.fz**2./9. + 2.*self.fz*b1/7. + b1**2./5)*(35./8.)*self.pk_mult[13]*h
+	#Compute Pgg in real space
+	def Pgg(ind):
+		resp = (bias[ind,0]*(pk_mult["lin"] + pk_mult["1loop"]) + bias[ind,1]*pk_mult["Id2"] + 2.0*bias[ind,2]*pk_mult["IG2"] + 2.0*bias[ind, 2]*pk_mult["FG2"] + 0.8*bias[ind, 3]*pk_mult["FG2"] + 0.25*bias[ind, 4]*pk_mult["Id2d2"] + bias[ind, 5]*pk_mult["IG2G2"] + bias[ind, 6]*pk_mult["Id2G2"])*h**3 + 2.0*ctrs[ind]*pk_mult["ctr"]*h
+		for i in range(len(c[ind,:])):
+			resp += c[ind,i]*np.power(k, 2*i)
 
+		return resp
 
+	#Compute the monopole of the power spectrum
+	def Pgg_l0(ind):
+		resp =  (pk_mult["lin_0_vv"] + pk_mult["1loop_0_vv"] + bias[ind,0]*(pk_mult["lin_0_vd"] + pk_mult["1loop_0_vd"]) + bias[ind,1]*(pk_mult["lin_0_dd"] + pk_mult["1loop_0_dd"]) + 0.25*bias[ind,2]*pk_mult["Id2d2"] + bias[ind,3]*pk_mult["Idd2_0"] + bias[ind,4]*pk_mult["Id2_0"] + bias[ind,5]*pk_mult["IdG2_0"] + bias[ind,6]*pk_mult["IG2_0"] + bias[ind,7]*pk_mult["Id2G2"] + bias[ind,8]*pk_mult["IG2G2"] + 2.0*bias[ind,5]*pk_mult["FG2_0b1"] + 2.0*bias[ind,6]*pk_mult["FG2_0"] + 0.8*bias[ind,9]*pk_mult["FG2_0b1"] + 0.8*bias[ind,10]*pk_mult["FG2_0"])*h**3 + 2.0*ctrs[ind,0]*pk_mult["ctr_0"]*h + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(1.0/9.0*bias[ind,11]*fz**2 + 2.0/7.0*fz*bias[ind,12] + 1.0/5.0*bias[ind,13])*h
+		for i in range(len(c[ind,:,0])):
+			resp += c[ind,i,0]*np.power(k, 2*i)
 
-	#Compute the galaxy-galaxy power spectrum
-	if(type(ls) == list or type(ls) == np.ndarray):
-		for l in ls:
+		return resp
 
-(self.pk_mult[15] +self.pk_mult[21]+ b1*self.pk_mult[16] + b1*self.pk_mult[22] + b1**2.*self.pk_mult[17] + b1**2.*self.pk_mult[23] + 0.25*b2**2.*self.pk_mult[1] + b1*b2*self.pk_mult[30]+ b2*self.pk_mult[31] + b1*bG2*self.pk_mult[32] + bG2*self.pk_mult[33]+ b2*bG2*self.pk_mult[4]+ bG2**2.*self.pk_mult[5] + 2.*cs0*self.pk_mult[11]/h**2.
-			+ (2.*bG2+0.8*bGamma3)*(b1*self.pk_mult[7]+self.pk_mult[8]))*h**3.+ Pshot + self.fz**2.*b4*(self.kh/h)**2.*(self.fz**2./9. + 2.*self.fz*b1/7. + b1**2./5)*(35./8.)*self.pk_mult[13]*h
+	#Compute the quadrupole of the power spectrum
+	def Pgg_l2(ind):
+		resp = (pk_mult["lin_2_vv"] + pk_mult["1loop_2_vv"] + bias[ind,0]*(pk_mult["lin_2_vd"] + pk_mult["1loop_2_vd"]) + bias[ind,1]*pk_mult["1loop_2_dd"] + bias[ind,3]*pk_mult["Idd2_2"] + bias[ind,4]*pk_mult["Id2_2"] + bias[ind,5]*pk_mult["IdG2_2"] + bias[ind,6]*pk_mult["IG2_2"] + (2.0*bias[ind,6] + 0.8*bias[ind,10])*pk_mult["FG2_2"])*h**3 + 2.0*ctrs[ind,1]*pk_mult["ctr_2"]*h + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(70.0*bias[ind,11]*fz**2 + 165.0*fz*bias[ind,12] + 99.0*bias[ind,13])*(4.0/693.0)*h + c[ind,0,1] + c[ind,1,1]*np.power(k, 2.0)
+		for i in range(len(c[ind,:,1])):
+			resp += c[ind,i,1]*np.power(k, 2*i)
 
-(self.pk_mult[18] +self.pk_mult[24]+b1*self.pk_mult[19] +b1*self.pk_mult[25] +b1**2.*self.pk_mult[26] +b1*b2*self.pk_mult[34]+b2*self.pk_mult[35] +b1*bG2*self.pk_mult[36]+bG2*self.pk_mult[37]+2.*cs2*self.pk_mult[12]/h**2. +(2.*bG2+0.8*bGamma3)*self.pk_mult[9])*h**3. +self.fz**2.*b4*(self.kh/h)**2.*((self.fz**2.*70. + 165.*self.fz*b1+99.*b1**2.)*4./693.)*(35./8.)*self.pk_mult[13]*h
+		return resp
 
-(self.pk_mult[20] +self.pk_mult[27]+b1*self.pk_mult[28] +b1**2.*self.pk_mult[29] +b2*self.pk_mult[38] +bG2*self.pk_mult[39] +2.*cs4*self.pk_mult[13]/h**2.)*h**3.+self.fz**2.*b4*(self.kh/h)**2.*((self.fz**2.*210. + 390.*self.fz*b1+143.*b1**2.)*8./5005.)*(35./8.)*self.pk_mult[13]*h
+	#Compute the hexadecapole of the power spectrum
+	def Pgg_l4(ind):
+		resp = (pk_mult["lin_4_vv"] + pk_mult["1loop_4_vv"] + bias[ind,0]*pk_mult["1loop_4_vd"] + bias[ind,1]*pk_mult["1loop_4_dd"] + bias[ind,4]*pk_mult["Id2_4"] + bias[ind,6]*pk_mult["IG2_4"])*h**3 + 2.0*ctrs[ind,2]*pk_mult["ctr_4"]*h + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(210.0*bias[ind,11]*fz**2 + 390.0*fz*bias[ind,12] + 143.0*bias[ind,13])*(8.0/5005.0)*h
+		for i in range(len(c[ind,:,2])):
+			resp += c[ind,i,2]*np.power(k, 2*i)
+
+		return resp
+
+	#Compute the spectra and save in the dictionary
+	x = {}
+	if(RSD == True):
+		if(0 in ls):
+			P = np.zeros([int(Ntracers*(Ntracers+1)/2), len(k)])
+			ind = 0
+			for i in range(Ntracers):
+				for j in range(i+1):
+					P[ind,:] = Pgg_l0(ind)
+					ind += 1
+			x["Pgg_l0"] = P	
+		if(2 in ls):
+			P = np.zeros([int(Ntracers*(Ntracers+1)/2), len(k)])
+			ind = 0
+			for i in range(Ntracers):
+				for j in range(i+1):
+					P[ind,:] = Pgg_l2(ind)
+					ind += 1
+			x["Pgg_l2"] = P	
+		if(4 in ls):
+			P = np.zeros([int(Ntracers*(Ntracers+1)/2), len(k)])
+			ind = 0
+			for i in range(Ntracers):
+				for j in range(i+1):
+					P[ind,:] = Pgg_l4(ind)
+					ind += 1
+			x["Pgg_l4"] = P	
+	else:
+		P = np.zeros([int(Ntracers*(Ntracers+1)/2), len(k)])
+		ind = 0
+		for i in range(Ntracers):
+			for j in range(i+1):
+				P[ind,:] = Pgg(ind)
+				ind += 1
+		x["Pgg"] = P
+
+	#Output the spectra
+	if(OUT_MULT == True):
+		for key in pk_mult.keys():
+			if(key == "ctr" or key == "ctr_0" or key == "ctr_2" or key == "ctr_4"):
+				x[key] = pk_mult[key]*h
+			else:
+				x[key] = pk_mult[key]*h**3
+
+	return x
