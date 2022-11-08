@@ -435,7 +435,7 @@ def Pgg_EFTofLSS(k = None, parameters = {}, b = None, cs = None, c = None, IR_re
        
 		#Save a dictionary with the spectra
 		pk_mult = {}
-		spectra_label = ["Id2d2", "Id2", "IG2", "Id2G2", "IG2G2", "FG2", "ctr", "lin", "1loop",]
+		spectra_label = ["Id2d2", "Id2", "IG2", "Id2G2", "IG2G2", "FG2", "ctr", "lin", "1loop"]
 		spectra_ind = [1, 2, 3, 4, 5, 6, 10, 14, 0]
 		for i in range(len(spectra_label)):
 			pk_mult[spectra_label[i]] = M_mult[spectra_ind[i]]
@@ -470,7 +470,7 @@ def Pgg_EFTofLSS(k = None, parameters = {}, b = None, cs = None, c = None, IR_re
 		Ntracers = b.shape[0]
 
 	#Set all combinations of the bias parameters 
-	#(b1, b1^2, b2^2, b1*b2, b2, b1*bG2, bG2, b2*bG2, bG^2, b1*bGamma3, bGamma3, b4, b1*b4, b1^2*b4)
+	#(b1, b1^2, b2^2, b1*b2, b2, b1*bG2, bG2, b2*bG2, bG2^2, b1*bGamma3, bGamma3, b4, b1*b4, b1^2*b4)
 	if(RSD == True):
 		bias = np.zeros([int(Ntracers*(Ntracers+1)/2), 14])
 		ctrs = np.zeros([int(Ntracers*(Ntracers+1)/2), 3])
