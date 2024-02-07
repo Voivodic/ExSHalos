@@ -1,4 +1,3 @@
-from tkinter.messagebox import NO
 import numpy as np
 from scipy.integrate import simps, odeint
 from scipy.special import binom
