@@ -161,6 +161,6 @@ setup(
     author = 'Rodrigo Voivodic',
     author_email = 'rodrigo.voivodic@usp.br',
     ext_modules = ext_modules,
-    install_requires = ["scipy", "matplotlib", "h5py", "cython", "setuptools", "camb", "pyfftw"],
+    install_requires = ["scipy", "matplotlib", "h5py", "cython", "setuptools"],
     license = 'MIT'
 )
