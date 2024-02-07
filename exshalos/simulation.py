@@ -184,6 +184,98 @@ def Compute_Power_Spectrum(grid, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min
 
     return x
 
+#Compute the power spectrum given the density grid
+def Compute_Power_Spectrum_individual(grid, pos, L = 1000.0, window = 0, R = 4.0, Nk = 25, k_min = None, k_max = None, l_max = 0, direction = None, folds = 1, verbose = False, nthreads = 1, ntypes = 1):
+    """
+    grid: Density grid for all tracers | 5D numpy array [1 if interlacing == False and 2 instead, number of types of tracer, nd, nd, nd]
+    pos: Position of the tracers | 2D numpy array [number of tracers, 3]
+    L: Size of the box in Mpc/h | float
+    window: Density assigment method used to construct the density grid | string or int ["NGP" = 0, "CIC" = 1, "SPHERICAL" = 2, "EXPONENTIAL" = 3]
+    R: Smoothing lenght used in the spherical and exponential windows | float
+    R_times: Scale considered to account for particles used in the exponential window in units of R | float
+    Nk: Number of bins in k to compute the power spectra | int
+    k_min: Minimum value of k to compute the power spectra | float
+    k_max: Maximum value of k to compute the power spectra | float
+    l_max: Maximum multipole computed | int
+    verbose: Output or do not output information in the c code | boolean
+    nthreads: Number of threads used by openmp | int
+    ntypes: Number of different types of tracers | int
+
+    return: All possible power spectra, the wavenumbers where the power spectra were mesured and the number of independent modes | Dictionary with 3 arrays. "k": 1D array [Nk], "Pk": 2D array [Number of spectra x Nk], "Nk": 1D array [Nk]
+    """
+
+    precision = exshalos.spectrum.spectrum.check_precision()
+
+    #Compute some parameters
+    if(len(grid.shape) == 3):
+        interlacing = 0
+        ntypes = 1
+    elif(len(grid.shape) == 5):
+        interlacing = 1
+        ntypes = grid.shape[0]
+    elif(len(grid.shape) == 4 and ntypes == 1):
+        interlacing = 1
+    elif(len(grid.shape) == 4 and ntypes > 1):
+        interlacing = 0
+    nd = grid.shape[-1]
+    Np = pos.shape[0]
+    L = L/folds
+
+    if(k_min is None):
+        k_min = 2.0*np.pi/L
+
+    if(k_max is None):
+        k_max = np.pi/L*nd
+
+    if(precision == 4):
+        grid = grid.astype("float32")
+        pos = pos.astype("float32")
+        L = np.float32(L)
+        R = np.float32(R)
+        k_min = np.float32(k_min)
+        k_max = np.float32(k_max)
+    else:
+        grid = grid.astype("float64")
+        pos = pos.astype("float64")
+        L = np.float64(L)
+        R = np.float64(R)
+        k_min = np.float64(k_min)
+        k_max = np.float64(k_max)  
+
+    #Set the window function to be de-convolved
+    if(window == "NO" or window == "no" or window == "No" or window == 0):
+        window = 0
+    elif(window == "NGP" or window == "ngp" or window == 1):
+        window = 1
+    elif(window == "CIC" or window == "cic" or window == 2):
+        window = 2
+    elif(window == "SPHERICAL" or window == "spherical" or window == 3):
+        window = 3
+    elif(window == "EXPONENTIAL" or window == "exponential" or window == 4):
+        window = 4
+
+    if(direction == None or direction == -1):
+        direction = -1
+    elif(direction == "x" or direction == "X" or direction == 0):
+        direction = 0
+    elif(direction == "y" or direction == "Y" or direction == 1):
+        direction = 1
+    elif(direction == "z" or direction == "Z" or direction == 2):
+        direction = 2
+    else:
+        raise ValueError("Direction must be None, x, y or z!")
+
+    x = exshalos.spectrum.spectrum.power_compute_individual(grid, pos, np.int32(ntypes), np.int32(nd), L, np.int32(window), R, np.int32(interlacing), np.int32(Nk), k_min, k_max, np.int32(l_max), np.int32(direction), np.int32(verbose), np.int32(nthreads))
+
+    if(ntypes == 1 and l_max == 0):
+        x["Pk"] = x["Pk"].reshape([Np, Nk])
+    elif(ntypes == 1):
+        x["Pk"] = x["Pk"].reshape([Np, int(l_max/2)+1, Nk])
+    elif(l_max == 0):
+        x["Pk"] = x["Pk"].reshape([Np, ntypes, Nk])
+
+    return x
+
 #Compute the bispectrum given the density grid
 def Compute_BiSpectrum(grid, L = 1000.0, window = "CIC", R = 4.0, Nk = 25, k_min = None, k_max = None, folds = 1, verbose = False, nthreads = 1, ntypes = 1):
     """

@@ -12,6 +12,7 @@
 static PyObject *spectrum_check_precision(PyObject * self, PyObject * args);
 static PyObject *grid_compute(PyObject * self, PyObject * args, PyObject *kwargs);
 static PyObject *power_compute(PyObject * self, PyObject * args, PyObject *kwargs);
+static PyObject *power_compute_individual(PyObject * self, PyObject * args, PyObject *kwargs);
 static PyObject *bi_compute(PyObject * self, PyObject * args, PyObject *kwargs);
 static PyObject *tri_compute(PyObject * self, PyObject * args, PyObject *kwargs);
 static PyObject *abundance_compute(PyObject * self, PyObject * args, PyObject *kwargs);
@@ -22,6 +23,7 @@ static PyMethodDef spectrum_methods[] = {
     {"check_precision", spectrum_check_precision, METH_VARARGS, "Returns precision used by the estimators of the spectra"},
     {"grid_compute", grid_compute, METH_VARARGS | METH_KEYWORDS, "Computes the density grid of a given list of particles"},
     {"power_compute", power_compute, METH_VARARGS | METH_KEYWORDS, "Computes the PowerSpectrum of a given density grid"},
+    {"power_compute_individual", power_compute_individual, METH_VARARGS | METH_KEYWORDS, "Computes the PowerSpectrum of a given density grid for individual particles"},
     {"bi_compute", bi_compute, METH_VARARGS | METH_KEYWORDS, "Computes the BiSpectrum of a given density grid"},
     {"tri_compute", tri_compute, METH_VARARGS | METH_KEYWORDS, "Computes the TriSpectrum of a given density grid"},
     {"abundance_compute", abundance_compute, METH_VARARGS | METH_KEYWORDS, "Computes the differential abundance of halos"},
@@ -165,6 +167,97 @@ static PyObject *power_compute(PyObject *self, PyObject *args, PyObject *kwargs)
 
 	/*Compute the spectra for all tracers*/
 	Power_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, Kmean, P, count_k, l_max, direction);
+
+    /*Put the values in the outputs*/
+    for(i=0;i<Nk;i++){
+        Kmean_out[i] = (fft_real) Kmean[i];
+        for(j=0;j<NPs;j++)
+            for(k=0;k<ls;k++)
+                P_out[(j*ls + k)*Nk + i] = (fft_real) P[(j*ls + k)*Nk + i];
+    }
+
+    /*Free the arrays*/
+    free(Kmean);
+    free(P);
+
+    /*Construct the output tuple for each case*/
+    PyObject *dict = PyDict_New();
+    
+    PyDict_SetItemString(dict, "k", PyArray_Return(np_k));
+    PyDict_SetItemString(dict, "Pk", PyArray_Return(np_P));
+    PyDict_SetItemString(dict, "Nk", PyArray_Return(np_count_k));
+
+    return dict;
+}
+
+/*Function that computes the cross power spectrum for all individual tracers and outputs it in numpy format*/
+static PyObject *power_compute_individual(PyObject *self, PyObject *args, PyObject *kwargs){
+    long *count_k;
+	int i, j, k, ntype, nd, np, window, interlacing, Nk, verbose, nthreads, NPs, l_max, direction, ls;
+    long double *P, *Kmean;
+	fft_real *grid, *pos, k_min, k_max, *P_out, *Kmean_out;
+	fft_real L, R;
+
+	/*Define the list of parameters*/
+	static char *kwlist[] = {"grid", "pos", "ntype", "nd", "L", "window", "R", "interlacing", "Nk", "k_min", "k_max", "l_max", "direction", "verbose", "nthreads", NULL};
+	import_array();
+
+	/*Define the pyobject with the 3D position of the tracers*/
+	PyArrayObject *grid_array, *pos_array;  
+
+	/*Read the input arguments*/
+	#ifdef DOUBLEPRECISION_FFTW
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOiididiiddiiii", kwlist, &grid_array, &pos_array, &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &l_max, &direction, &verbose, &nthreads))
+			return NULL;
+	#else
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOiififiiffiiii", kwlist, &grid_array, &pos_array, &ntype, &nd, &L, &window, &R, &interlacing, &Nk, &k_min, &k_max, &l_max, &direction, &verbose, &nthreads))
+			return NULL;
+	#endif
+
+	/*Convert the PyObjects to C arrays*/
+	grid = (fft_real *) grid_array->data;
+    pos = (fft_real *) pos_array->data;
+    np = (int) pos_array->dimensions[0];
+    NPs = ntype*np;
+    ls = floor(l_max/2) + 1;
+
+    /*Initialize FFTW and openmp to run in parallel*/
+    omp_set_num_threads(nthreads);
+    FFTW(init_threads)();
+    FFTW(plan_with_nthreads)(nthreads);
+
+    if(verbose == TRUE){
+		printf("Computing the power spectra of individual particles\n");
+		printf("kmin = %f, kmax = %f, Nk = %d, l_max = %d, L = %f, Ntype = %d, Ncells = %d, interlacing = %d, window = %d", (float) k_min, (float) k_max, Nk, l_max, (float) L, ntype, nd, interlacing, window);
+		if(window > 2)
+			printf(", R = %f", (float) R);
+		printf(", nthreads = %d\n", nthreads);
+	}
+
+    /*Prepare the PyObject arrays for the outputs*/
+	npy_intp dims_P[] = {(npy_intp) np, (npy_intp) ntype, (npy_intp) ls, (npy_intp) Nk};
+    npy_intp dims_k[] = {(npy_intp) Nk};
+
+	/*Alloc the PyObjects for the output*/
+    PyArrayObject *np_P = (PyArrayObject *) PyArray_ZEROS(4, dims_P, NP_OUT_TYPE, 0);
+    PyArrayObject *np_k = (PyArrayObject *) PyArray_ZEROS(1, dims_k, NP_OUT_TYPE, 0);
+    PyArrayObject *np_count_k = (PyArrayObject *) PyArray_ZEROS(1, dims_k, PyArray_LONG, 0);   
+    P_out = (fft_real *) np_P->data;
+    Kmean_out = (fft_real *) np_k->data;
+    count_k = (long *) np_count_k->data;
+
+    /*Allocs the arrays for P and k*/
+    P = (long double *) malloc(NPs*Nk*ls*sizeof(long double));
+    Kmean = (long double *) malloc(Nk*sizeof(long double));
+    for(i=0;i<Nk;i++){
+        Kmean[i] = 0.0;
+        for(j=0;j<NPs;j++)
+            for(k=0;k<ls;k++)
+                P[(j*ls + k)*Nk + i] = 0.0;
+    }   
+
+	/*Compute the spectra for all tracers*/
+	Power_Spectrum_individual(grid, pos, np, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, Kmean, P, count_k, l_max, direction);
 
     /*Put the values in the outputs*/
     for(i=0;i<Nk;i++){
