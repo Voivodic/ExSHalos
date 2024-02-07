@@ -253,7 +253,7 @@ def Compute_Lagrangian_Operator(grid, order = 2, Galileons = False, Lc = 2.0, ve
     return: A dictionary with all fields (less the linear) up to the given order | python dict
     """
 
-    #Define the parameters used in the case (or not) of Galileons the operators are:
+    #Define the parameters used in the case (or not) of Galileons. The operators are:
     #K2 = K^2 - params[0]*delta^2
     #K3 = K_ij*K_jk*K_ki - params[1]*K^2*delta + params[2]*delta^3
     if(Galileons == False):
