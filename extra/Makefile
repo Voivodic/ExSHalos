@@ -30,7 +30,7 @@ AR        = ar rv
 # add a compilation option on the terminal command line:
 # "PYTHON=python3 make all" (THanks to Marius Millea for pyhton3
 # compatibility)
-PYTHON ?= python
+PYTHON ?= python3
 
 # your optimization flag
 OPTFLAG = -O4 -ffast-math
@@ -51,7 +51,7 @@ LDFLAG = -g -fPIC
 HYREC = hyrec
 
 #put your path to libopenblas.a here
-OPENBLAS = /home/researcher/Libraries/OpenBLAS/lib/libopenblas.a
+OPENBLAS = /usr/lib/x86_64-linux-gnu/libopenblas.a
 
 ########################################################
 ###### IN PRINCIPLE THE REST SHOULD BE LEFT UNCHANGED ##
