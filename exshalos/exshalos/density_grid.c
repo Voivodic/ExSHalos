@@ -175,7 +175,7 @@ void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *del
                 }
                 else{
                     if(fixed == TRUE){
-                        theta = 2.0*M_PI*gsl_ran_uniform(rng_ptr);
+                        theta = 2.0*M_PI*((fft_real) gsl_ran_uniform(rng_ptr));
                         deltak[ind][0] = A*cos(theta); 
                         deltak[ind][1] = A*sin(theta);   
                     }
