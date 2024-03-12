@@ -312,6 +312,41 @@ def Smooth_Fields(grid, Lc = 2.0, k_smooth = 10000.0, Input_k = False, Nfields =
 
     return np.array(x) 
 
+#Smooth a given field (or fields) in a given scale
+def Smooth_and_Reduce_Fields(grid, Lc = 2.0, k_smooth = 10000.0, Input_k = False, Nfields = 1, verbose = False, nthreads = 1):
+    """
+    grid: Lagrangian density grid | 3D array (ndx, ndy, ndz)
+    k_smooth: Scale used to smooth the fields | float
+    Lc: Size of each cell in Mpc/h | float
+    Inpute_k: The density grid is in real or Fourier space | boolean
+    Nfields: Number of fields | int
+    verbose: Output or do not output information in the c code | boolean
+    nthreads: Number of threads used by openmp | int
+
+    return: A dictionary with all fields (less the linear) up to the given order | python dict
+    """
+
+    precision = exshalos.exshalos.exshalos.check_precision()
+
+    if(precision == 4):
+        grid = grid.astype("float32")
+        Lc = np.float32(Lc)
+        k_smooth = np.float32(k_smooth)
+
+    else:
+        grid = grid.astype("float64")
+        Lc = np.float64(Lc)  
+        k_smooth = np.float32(k_smooth)
+
+    if(Nfields > 1):
+        x = []
+        for i in range(Nfields):
+            x.append(exshalos.exshalos.exshalos.smooth_and_reduce_field(grid[i,:], Lc, k_smooth, np.int32(Input_k), np.int32(nthreads), np.int32(verbose)))
+    else:
+        x = exshalos.exshalos.exshalos.smooth_and_reduce_field(grid, Lc, k_smooth, np.int32(Input_k), np.int32(nthreads), np.int32(verbose))
+
+    return np.array(x) 
+
 #Compute the correlation function given the power spectrum or the power spectrum given the correlation function
 def Compute_Correlation(k, P, direction = 1, verbose = False):
     """
