@@ -153,16 +153,11 @@ void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *del
 
                 /*Compute the amplitude of the field*/
                 if(kmod <= k_smooth){
-                    if(kmod > 0.0){
-                        A = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc));
-                        if(fixed == FALSE)
-                            A = A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0));               
-                    }
+                    if(kmod > 0.0)
+                        A = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc)/2.0);             
                     else if(kmod == 0.0 && R_max < 100000.0){
                         kmod = (fft_real) pow(box.kl[0]*box.kl[1]*box.kl[2], 1.0/3.0)/4.0;
-                        A = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc));
-                        if(fixed == FALSE)
-                            A = A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0));
+                        A = (fft_real) sqrt(gsl_spline_eval(spline, (double) kmod, acc)/2.0);
                     }
                     else
                         A = 0.0;
@@ -172,14 +167,29 @@ void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *del
 	
 				/*Generate Gaussian random number with std*/
                 if((i == 0 || i == box.nd[0]/2) && (j == 0 || j == box.nd[1]/2) && (k == 0 || k == box.nd[2]/2)){
-                    deltak[ind][0] = A; 
+                    if(fixed == TRUE)
+                        deltak[ind][0] = A; 
+                    else
+                        deltak[ind][0] = A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0));;
                     deltak[ind][1] = 0.0;
                 }
                 else{
-                    theta = 2.0*M_PI*((fft_real) gsl_rng_uniform(rng_ptr));
-                    deltak[ind][0] = A*cos(theta + phase); 
-                    deltak[ind][1] = A*sin(theta + phase);   
+                    if(fixed == TRUE){
+                        deltak[ind][0] = A; 
+                        deltak[ind][1] = A;   
+                    }
+                    else{
+                        deltak[ind][0] = A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0)); 
+                        deltak[ind][1] = A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0));           
+                    }
                 }
+
+                /*Add the constant phase*/
+                if(phase != 0.0){
+                    deltak[ind][0] = deltak[ind][0]*cos(phase) - deltak[ind][1]*sin(phase);
+                    deltak[ind][1] = deltak[ind][0]*sin(phase) + deltak[ind][1]*cos(phase);
+                }
+
 				deltak_tmp[ind][0] = deltak[ind][0];
 				deltak_tmp[ind][1] = deltak[ind][1]; 
 	
