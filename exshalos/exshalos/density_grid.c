@@ -168,15 +168,16 @@ void Compute_Den(fft_real *K, fft_real *P, int Nk, fft_real R_max, fft_real *del
 				/*Generate Gaussian random number with std*/
                 if((i == 0 || i == box.nd[0]/2) && (j == 0 || j == box.nd[1]/2) && (k == 0 || k == box.nd[2]/2)){
                     if(fixed == TRUE)
-                        deltak[ind][0] = A; 
+                        deltak[ind][0] = sqrt(2.0)*A; 
                     else
-                        deltak[ind][0] = A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0));;
+                        deltak[ind][0] = sqrt(2.0)*A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0));;
                     deltak[ind][1] = 0.0;
                 }
                 else{
                     if(fixed == TRUE){
-                        deltak[ind][0] = A; 
-                        deltak[ind][1] = A;   
+                        theta = 2.0*M_PI*gsl_ran_uniform(rng_ptr);
+                        deltak[ind][0] = A*cos(theta); 
+                        deltak[ind][1] = A*sin(theta);   
                     }
                     else{
                         deltak[ind][0] = A*((fft_real) gsl_ran_gaussian(rng_ptr, 1.0)); 
