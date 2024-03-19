@@ -271,7 +271,7 @@ int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_
         free(Tu1[i]);
         free(Tu2[i]);
     }
-    FFTW(free)(Tu1); FFTW(free)(Tu2);
+    free(Tu1); free(Tu2);
 
     return count_sq;
 }
