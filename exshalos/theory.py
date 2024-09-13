@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.integrate import simps, odeint
+from scipy.integrate import simpson, odeint
 from scipy.special import binom
 import exshalos
 
@@ -83,7 +83,7 @@ def Compute_sigma(k, P, R = None, M = None, Om0 = 0.31, z = 0.0):
 		kt = k[k<=2.0*np.pi/R[j]]
 		Pt = P[k<=2.0*np.pi/R[j]]
 		
-		sigma[j] = np.sqrt(simps(Pt*kt*kt*np.power(W(kt, R[j]), 2.0), kt)/(2.0*np.pi*np.pi))
+		sigma[j] = np.sqrt(simpson(Pt*kt*kt*np.power(W(kt, R[j]), 2.0), kt)/(2.0*np.pi*np.pi))
 
 	return sigma
 
