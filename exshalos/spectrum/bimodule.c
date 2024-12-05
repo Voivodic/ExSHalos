@@ -1,7 +1,7 @@
 #include "bimodule.h"
 
 /*Compute all the cross bispectra*/
-int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_real R, int interlacing, int Nk, fft_real k_min, fft_real k_max, long double *K1, long double *K2, long double *K3, long double **B, long double *I, long double *KP, long double **P, long double *IP, int verbose){
+int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_real R, int interlacing, int Nk, fft_real k_min, fft_real k_max, long double *K1, long double *K2, long double *K3, long double **B, long double *IB, long double *KP, long double **P, long double *IP, int verbose){
     int i, j, k, l, a, b, c, f1, f2, f3, tmpc, count_tri, count_pk, ind, NPs, NBs, countk1, countk2, countk3;
     size_t tmp, ng;
     fft_real dk, kmod, kx, ky, kz, kn = 2*M_PI/L, km1, km2, km3;
@@ -169,7 +169,7 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
                 /*Compute the sum of the grids in real space and save the unormalized Bispectrum and the number of triangles*/
                 for(l=0;l<NBs;l++)
                     B[l][count_tri] = 0.0;
-                I[count_tri] = 0.0;
+                IB[count_tri] = 0.0;
                 for(i=0;i<nd;i++)
                     for(j=0;j<nd;j++)
                         for(k=0;k<nd;k++){
@@ -181,7 +181,7 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
                                         ind = f1*ntype*ntype + f2*ntype + f3;
                                         B[ind][count_tri] += (long double) out_Bm1[f1][tmp]*out_Bm1[f2][tmp]*out_Bm2[f3][tmp];
                                     }
-                            I[count_tri] += (long double) out_I1[tmp]*out_I1[tmp]*out_I2[tmp];
+                            IB[count_tri] += (long double) out_I1[tmp]*out_I1[tmp]*out_I2[tmp];
                         }
                 K1[count_tri] = (long double) km1;
                 K2[count_tri] = (long double) km1;
@@ -252,7 +252,7 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
                 /*Compute the sum of the grids in real space and save the unormalized Bispectrum and the number of triangles*/
                 for(l=0;l<NBs;l++)
                     B[l][count_tri] = 0.0;
-                I[count_tri] = 0.0;
+                IB[count_tri] = 0.0;
                 for(i=0;i<nd;i++)
                     for(j=0;j<nd;j++)
                         for(k=0;k<nd;k++){
@@ -264,7 +264,7 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
                                         ind = f1*ntype*ntype + f2*ntype + f3;
                                         B[ind][count_tri] += (long double) out_Bm1[f1][tmp]*out_Bm2[f2][tmp]*out_Bm3[f3][tmp];
                                     }
-                            I[count_tri] += (long double) out_I1[tmp]*out_I2[tmp]*out_I3[tmp];
+                            IB[count_tri] += (long double) out_I1[tmp]*out_I2[tmp]*out_I3[tmp];
                         }
                 K1[count_tri] = (long double) km1;
                 K2[count_tri] = (long double) km2;
@@ -277,8 +277,8 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
                 B[l][count_tri] = 0.0;
                 B[l][count_tri+1] = 0.0;
             }
-            I[count_tri] = 0.0;
-            I[count_tri+1] = 0.0;
+            IB[count_tri] = 0.0;
+            IB[count_tri+1] = 0.0;
             for(i=0;i<nd;i++)
                 for(j=0;j<nd;j++)
                     for(k=0;k<nd;k++){
@@ -291,8 +291,8 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
                                     B[ind][count_tri] += (long double) out_Bm1[f1][tmp]*out_Bm2[f2][tmp]*out_Bm2[f3][tmp];
                                     B[ind][count_tri+1] += (long double) out_Bm1[f1][tmp]*out_Bm1[f2][tmp]*out_Bm2[f3][tmp];
                                 }
-                        I[count_tri] += (long double) out_I1[tmp]*out_I2[tmp]*out_I2[tmp];
-                        I[count_tri+1] += (long double) out_I1[tmp]*out_I1[tmp]*out_I2[tmp];
+                        IB[count_tri] += (long double) out_I1[tmp]*out_I2[tmp]*out_I2[tmp];
+                        IB[count_tri+1] += (long double) out_I1[tmp]*out_I1[tmp]*out_I2[tmp];
                     }
             K1[count_tri] = (long double) km1;
             K2[count_tri] = (long double) km2;
@@ -309,7 +309,7 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
             B[l][count_tri] = 0.0;
         for(l=0;l<NPs;l++)
             P[l][count_pk] = 0.0;
-        I[count_tri] = 0.0;
+        IB[count_tri] = 0.0;
         IP[count_pk] = 0.0;
         for(i=0;i<nd;i++)
             for(j=0;j<nd;j++)
@@ -322,7 +322,7 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
                                 ind = f1*ntype*ntype + f2*ntype + f3;
                                 B[ind][count_tri] += (long double) out_Bm1[f1][tmp]*out_Bm1[f2][tmp]*out_Bm1[f3][tmp];
                             }
-                    I[count_tri] += (long double) out_I1[tmp]*out_I1[tmp]*out_I1[tmp];
+                    IB[count_tri] += (long double) out_I1[tmp]*out_I1[tmp]*out_I1[tmp];
 
                     ind = 0;
                     for(f1=0;f1<ntype;f1++)
@@ -356,8 +356,8 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
     /*Fill Compute the normalized quantities*/
     for(i=0;i<count_tri;i++){
         for(j=0;j<NBs;j++)
-            B[j][i] = B[j][i]/I[i]*pow(L, 3.0/2.0);
-        I[i] = I[i]/ng;
+            B[j][i] = B[j][i]/IB[i]*pow(L, 3.0/2.0);
+        IB[i] = IB[i]/ng;
     }
 
     for(i=0;i<count_pk;i++){

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #define SPECTRUM_MODULE
 
 #include "spectrum_h.h"
@@ -147,14 +148,14 @@ static PyObject *power_compute(PyObject *self, PyObject *args, PyObject *kwargs)
 	npy_intp dims_P[] = {(npy_intp) NPs, (npy_intp) ls, (npy_intp) Nk};
     npy_intp dims_k[] = {(npy_intp) Nk};
 
-	/*Alloc the PyObjects for the output*/
+    /*Alloc the PyObjects for the output*/
     PyArrayObject *np_P = (PyArrayObject *) PyArray_ZEROS(3, dims_P, NP_OUT_TYPE, 0);
     PyArrayObject *np_k = (PyArrayObject *) PyArray_ZEROS(1, dims_k, NP_OUT_TYPE, 0);
-    PyArrayObject *np_count_k = (PyArrayObject *) PyArray_ZEROS(1, dims_k, PyArray_LONG, 0);   
+    PyArrayObject *np_count_k = (PyArrayObject *) PyArray_ZEROS(1, dims_k, NPY_LONG, 0);   
     P_out = (fft_real *) np_P->data;
     Kmean_out = (fft_real *) np_k->data;
     count_k = (long *) np_count_k->data;
-
+   
     /*Allocs the arrays for P and k*/
     P = (long double *) malloc(NPs*Nk*ls*sizeof(long double));
     Kmean = (long double *) malloc(Nk*sizeof(long double));
@@ -165,9 +166,9 @@ static PyObject *power_compute(PyObject *self, PyObject *args, PyObject *kwargs)
                 P[(j*ls + k)*Nk + i] = 0.0;
     }   
 
-	/*Compute the spectra for all tracers*/
+    /*Compute the spectra for all tracers*/
 	Power_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, Kmean, P, count_k, l_max, direction);
-
+   
     /*Put the values in the outputs*/
     for(i=0;i<Nk;i++){
         Kmean_out[i] = (fft_real) Kmean[i];
@@ -175,18 +176,18 @@ static PyObject *power_compute(PyObject *self, PyObject *args, PyObject *kwargs)
             for(k=0;k<ls;k++)
                 P_out[(j*ls + k)*Nk + i] = (fft_real) P[(j*ls + k)*Nk + i];
     }
-
+   
     /*Free the arrays*/
     free(Kmean);
     free(P);
-
+   
     /*Construct the output tuple for each case*/
     PyObject *dict = PyDict_New();
-    
+   
     PyDict_SetItemString(dict, "k", PyArray_Return(np_k));
     PyDict_SetItemString(dict, "Pk", PyArray_Return(np_P));
     PyDict_SetItemString(dict, "Nk", PyArray_Return(np_count_k));
-
+   
     return dict;
 }
 
@@ -241,7 +242,7 @@ static PyObject *power_compute_individual(PyObject *self, PyObject *args, PyObje
 	/*Alloc the PyObjects for the output*/
     PyArrayObject *np_P = (PyArrayObject *) PyArray_ZEROS(4, dims_P, NP_OUT_TYPE, 0);
     PyArrayObject *np_k = (PyArrayObject *) PyArray_ZEROS(1, dims_k, NP_OUT_TYPE, 0);
-    PyArrayObject *np_count_k = (PyArrayObject *) PyArray_ZEROS(1, dims_k, PyArray_LONG, 0);   
+    PyArrayObject *np_count_k = (PyArrayObject *) PyArray_ZEROS(1, dims_k, NPY_LONG, 0);   
     P_out = (fft_real *) np_P->data;
     Kmean_out = (fft_real *) np_k->data;
     count_k = (long *) np_count_k->data;
@@ -284,7 +285,7 @@ static PyObject *power_compute_individual(PyObject *self, PyObject *args, PyObje
 /*Function that computes the cross bispectrum for all tracers and outputs it in numpy format*/
 static PyObject *bi_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 	int i, j, ntype, nd, window, interlacing, Nk, verbose, nthreads, NPs, NBs, Ntri;
-    long double **P, *KP, **B, *K1, *K2, *K3, *I, *IP;
+    long double **P, *KP, **B, *K1, *K2, *K3, *IB, *IP;
 	fft_real *grid, k_min, k_max, *P_out, *KP_out, *B_out, *KB_out, *count_k, *count_tri;
 	fft_real L, R;
 
@@ -335,10 +336,10 @@ static PyObject *bi_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     K2 = (long double *) malloc(Ntri*sizeof(long double));
     K3 = (long double *) malloc(Ntri*sizeof(long double));  
     IP = (long double *) malloc(Nk*sizeof(long double));
-    I = (long double *) malloc(Ntri*sizeof(long double));  
+    IB = (long double *) malloc(Ntri*sizeof(long double));  
 
     /*Computes the bispectrum*/
-    Ntri = Bi_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, K1, K2, K3, B, I, KP, P, IP, verbose);
+    Ntri = Bi_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, K1, K2, K3, B, IB, KP, P, IP, verbose);
 
     /*Prepare the PyObject arrays for the outputs*/
     npy_intp dims_B[] = {(npy_intp) NBs, (npy_intp) Ntri};
@@ -372,7 +373,7 @@ static PyObject *bi_compute(PyObject *self, PyObject *args, PyObject *kwargs){
         KB_out[i] = (fft_real) K1[i];
         KB_out[i + Ntri] = (fft_real) K2[i];
         KB_out[i + 2*Ntri] = (fft_real) K3[i];   
-        count_tri[i] = (fft_real) I[i];  
+        count_tri[i] = (fft_real) IB[i];  
         for(j=0;j<NBs;j++)
             B_out[j*Ntri + i] = (fft_real) B[j][i];  
     }
@@ -384,7 +385,7 @@ static PyObject *bi_compute(PyObject *self, PyObject *args, PyObject *kwargs){
         free(B[i]);
     free(KP); free(K1); free(K2); free(K3);
     free(P); free(B);
-    free(IP); free(I);
+    free(IP); free(IB);
 
     /*Construct the output tuple for each case*/
     PyObject *dict = PyDict_New();
@@ -402,7 +403,7 @@ static PyObject *bi_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 /*Function that computes the cross bispectrum for all tracers and outputs it in numpy format*/
 static PyObject *tri_compute(PyObject *self, PyObject *args, PyObject *kwargs){
 	int i, j, ntype, nd, window, interlacing, Nk, verbose, nthreads, NPs, NTs, Nsq;
-    long double **P, *KP, **T, **Tu, *K1, *K2, *I, *IP;
+    long double **P, *KP, **T, **Tu, *K1, *K2, *IT, *IP;
 	fft_real *grid, k_min, k_max, *P_out, *KP_out, *T_out, *Tu_out, *KT_out, *count_k, *count_sq;
 	fft_real L, R;
 
@@ -455,10 +456,10 @@ static PyObject *tri_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     K1 = (long double *) malloc(Nsq*sizeof(long double));
     K2 = (long double *) malloc(Nsq*sizeof(long double));
     IP = (long double *) malloc(Nk*sizeof(long double));
-    I = (long double *) malloc(Nsq*sizeof(long double));  
+    IT = (long double *) malloc(Nsq*sizeof(long double));  
 
     /*Computes the bispectrum*/
-    Nsq = Tri_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, K1, K2, T, Tu, I, KP, P, IP);
+    Nsq = Tri_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, K1, K2, T, Tu, IT, KP, P, IP);
 
     /*Prepare the PyObject arrays for the outputs*/
     npy_intp dims_T[] = {(npy_intp) NTs, (npy_intp) Nsq};
@@ -493,7 +494,7 @@ static PyObject *tri_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     for(i=0;i<Nsq;i++){
         KT_out[i] = (fft_real) K1[i];
         KT_out[i + Nsq] = (fft_real) K2[i];
-        count_sq[i] = (fft_real) I[i];  
+        count_sq[i] = (fft_real) IT[i];  
         for(j=0;j<NTs;j++){
             T_out[j*Nsq + i] = (fft_real) T[j][i];  
             Tu_out[j*Nsq + i] = (fft_real) Tu[j][i];
@@ -509,7 +510,7 @@ static PyObject *tri_compute(PyObject *self, PyObject *args, PyObject *kwargs){
         free(Tu[i]);
     free(KP); free(K1); free(K2);
     free(P); free(T); free(Tu);
-    free(IP); free(I);
+    free(IP); free(IT);
 
     /*Construct the output tuple for each case*/
     PyObject *dict = PyDict_New();
@@ -650,8 +651,8 @@ static PyObject *histogram_compute(PyObject *self, PyObject *args, PyObject *kwa
     npy_intp dims_Mmean[] = {(npy_intp) Nm};
 
 	/*Alloc the PyObjects for the output*/
-    PyArrayObject *np_hist_unmasked = (PyArrayObject *) PyArray_ZEROS(1, dims_hist_unmasked, PyArray_LONG, 0);
-    PyArrayObject *np_hist_masked = (PyArrayObject *) PyArray_ZEROS(2, dims_hist_masked, PyArray_LONG, 0);
+    PyArrayObject *np_hist_unmasked = (PyArrayObject *) PyArray_ZEROS(1, dims_hist_unmasked, NPY_LONG, 0);
+    PyArrayObject *np_hist_masked = (PyArrayObject *) PyArray_ZEROS(2, dims_hist_masked, NPY_LONG, 0);
     PyArrayObject *np_Mmean = (PyArrayObject *) PyArray_ZEROS(1, dims_Mmean, NP_OUT_TYPE, 0);
     PyArrayObject *np_delta_mean = (PyArrayObject *) PyArray_ZEROS(1, dims_hist_unmasked, NP_OUT_TYPE, 0);
 

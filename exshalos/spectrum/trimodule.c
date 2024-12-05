@@ -1,7 +1,7 @@
 #include "trimodule.h"
 
 /*Compute all the cross trispectra for the covariance*/
-int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_real R, int interlacing, int Nk, fft_real k_min, fft_real k_max, long double *K1, long double *K2, long double **T, long double **Tu, long double *I, long double *KP, long double **P, long double *IP){
+int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_real R, int interlacing, int Nk, fft_real k_min, fft_real k_max, long double *K1, long double *K2, long double **T, long double **Tu, long double *IT, long double *KP, long double **P, long double *IP){
     int i, j, k, l, a, b, f1, f2, f3, f4, count_sq, count_pk, ind, NPs, NTs, countk1, countk2;
     size_t tmp, ng;
     fft_real dk, kmod, kx, ky, kz, kn = 2*M_PI/L, km1, km2;
@@ -173,7 +173,7 @@ int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_
                 Tu1[l][count_sq] = 0.0;
                 Tu2[l][count_sq] = 0.0;
             }
-            I[count_sq] = 0.0;
+            IT[count_sq] = 0.0;
             for(i=0;i<nd;i++)
                 for(j=0;j<nd;j++)
                     for(k=0;k<nd;k++){
@@ -190,7 +190,7 @@ int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_
 
                                         ind ++;
                                     }
-                        I[count_sq] += (long double) out_I1[tmp]*out_I1[tmp]*out_I2[tmp]*out_I2[tmp];
+                        IT[count_sq] += (long double) out_I1[tmp]*out_I1[tmp]*out_I2[tmp]*out_I2[tmp];
                     }
             K1[count_sq] = (long double) km1;
             K2[count_sq] = (long double) km2;
@@ -205,7 +205,7 @@ int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_
         }
         for(l=0;l<NPs;l++)
             P[l][count_pk] = 0.0;
-        I[count_sq] = 0.0;
+        IT[count_sq] = 0.0;
         IP[count_pk] = 0.0;
         for(i=0;i<nd;i++)
             for(j=0;j<nd;j++)
@@ -223,7 +223,7 @@ int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_
 
                                     ind ++;
                                 }
-                    I[count_sq] += (long double) out_I1[tmp]*out_I1[tmp]*out_I1[tmp]*out_I1[tmp];
+                    IT[count_sq] += (long double) out_I1[tmp]*out_I1[tmp]*out_I1[tmp]*out_I1[tmp];
 
                     ind = 0;
                     for(f1=0;f1<ntype;f1++)
@@ -255,10 +255,10 @@ int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_
     /*Fill Compute the normalized quantities*/
     for(i=0;i<count_sq;i++){
         for(j=0;j<NTs;j++){
-            T[j][i] = T[j][i]/I[i]*pow(L, 3.0);
-            Tu[j][i] = Tu1[j][i]*Tu2[j][i]/I[i]*pow(L, 3.0)/ng;
+            T[j][i] = T[j][i]/IT[i]*pow(L, 3.0);
+            Tu[j][i] = Tu1[j][i]*Tu2[j][i]/IT[i]*pow(L, 3.0)/ng;
         }
-        I[i] = I[i]/ng;
+        IT[i] = IT[i]/ng;
     }
 
     for(i=0;i<count_pk;i++){
