@@ -72,7 +72,7 @@ x = exshalos.mock.Generate_Halos_Box_from_Pk(
     OUT_FLAG=OUT_FLAG,
     OUT_PROF=OUT_PROF,
     nthreads=nthreads,
-    verbose=True,
+    verbose=False,
 )
 end = time.time()
 
@@ -212,7 +212,7 @@ if Ntracers > 1:
         pl.errorbar(
             xh["k"],
             xh["Pk"][i],
-            yerr=xh["Pk"][i] / np.sqrt(xh["Nk"]),
+            yerr=np.abs(xh["Pk"][i]) / np.sqrt(xh["Nk"]),
             linestyle="",
             marker="o",
             markersize=5,
@@ -222,7 +222,7 @@ else:
     pl.errorbar(
         xh["k"],
         xh["Pk"],
-        yerr=xh["Pk"] / np.sqrt(xh["Nk"]),
+        yerr=np.abs(xh["Pk"]) / np.sqrt(xh["Nk"]),
         linestyle="",
         marker="o",
         markersize=8,
@@ -231,7 +231,7 @@ else:
 pl.errorbar(
     xp["k"],
     xp["Pk"],
-    yerr=xp["Pk"] / np.sqrt(xp["Nk"]),
+    yerr=np.abs(xp["Pk"]) / np.sqrt(xp["Nk"]),
     linestyle="",
     marker="o",
     markersize=5,
