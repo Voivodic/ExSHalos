@@ -221,6 +221,7 @@ size_t Grow_Halos(size_t np, long *flag, fft_real *Sig_Grid, fft_real *delta, PE
     /*Number of bins used to storage the Lagrangian density profile*/
     Nbins = 1000;//(int) floor(pow(M_max/box.Mcell, 1.0/3.0));
 
+printf("ok123\n");
     /*Run over all peaks*/
     nh = 0;
     for(l=np-1;l>0;l--){
@@ -375,6 +376,7 @@ size_t Grow_Halos(size_t np, long *flag, fft_real *Sig_Grid, fft_real *delta, PE
         }
     }
 
+printf("ok123\n");
     return nh;
 }
 
@@ -534,8 +536,9 @@ size_t Find_Halos(fft_real *delta, fft_real *K, fft_real *P, int Nk, long *flag,
 	*halos = (HALOS *)malloc(np*sizeof(HALOS));
 	if(out.VERBOSE == 1)
 		printf("There are %ld peaks\n", np);
+    printf("ok\n");
 	nh = Grow_Halos(np, flag, Sig_grid, delta, peaks, *halos);
-
+printf("ok\n");
 	free(peaks);
 	if(out.VERBOSE == 1)
 		printf("There are %ld halos\n", nh);

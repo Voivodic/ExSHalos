@@ -531,7 +531,7 @@ static PyObject *find_halos(PyObject *self, PyObject *args, PyObject *kwargs){
     PyArrayObject *np_flag;
     if(OUT_FLAG == TRUE){
         npy_intp dims_flag[] = {(npy_intp) box.nd, (npy_intp) box.nd, (npy_intp) box.nd};
-        np_flag = (PyArrayObject *) PyArray_ZEROS(3, dims_flag, PyArray_LONG, 0);
+        np_flag = (PyArrayObject *) PyArray_ZEROS(3, dims_flag, NPY_LONG, 0);
         flag = (long *) np_flag->data;
     }
     else{
@@ -760,7 +760,7 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
 
     /*Alloc the flag array*/
     if(OUT_FLAG == TRUE){
-        np_flag = (PyArrayObject *) PyArray_ZEROS(3, dims_flag, PyArray_LONG, 0);
+        np_flag = (PyArrayObject *) PyArray_ZEROS(3, dims_flag, NPY_LONG, 0);
         flag = (long *) np_flag->data;
     }
     else{
@@ -990,7 +990,7 @@ static PyObject *halos_box_from_grid(PyObject *self, PyObject *args, PyObject *k
 
     /*Alloc the flag array*/
     if(OUT_FLAG == TRUE){
-        np_flag = (PyArrayObject *) PyArray_ZEROS(3, dims_flag, PyArray_LONG, 0);
+        np_flag = (PyArrayObject *) PyArray_ZEROS(3, dims_flag, NPY_LONG, 0);
         flag = (long *) np_flag->data;
     }
     else{
