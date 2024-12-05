@@ -96,7 +96,7 @@ static PyObject *populate_halos(PyObject *self, PyObject *args, PyObject *kwargs
         velg_out = (fft_real *) np_vel->data;
     }
     if(OUT_FLAG == TRUE){
-        np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_flag, PyArray_LONG, 0);
+        np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_flag, NPY_LONG, 0);
         flag_out = (long *) np_flag->data;
     }
 
@@ -195,7 +195,7 @@ static PyObject *split_galaxies(PyObject *self, PyObject *args, PyObject *kwargs
     npy_intp dims_type[] = {(npy_intp) ng};
     PyArrayObject *np_type;
 
-    np_type = (PyArrayObject *) PyArray_ZEROS(1, dims_type, PyArray_INT, 0);
+    np_type = (PyArrayObject *) PyArray_ZEROS(1, dims_type, NPY_INT, 0);
     type = (int *) np_type->data;
 
     /*Compute the type of each galaxy*/

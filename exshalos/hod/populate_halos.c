@@ -57,7 +57,7 @@ fft_real Generate_Profile(fft_real rv, fft_real c, fft_real A, gsl_spline *splin
 void Interpolate_r_Eps(fft_real cmin, fft_real cmax, size_t nh, gsl_spline **spline_r, gsl_interp_accel *acc){
 	size_t i, j;
 	fft_real c, A, rtmp;
-	double x[NRs], I[NRs], Eps[Neps], r[Neps];
+	double x[NRs], Int[NRs], Eps[Neps], r[Neps];
 
 	/*Alloc the GSL stuff for interpolations*/
     gsl_spline *spline_I;
@@ -74,10 +74,10 @@ void Interpolate_r_Eps(fft_real cmin, fft_real cmax, size_t nh, gsl_spline **spl
 		c = pow(10.0, log10(cmin) + (log10(cmax) - log10(cmin))*i/(NCs - 1));
 
 		/*Compute the integral of the density profile and interpolate it*/
-		I[0] = 0.0;
+		Int[0] = 0.0;
 		for(j=1;j<NRs;j++)
-			I[j] = I[j-1] + (Profile(x[j], c)*x[j]*x[j] + Profile(x[j-1], c)*x[j-1]*x[j-1])*(x[j] - x[j-1])/2.0;
-		gsl_spline_init(spline_I, x, I, NRs);
+			Int[j] = Int[j-1] + (Profile(x[j], c)*x[j]*x[j] + Profile(x[j-1], c)*x[j-1]*x[j-1])*(x[j] - x[j-1])/2.0;
+		gsl_spline_init(spline_I, x, Int, NRs);
 		A = gsl_spline_eval(spline_I, R_MAX, acc);
 
 		/*Run over different values of epsilon*/

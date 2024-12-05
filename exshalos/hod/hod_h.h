@@ -1,13 +1,12 @@
 #ifndef HOD_H
 #define HOD_H
 
-#include <Python.h>
-#include <numpy/arrayobject.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <fftw3.h>
+
+#include <Python.h>
+#include <numpy/arrayobject.h>
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
@@ -18,21 +17,11 @@
 #define CONCAT(prefix, name) prefix ## name
 
 #ifdef DOUBLEPRECISION_FFTW
-	#define FFTW(x) CONCAT(fftw_, x)
-#else
-	#define FFTW(x) CONCAT(fftwf_, x)
-#endif
-
-#ifdef DOUBLEPRECISION_FFTW
   typedef double fft_real;
-  typedef fftw_complex fft_complex;
-  #define NP_OUT_TYPE PyArray_FLOAT64
-  #define H5_OUT_TYPE H5T_NATIVE_DOUBLE
+  #define NP_OUT_TYPE NPY_DOUBLE
 #else
   typedef float fft_real;
-  typedef fftwf_complex fft_complex;
-  #define NP_OUT_TYPE PyArray_FLOAT32
-  #define H5_OUT_TYPE H5T_NATIVE_FLOAT
+  #define NP_OUT_TYPE NPY_FLOAT 
 #endif
 
 #define FALSE 0
