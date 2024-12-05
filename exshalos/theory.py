@@ -372,7 +372,7 @@ def Xi_lm(r, k, P, Lambda = 0.7, l = 0, mk = 2, mr = 0, K = 11, alpha = 4.0, Rma
 	alpha: Value of alpha used by the Gaussian smooth | float
 	verbose: Output or do not output information in the c code | boolean
 	
-	return: The generalized correlation function xi_lm = \int dk k^mk r^mr P(k) j_l(kr) | 1D numpy array
+	return: The generalized correlation function xi_lm = int dk k^mk r^mr P(k) j_l(kr) | 1D numpy array
 	"""
 
 	x = exshalos.analytical.analytical.xilm_compute(r.astype("float64"), k.astype("float64"), P.astype("float64"), np.float64(Lambda), np.int32(l), np.int32(mk), np.int32(mr), np.int32(K), np.float64(alpha), np.float64(Rmax), np.int32(verbose))
