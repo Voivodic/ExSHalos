@@ -221,7 +221,6 @@ size_t Grow_Halos(size_t np, long *flag, fft_real *Sig_Grid, fft_real *delta, PE
     /*Number of bins used to storage the Lagrangian density profile*/
     Nbins = 1000;//(int) floor(pow(M_max/box.Mcell, 1.0/3.0));
 
-printf("ok123\n");
     /*Run over all peaks*/
     nh = 0;
     for(l=np-1;l>0;l--){
@@ -376,7 +375,6 @@ printf("ok123\n");
         }
     }
 
-printf("ok123\n");
     return nh;
 }
 
@@ -536,30 +534,30 @@ size_t Find_Halos(fft_real *delta, fft_real *K, fft_real *P, int Nk, long *flag,
 	*halos = (HALOS *)malloc(np*sizeof(HALOS));
 	if(out.VERBOSE == 1)
 		printf("There are %ld peaks\n", np);
-    printf("ok\n");
-	nh = Grow_Halos(np, flag, Sig_grid, delta, peaks, *halos);
-printf("ok\n");
-	free(peaks);
+
+    nh = Grow_Halos(np, flag, Sig_grid, delta, peaks, *halos);
+
+    free(peaks);
 	if(out.VERBOSE == 1)
 		printf("There are %ld halos\n", nh);
 	free(Sig_grid);
-
-	/*Compute the file with the number of grid cells in each possible sphere (used in the mass computation)*/
+	
+    /*Compute the file with the number of grid cells in each possible sphere (used in the mass computation)*/
 	//Compute_Spheres(Ncells);
 
 	/*Read the number of grid cells inside each possible sphere*/
     strcpy(spheresfile,  SPHERES_DIRC);
     strcat(spheresfile, "Spheres.dat");
 	Read_Spheres(&spheres, spheresfile);
-
+   
     /*Compute the mass of each halo*/
 	Compute_Mass(nh, spheres, *halos, acc, spline_I, spline_InvI);
 
-	/*Free some arrays*/
+    /*Free some arrays*/
 	free(spheres);
 	gsl_spline_free(spline_I);
 	gsl_spline_free(spline_InvI);
     gsl_interp_accel_free(acc);
-
+   
     return nh;
 }

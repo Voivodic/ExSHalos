@@ -73,7 +73,7 @@ extensions = [
         libraries=["m", "fftw3", "gsl", "gslcblas"] + fftw3_libs,
         extra_link_args=extra_link_args,
         extra_compile_args=extra_compile_args
-        + [f"-DSPHERES_DIRC='{os.getcwd()}/exshalos/exshalos/'"],
+            + ['-DSPHERES_DIRC="%s/exshalos/exshalos/"' %(os.getcwd())],
     ),
 
     # Module that populate the halos using a HOD
