@@ -22,4 +22,5 @@ ext-modules = [
     "exshalos.spectrum.spectrum",
     "exshalos.exshalos.exshalos",
     "exshalos.hod.hod",
+    "exshalos.finder.finder",
 ]

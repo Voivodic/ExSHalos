@@ -1,7 +1,7 @@
 import os
 
 import numpy
-from setuptools import Extension, setup, find_packages
+from setuptools import Extension, find_packages, setup
 
 # Set the paths to the include dirs
 include_dirs = [
@@ -20,6 +20,8 @@ extra_link_args = ["-lgomp"]
 # Set the extra compile argumments
 extra_compile_args = [
     "-g",
+    "-O3",
+    "-funroll-loops",
     "-Wall",
     "-fPIC",
     "-fopenmp",
@@ -54,7 +56,6 @@ extensions = [
         extra_link_args=extra_link_args,
         extra_compile_args=extra_compile_args,
     ),
-
     # Module that runs the ExSHalos
     Extension(
         "exshalos.exshalos.exshalos",
@@ -73,9 +74,8 @@ extensions = [
         libraries=["m", "fftw3", "gsl", "gslcblas"] + fftw3_libs,
         extra_link_args=extra_link_args,
         extra_compile_args=extra_compile_args
-            + ['-DSPHERES_DIRC="%s/exshalos/exshalos/"' %(os.getcwd())],
+        + ['-DSPHERES_DIRC="%s/exshalos/exshalos/"' % (os.getcwd())],
     ),
-
     # Module that populate the halos using a HOD
     Extension(
         "exshalos.hod.hod",
@@ -90,7 +90,21 @@ extensions = [
         library_dirs=library_dirs,
         libraries=["m", "gsl", "gslcblas"],
         extra_link_args=extra_link_args,
-        extra_compile_args=extra_compile_args
+        extra_compile_args=extra_compile_args,
+    ),
+    # Module that find voids and halos
+    Extension(
+        "exshalos.finder.finder",
+        sources=[
+            "exshalos/finder/finder_h.cpp",
+            "exshalos/finder/finder.cpp",
+        ],
+        language="c++",
+        include_dirs=include_dirs,
+        library_dirs=library_dirs,
+        libraries=["m"],
+        extra_link_args=extra_link_args,
+        extra_compile_args=extra_compile_args,
     ),
 ]
 
@@ -99,12 +113,13 @@ setup(
     name="exshalos",
     version="0.1.0",
     packages=find_packages(),
-    #packages=[
+    # packages=[
     #    "exshalos/",
     #    "exshalos/spectrum/",
     #    "exshalos/exshalos/",
     #    "exshalos/hod/",
-    #],
+    #    "exshalos/finder/",
+    # ],
     ext_modules=extensions,
     install_requires=[
         "numpy",
