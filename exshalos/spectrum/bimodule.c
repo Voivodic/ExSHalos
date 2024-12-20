@@ -340,6 +340,9 @@ int Bi_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_r
         count_pk ++;
     }/*Close the loop in the first field*/
 
+    if(verbose == TRUE)
+        printf("%d bispectra computed!\n", count_tri);
+
     /*Free the FFTW3 arrays*/
     for(i=0;i<ntype;i++){
         FFTW(free)(in_Bm[i]);

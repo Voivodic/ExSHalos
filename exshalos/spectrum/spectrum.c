@@ -459,7 +459,7 @@ static PyObject *tri_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     IT = (long double *) malloc(Nsq*sizeof(long double));  
 
     /*Computes the bispectrum*/
-    Nsq = Tri_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, K1, K2, T, Tu, IT, KP, P, IP);
+    Nsq = Tri_Spectrum(grid, nd, L, ntype, window, R, interlacing, Nk, k_min, k_max, K1, K2, T, Tu, IT, KP, P, IP, verbose);
 
     /*Prepare the PyObject arrays for the outputs*/
     npy_intp dims_T[] = {(npy_intp) NTs, (npy_intp) Nsq};

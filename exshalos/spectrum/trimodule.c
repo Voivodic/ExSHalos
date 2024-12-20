@@ -1,7 +1,7 @@
 #include "trimodule.h"
 
 /*Compute all the cross trispectra for the covariance*/
-int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_real R, int interlacing, int Nk, fft_real k_min, fft_real k_max, long double *K1, long double *K2, long double **T, long double **Tu, long double *IT, long double *KP, long double **P, long double *IP){
+int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_real R, int interlacing, int Nk, fft_real k_min, fft_real k_max, long double *K1, long double *K2, long double **T, long double **Tu, long double *IT, long double *KP, long double **P, long double *IP, int verbose){
     int i, j, k, l, a, b, f1, f2, f3, f4, count_sq, count_pk, ind, NPs, NTs, countk1, countk2;
     size_t tmp, ng;
     fft_real dk, kmod, kx, ky, kz, kn = 2*M_PI/L, km1, km2;
@@ -58,6 +58,9 @@ int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_
     /**************************/
     /*Compute the density grids for the first bin of k*/
     for(a=0;a<(int) Nk;a++){
+        if(verbose == TRUE)
+            printf("a = %d of %d. %d Trispectra computed so far\n", a+1, Nk, count_sq);
+
         km1 = 0.0;
         countk1 = 0;
         #pragma omp parallel for private(i, j, k, l, kx, ky, kz, kmod, ind, tmp) reduction(+:km1,countk1)
@@ -239,6 +242,9 @@ int Tri_Spectrum(fft_real *grid, int nd, fft_real L, int ntype, int window, fft_
         KP[count_pk] = (long double) km1;
         count_pk ++;
     }/*Close the loop in the first field*/
+
+    if(verbose == TRUE)
+        printf("%d Trispectra computed!\n", count_sq);
 
     /*Free the FFTW3 arrays*/
     for(i=0;i<ntype;i++){
