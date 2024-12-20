@@ -240,11 +240,12 @@ def Fit_HOD(k, P, nbar = None, posh = None, Mh = None, velh = None, Ch = None, n
 
     return x
 
-#Compute the Lagrangian operators up to a given order
-def Compute_Lagrangian_Operator(grid, order = 2, Galileons = False, Lc = 2.0, verbose = False, nthreads = 1):
+#Compute the higher order local operators up to a given order
+def Compute_High_Order_Operators(grid, order = 2, nl_order = 0, Galileons = False, Renormalized = False, Lc = 2.0, verbose = False, nthreads = 1):
     """
     grid: Lagrangian density grid | 3D array (ndx, ndy, ndz)
     order: Order to be used to compute the operators | int
+    nl_order: Order to be used to compute the non local operators | int
     Galileons: Use the galileons operators or the ones written in terms of s_ij? | bollean
     Lc: Size of each cell in Mpc/h | float
     verbose: Output or do not output information in the c code | boolean
@@ -273,7 +274,7 @@ def Compute_Lagrangian_Operator(grid, order = 2, Galileons = False, Lc = 2.0, ve
         params = params.astype("float64")
         Lc = np.float64(Lc)  
 
-    x = exshalos.exshalos.exshalos.operators_compute(grid, np.int32(order), params, Lc, np.int32(nthreads), np.int32(verbose))
+    x = exshalos.exshalos.exshalos.operators_compute(grid, np.int32(order), np.int32(nl_order), params, np.int32(Renormalized), Lc, np.int32(nthreads), np.int32(verbose))
 
     return x 
 
