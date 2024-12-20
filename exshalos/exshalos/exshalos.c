@@ -117,12 +117,12 @@ static PyObject *density_grid_compute(PyObject *self, PyObject *args, PyObject *
 /*Compute all possible scalar operator up to a given order*/
 static PyObject *operators_compute(PyObject *self, PyObject *args, PyObject *kwargs){
     size_t ind;
-    int ndx, ndy, ndz, nthreads, verbose, order;
+    int ndx, ndy, ndz, nthreads, verbose, order, nl_order, renormalized;
     fft_real Lc, *delta, *params, *tidal;
-    fft_real *delta2, *K2, *delta3, *K3, *deltaK2;
+    fft_real *delta2, *K2, *delta3, *K3, *deltaK2, *laplacian;
 
 	/*Define the list of parameters*/
-	static char *kwlist[] = {"delta", "Order", "Params", "Lc", "nthreads", "verbose", NULL};
+	static char *kwlist[] = {"delta", "Order", "NL_Order", "Params", "Renormalized", "Lc", "nthreads", "verbose", NULL};
 	import_array();
 
 	/*Define the pyobject with the 3D position of the tracers*/
@@ -130,10 +130,10 @@ static PyObject *operators_compute(PyObject *self, PyObject *args, PyObject *kwa
 
 	/*Read the input arguments*/
 	#ifdef DOUBLEPRECISION_FFTW
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OiOdii", kwlist, &grid_array, &order, &params_array, &Lc, &nthreads, &verbose))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OiiOidii", kwlist, &grid_array, &order, &nl_order, &params_array, &renormalized, &Lc, &nthreads, &verbose))
 			return NULL;
 	#else
-		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OiOfii", kwlist, &grid_array, &order, &params_array, &Lc, &nthreads, &verbose))
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OiiOifii", kwlist, &grid_array, &order, &nl_order, &params_array, &renormalized, &Lc, &nthreads, &verbose))
 			return NULL;
 	#endif
 
@@ -172,11 +172,11 @@ static PyObject *operators_compute(PyObject *self, PyObject *args, PyObject *kwa
         K2 = (fft_real *) np_K2->data;
 
         /*delta^2*/
-        Compute_Den_to_n(delta, delta2, 2);
+        Compute_Den_to_n(delta, delta2, 2, renormalized);
         PyDict_SetItemString(dict, "delta2", PyArray_Return(np_delta2));
 
         /*K^2*/
-        Compute_K2(delta, NULL, tidal, K2, params[0]);
+        Compute_K2(delta, NULL, tidal, K2, params[0], renormalized);
         PyDict_SetItemString(dict, "K2", PyArray_Return(np_K2));
     }
 
@@ -192,7 +192,7 @@ static PyObject *operators_compute(PyObject *self, PyObject *args, PyObject *kwa
         deltaK2 = (fft_real *) np_deltaK2->data;
 
         /*delta^3*/
-        Compute_Den_to_n(delta, delta3, 3);
+        Compute_Den_to_n(delta, delta3, 3, renormalized);
         PyDict_SetItemString(dict, "delta3", PyArray_Return(np_delta3));
 
         /*K^3*/
@@ -204,6 +204,18 @@ static PyObject *operators_compute(PyObject *self, PyObject *args, PyObject *kwa
             deltaK2[ind] = delta[ind]*K2[ind];
         PyDict_SetItemString(dict, "deltaK2", PyArray_Return(np_deltaK2));
     }   
+
+    /*Alloc and compute the non local second order operators*/
+    if(nl_order >= 2){
+        PyArrayObject *np_laplacian;
+        np_laplacian = (PyArrayObject *) PyArray_ZEROS(3, dims_grid, NP_OUT_TYPE, 0);
+
+        laplacian = (fft_real *) np_laplacian->data;
+        
+        /*Laplacian delta*/
+        Compute_Laplacian_Delta(delta, NULL, laplacian);
+        PyDict_SetItemString(dict, "laplacian", PyArray_Return(np_laplacian));
+    }
 
     /*Free the tidal array*/
     free(tidal);
