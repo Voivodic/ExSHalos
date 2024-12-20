@@ -22,10 +22,13 @@ void Save_Den(char *denfile, fft_real *delta);
 void Compute_MS(fft_real *delta);
 
 /*Compute the density field to a given power*/
-void Compute_Den_to_n(fft_real *delta, fft_real *delta_n, int n);
+void Compute_Den_to_n(fft_real *delta, fft_real *delta_n, int n, int renormaliormalized);
 
 /*Compute the potential field of a given density field*/
 void Compute_Phi(fft_real *delta, fft_complex *deltak, fft_real *phi);
+
+/*Compute the laplacian of the dencity field*/
+void Compute_Laplacian_Delta(fft_real *delta, fft_complex *deltak, fft_real *laplacian);
 
 /*Compute the tidal field*/
 void Compute_Tidal(fft_real *delta, fft_complex *deltak, fft_real *tidal);
@@ -34,7 +37,7 @@ void Compute_Tidal(fft_real *delta, fft_complex *deltak, fft_real *tidal);
 int Get_IndK(int i, int j);
 
 /*Compute K2 given the density field or the tidal field and the subtraction of the delta field (given by a):K2 =  K^2 - a*delta^2*/
-void Compute_K2(fft_real *delta, fft_complex *deltak, fft_real *tidal, fft_real *K2, fft_real a);
+void Compute_K2(fft_real *delta, fft_complex *deltak, fft_real *tidal, fft_real *K2, fft_real a, int renormalized);
 
 /*Compute K3 given the density field or the tidal field*/
 void Compute_K3(fft_real *delta, fft_complex *deltak, fft_real *tidal, fft_real *K3, fft_real a, fft_real b);

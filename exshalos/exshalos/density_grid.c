@@ -275,23 +275,45 @@ void Compute_MS(fft_real *delta){
 }
 
 /*Compute the density field to a given power*/
-void Compute_Den_to_n(fft_real *delta, fft_real *delta_n, int n){
+void Compute_Den_to_n(fft_real *delta, fft_real *delta_n, int n, int renormalized){
     size_t i;
+    double sigma2;
 
+    /*Compute the non-renormalized delta^n*/
     for(i=0;i<box.ng;i++)
         delta_n[i] = pow(delta[i], n);
+
+    /*Renormalize the operator*/
+    if(renormalized == TRUE){
+        /*Compute the variance of the field*/
+        sigma2 = 0;
+        for(i=0;i<box.ng;i++)
+            sigma2 += (double) delta[i]*delta[i];
+        sigma2 = sigma2/((double)box.ng);
+
+        /*Renormalize delta^2*/
+        if(n == 2){
+            for(i=0;i<box.ng;i++)
+                delta_n[i] -= sigma2;
+        }
+
+        /*Renoramalize delta^3*/
+        if(n == 3){
+            for(i=0;i<box.ng;i++)
+                delta_n[i] -= 3.0*sigma2*delta[i];
+        }
+    }
 }
 
 /*Compute the potential field of a given density field*/
 void Compute_Phi(fft_real *delta, fft_complex *deltak, fft_real *phi){
     int i, j, k, ink;
     size_t ind;
-    fft_real kx, ky, kz, kmod, fact;
+    fft_real kx, ky, kz, k2;
     FFTW(plan) p1;
 
     /*Create and compute deltak if it was not given*/
     if(deltak == NULL){
-        fft_complex *deltak;
         ink = FALSE;
 
         /*Alloc the array for the density field in Fourier space*/
@@ -317,19 +339,12 @@ void Compute_Phi(fft_real *delta, fft_complex *deltak, fft_real *phi){
 				kz = k*box.kl[2];
 				if(k == box.nd[2]/2) kz = -(fft_real)box.nd[2]/2.0*box.kl[2];
 
-				kmod = sqrt(pow(kx, 2.0) + pow(ky, 2.0) + pow(kz, 2.0));
+				k2 = pow(kx, 2.0) + pow(ky, 2.0) + pow(kz, 2.0);
 
 				ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nz2 + (size_t)k;
-				if(kmod != 0.0){
-					fact = -pow(kmod, 2.0);
 					
-					deltak[ind][0] = deltak[ind][0]/fact;
-					deltak[ind][1] = deltak[ind][1]/fact;
-				}
-				else{
-					deltak[ind][0] = 0.0;
-					deltak[ind][1] = 0.0;
-				}
+                deltak[ind][0] = -deltak[ind][0]/k2;
+                deltak[ind][1] = -deltak[ind][1]/k2;
 			}
 		}
 	}
@@ -345,6 +360,64 @@ void Compute_Phi(fft_real *delta, fft_complex *deltak, fft_real *phi){
     #pragma omp parallel for private(ind) 
     for(ind=0;ind<box.ng;ind++)
         phi[ind] = box.Normx*phi[ind];
+}
+
+/*Compute the laplacian of the dencity field*/
+void Compute_Laplacian_Delta(fft_real *delta, fft_complex *deltak, fft_real *laplacian){
+    int i, j, k, ink;
+    size_t ind;
+    fft_real kx, ky, kz, k2;
+    FFTW(plan) p1;
+ 
+    /*Create and compute deltak if it was not given*/
+    if(deltak == NULL){
+        ink = FALSE;
+
+        /*Alloc the array for the density field in Fourier space*/
+        deltak = (fft_complex *) FFTW(malloc)((size_t)box.nd[0]*(size_t)box.nd[1]*(size_t)box.nz2*sizeof(fft_complex));
+        check_memory(deltak, "deltak")
+
+        /*Compute the density grid in Fourier space*/
+        Compute_Denk(delta, deltak);
+    }
+    else
+        ink = TRUE;
+
+    /*Compute the first order potential in Fourier space*/
+	for(i=0;i<box.nd[0];i++){
+		if(2*i<box.nd[0]) kx = i*box.kl[0];
+		else kx = (i-box.nd[0])*box.kl[0];
+	
+		for(j=0;j<box.nd[1];j++){
+			if(2*j<box.nd[1]) ky = j*box.kl[1];
+			else ky = (j-box.nd[1])*box.kl[1];
+	
+			for(k=0;k<box.nz2;k++){
+				kz = k*box.kl[2];
+				if(k == box.nd[2]/2) kz = -(fft_real)box.nd[2]/2.0*box.kl[2];
+
+				k2 = pow(kx, 2.0) + pow(ky, 2.0) + pow(kz, 2.0);
+
+				ind = (size_t)(i*box.nd[1] + j)*(size_t)box.nz2 + (size_t)k;
+                
+                deltak[ind][0] = -deltak[ind][0]*k2;
+                deltak[ind][1] = -deltak[ind][1]*k2;
+             }
+		}
+	}
+
+    /*Compute the potential in real space*/
+    p1 = FFTW(plan_dft_c2r_3d)(box.nd[0], box.nd[1], box.nd[2], deltak, laplacian, FFTW_ESTIMATE); 
+	FFTW(execute)(p1);
+   
+    FFTW(destroy_plan)(p1);
+    if(ink == FALSE)
+        FFTW(free)(deltak);
+   
+    /*Normalize the laplacian*/
+    #pragma omp parallel for private(ind) 
+    for(ind=0;ind<box.ng;ind++)
+        laplacian[ind] = box.Normx*laplacian[ind];
 }
 
 /*Compute the tidal field*/
@@ -448,7 +521,7 @@ int Get_IndK(int i, int j){
 }
 
 /*Compute K2 given the density field or the tidal field and the subtraction of the delta field (given by a):K2 =  K^2 - a*delta^2*/
-void Compute_K2(fft_real *delta, fft_complex *deltak, fft_real *tidal, fft_real *K2, fft_real a){
+void Compute_K2(fft_real *delta, fft_complex *deltak, fft_real *tidal, fft_real *K2, fft_real a, int renormalized){
     size_t ind;
     int intd;
     fft_real trace, K2_tmp;
@@ -473,6 +546,17 @@ void Compute_K2(fft_real *delta, fft_complex *deltak, fft_real *tidal, fft_real 
         K2_tmp = pow(tidal[0*box.ng + ind], 2.0) + pow(tidal[3*box.ng + ind], 2.0) + pow(tidal[5*box.ng + ind], 2.0) + 2.0*(pow(tidal[1*box.ng + ind], 2.0) + pow(tidal[2*box.ng + ind], 2.0) + pow(tidal[4*box.ng + ind], 2.0));
 
         K2[ind] = K2_tmp - a*pow(trace, 2.0);
+    }
+
+    /*Renormalize K2*/
+    if(renormalized == TRUE){
+        double sigma2 = 0;
+
+        for(ind=0;ind<box.ng;ind++)
+            sigma2 += pow(K2[ind], 2);
+
+        for(ind=0;ind<box.ng;ind++) 
+            K2[ind] -= (fft_real) sigma2; //It should be equal K2 = K2 - 2/3*sigma^2
     }
 
     /*Free the array with the tidal field if it was not give*/
