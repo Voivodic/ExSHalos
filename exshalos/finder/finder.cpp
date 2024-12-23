@@ -1,7 +1,7 @@
 #include <stdio.h>
 #define FINDER_MODULE
 
-#include "finder_h.hpp"
+#include "finder_h.h"
 
 /*This declares the compute function*/
 static PyObject *finder_check_precision(PyObject *self, PyObject *args);

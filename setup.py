@@ -96,7 +96,7 @@ extensions = [
     Extension(
         "exshalos.finder.finder",
         sources=[
-            "exshalos/finder/finder_h.cpp",
+            "exshalos/finder/finder_h.c",
             "exshalos/finder/finder.cpp",
         ],
         language="c++",
