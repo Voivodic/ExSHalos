@@ -200,8 +200,15 @@ static PyObject *operators_compute(PyObject *self, PyObject *args, PyObject *kwa
         PyDict_SetItemString(dict, "K3", PyArray_Return(np_K3));
 
         /*delta*K^2*/
-        for(ind=0;ind<box.ng;ind++)
+        double sigma3 = 0.0;
+        for(ind=0;ind<box.ng;ind++){
             deltaK2[ind] = delta[ind]*K2[ind];
+            sigma3 += deltaK2[ind];
+        }
+        sigma3 /= (double) box.ng;
+        
+        for(ind=0;ind<box.ng;ind++)
+            deltaK2[ind] -= sigma3;
         PyDict_SetItemString(dict, "deltaK2", PyArray_Return(np_deltaK2));
     }   
 

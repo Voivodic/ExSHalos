@@ -299,8 +299,15 @@ void Compute_Den_to_n(fft_real *delta, fft_real *delta_n, int n, int renormalize
 
         /*Renoramalize delta^3*/
         if(n == 3){
+            /*Set the mean to zero*/
+            double sigma3 = 0.0;
+
             for(i=0;i<box.ng;i++)
-                delta_n[i] -= 3.0*sigma2*delta[i];
+                sigma3 += delta_n[i];
+            sigma3 = sigma3/((double)box.ng);
+
+            for(i=0;i<box.ng;i++)
+                delta_n[i] -= 3.0*sigma2*delta[i] + sigma3;
         }
     }
 }
@@ -553,7 +560,8 @@ void Compute_K2(fft_real *delta, fft_complex *deltak, fft_real *tidal, fft_real 
         double sigma2 = 0;
 
         for(ind=0;ind<box.ng;ind++)
-            sigma2 += pow(K2[ind], 2);
+            sigma2 += K2[ind];
+        sigma2 = sigma2/((double) box.ng);
 
         for(ind=0;ind<box.ng;ind++) 
             K2[ind] -= (fft_real) sigma2; //It should be equal K2 = K2 - 2/3*sigma^2
@@ -593,7 +601,17 @@ void Compute_K3(fft_real *delta, fft_complex *deltak, fft_real *tidal, fft_real 
         K3[ind] = K3_tmp - a*K2*trace + b*pow(trace, 3.0);
     }
 
-    /*Free the array with the tidal field if it was not give*/
+    /*Set the mean to zero*/
+    double sigma3 = 0;
+
+    for(ind=0;ind<box.ng;ind++)
+        sigma3 += K3[ind];
+    sigma3 = sigma3/((double) box.ng);
+
+    for(ind=0;ind<box.ng;ind++) 
+        K3[ind] -= (fft_real) sigma3; //It should be equal K3 = K3 - 3/5*sigma^3
+
+    /*Free the array with the tidal field if it was not given*/
     if(intd == FALSE)
         free(tidal);
 }
