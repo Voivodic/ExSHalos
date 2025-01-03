@@ -97,14 +97,15 @@ extensions = [
         "exshalos.finder.finder",
         sources=[
             "exshalos/finder/finder_h.c",
-            "exshalos/finder/finder.cpp",
+            "exshalos/finder/finder.c",
+            "exshalos/finder/voronoi.cpp",
         ],
         language="c++",
         include_dirs=include_dirs,
         library_dirs=library_dirs,
-        libraries=["m"],
-        extra_link_args=extra_link_args,
-        extra_compile_args=extra_compile_args,
+        libraries=[],
+        extra_link_args=extra_link_args + ["-lstdc++"],
+        extra_compile_args=extra_compile_args + ["-std=c++11"],
     ),
 ]
 

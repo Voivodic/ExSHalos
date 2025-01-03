@@ -2,6 +2,7 @@
 from .spectrum.spectrum import *
 from .exshalos.exshalos import *
 from .hod.hod import *
+from .finder.finder import *
 # from .sampler.sampler import *
 # from .analytical.analytical import *
 
