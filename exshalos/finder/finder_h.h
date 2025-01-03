@@ -19,7 +19,7 @@
 #endif
 
 #ifdef DOUBLEPRECISION_FFTW
-typedef double fft_real;
+    typedef double fft_real;
 #define NP_OUT_TYPE NPY_DOUBLE
 #else
 typedef float fft_real;
@@ -38,7 +38,6 @@ typedef float fft_real;
 
 /*Define some hard coded numbers*/
 #define PART_ALLOC_PER_BLOCK 8
-#define RATIO_BLOCKS 2
 #define Lc_MAX	1.0e+2  //Maximum size of a cell
 #define Mc_MIN	1.0e+5  //Minimum mass of a cell
 
