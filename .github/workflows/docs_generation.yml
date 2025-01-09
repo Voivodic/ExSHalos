@@ -36,4 +36,6 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh-pages
         force: true
+        publish_branch: gh-pages
+        force: true
         publish_dir: ./docs/_build/html  # Adjust this if your build directory is different
