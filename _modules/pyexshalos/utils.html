@@ -1,0 +1,1302 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyexshalos.utils &#8212; ExSHalos 0.1.0</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=a3416100" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=a1637f0b"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyexshalos/utils';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ExSHalos 0.1.0</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    ExSHalos
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../pyexshalos.html">pyExSHalos</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/mock.html">Mock</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/simulation.html">Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/theory.html">Theory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/utils.html">Utils</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/Voivodic/ExSHalos" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for pyexshalos.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+
+<span class="c1"># Compute the gaussian density grid given the power spectrum</span>
+<div class="viewcode-block" id="Generate_Density_Grid">
+<a class="viewcode-back" href="../../modules/utils.html#pyexshalos.utils.Generate_Density_Grid">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Generate_Density_Grid</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">P</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">R_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100000.0</span><span class="p">,</span>
+    <span class="n">nd</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span>
+    <span class="n">ndx</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ndy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ndz</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">outk</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">12345</span><span class="p">,</span>
+    <span class="n">fixed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">phase</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">k_smooth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100000.0</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">nthreads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the Gaussian density grid given the power spectrum.</span>
+
+<span class="sd">    :param k: Wavenumbers of the power spectrum.</span>
+<span class="sd">    :type k: numpy.ndarray</span>
+<span class="sd">    :param P: Power spectrum.</span>
+<span class="sd">    :type P: numpy.ndarray</span>
+<span class="sd">    :param R_max: Maximum size used to compute the correlation function in Mpc/h. Fiducial value: 100000.0</span>
+<span class="sd">    :type R_max: float</span>
+<span class="sd">    :param nd: Number of cells per dimension. Fiducial value: 256</span>
+<span class="sd">    :type nd: int</span>
+<span class="sd">    :param ndx: Number of cells in the x direction. Fiducial value: None</span>
+<span class="sd">    :type ndx: Optional[int]</span>
+<span class="sd">    :param ndy: Number of cells in the y direction. Fiducial value: None</span>
+<span class="sd">    :type ndy: Optional[int]</span>
+<span class="sd">    :param ndz: Number of cells in the z direction. Fiducial value: None</span>
+<span class="sd">    :type ndz: Optional[int]</span>
+<span class="sd">    :param Lc: Size of each cell in Mpc/h. Fiducial value: 2.0</span>
+<span class="sd">    :type Lc: float</span>
+<span class="sd">    :param outk: Whether to return the density field in Fourier space. Fiducial value: False</span>
+<span class="sd">    :type outk: bool</span>
+<span class="sd">    :param seed: Seed used to generate the random numbers. Fiducial value: 12345</span>
+<span class="sd">    :type seed: int</span>
+<span class="sd">    :param fixed: Whether to use fixed amplitudes. Fiducial value: False</span>
+<span class="sd">    :type fixed: bool</span>
+<span class="sd">    :param phase: Phase of the density field. Fiducial value: 0.0</span>
+<span class="sd">    :type phase: float</span>
+<span class="sd">    :param k_smooth: Smoothing scale in k-space. Fiducial value: 100000.0</span>
+<span class="sd">    :type k_smooth: float</span>
+<span class="sd">    :param verbose: Whether to output information in the C code. Fiducial value: False</span>
+<span class="sd">    :type verbose: bool</span>
+<span class="sd">    :param nthreads: Number of threads used by OpenMP. Fiducial value: 1</span>
+<span class="sd">    :type nthreads: int</span>
+
+<span class="sd">    :return: The 3D density grid in real space (and in Fourier space if outk is True).</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check the precision and convert the arrays</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_precision</span>
+
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">check_precision</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">precision</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">R_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">R_max</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+        <span class="n">k_smooth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">k_smooth</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+        <span class="n">R_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">R_max</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+        <span class="n">k_smooth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">k_smooth</span><span class="p">)</span>
+
+    <span class="c1"># Set the number of divisions per dimension</span>
+    <span class="k">if</span> <span class="n">ndx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ndx</span> <span class="o">=</span> <span class="n">nd</span>
+    <span class="k">if</span> <span class="n">ndy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ndy</span> <span class="o">=</span> <span class="n">nd</span>
+    <span class="k">if</span> <span class="n">ndz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ndz</span> <span class="o">=</span> <span class="n">nd</span>
+
+    <span class="c1"># Call the C function to compute the density field</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">density_grid_compute</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">density_grid_compute</span><span class="p">(</span>
+        <span class="n">k</span><span class="p">,</span>
+        <span class="n">P</span><span class="p">,</span>
+        <span class="n">R_max</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">ndx</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">ndy</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">ndz</span><span class="p">),</span>
+        <span class="n">Lc</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">outk</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">seed</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">fixed</span><span class="p">),</span>
+        <span class="n">phase</span><span class="p">,</span>
+        <span class="n">k_smooth</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">verbose</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">nthreads</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+
+<span class="c1"># Generate a halo catalogue (in Lagrangian space) given an initial density grid</span>
+<div class="viewcode-block" id="Find_Halos_from_Grid">
+<a class="viewcode-back" href="../../modules/utils.html#pyexshalos.utils.Find_Halos_from_Grid">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Find_Halos_from_Grid</span><span class="p">(</span>
+    <span class="n">grid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">P</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">Om0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.31</span><span class="p">,</span>
+    <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">delta_c</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">Nmin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">OUT_FLAG</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a halo catalogue (in Lagrangian space) given an initial density grid.</span>
+
+<span class="sd">    :param grid: Density grid where the halos will be found.</span>
+<span class="sd">    :type grid: numpy.ndarray</span>
+<span class="sd">    :param k: Wavenumbers of the power spectrum.</span>
+<span class="sd">    :type k: numpy.ndarray</span>
+<span class="sd">    :param P: Power spectrum.</span>
+<span class="sd">    :type P: numpy.ndarray</span>
+<span class="sd">    :param Lc: Size of each cell in Mpc/h. Fiducial value: 2.0</span>
+<span class="sd">    :type Lc: float</span>
+<span class="sd">    :param Om0: Value of the matter overdensity today. Fiducial value: 0.31</span>
+<span class="sd">    :type Om0: float</span>
+<span class="sd">    :param z: Redshift of the density grid and final halo catalogue. Fiducial value: 0.0</span>
+<span class="sd">    :type z: float</span>
+<span class="sd">    :param delta_c: Critical density of the halo formation linearly extrapolated to z. Fiducial value: None</span>
+<span class="sd">    :type delta_c: Optional[float]</span>
+<span class="sd">    :param Nmin: Minimum number of particles in each halo. Fiducial value: 10</span>
+<span class="sd">    :type Nmin: int</span>
+<span class="sd">    :param a: Parameter a of the ellipsoidal barrier. Fiducial value: 1.0</span>
+<span class="sd">    :type a: float</span>
+<span class="sd">    :param beta: Parameter beta of the ellipsoidal barrier. Fiducial value: 0.0</span>
+<span class="sd">    :type beta: float</span>
+<span class="sd">    :param alpha: Parameter alpha of the ellipsoidal barrier. Fiducial value: 0.0</span>
+<span class="sd">    :type alpha: float</span>
+<span class="sd">    :param OUT_FLAG: Whether to output flag with the information if a cell belongs to a halo. Fiducial value: False</span>
+<span class="sd">    :type OUT_FLAG: bool</span>
+<span class="sd">    :param verbose: Whether to output information in the C code. Fiducial value: False</span>
+<span class="sd">    :type verbose: bool</span>
+
+<span class="sd">    :return: Dictionay with keys:</span>
+<span class="sd">             - &quot;posh&quot;: Ndarray with halo positions</span>
+<span class="sd">             - &quot;Mh&quot;: Ndarray with halo masses</span>
+<span class="sd">             - &quot;flag&quot;: Ndarray with flags for each cell</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check the precision and convert the arrays</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_precision</span>
+
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">check_precision</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">precision</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">delta_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">delta_c</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">delta_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">delta_c</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+
+    <span class="c1"># Call the C function to compute the halo catalogue</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_halos</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">find_halos</span><span class="p">(</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">k</span><span class="p">,</span>
+        <span class="n">P</span><span class="p">,</span>
+        <span class="n">Lc</span><span class="p">,</span>
+        <span class="n">Om0</span><span class="p">,</span>
+        <span class="n">z</span><span class="p">,</span>
+        <span class="n">delta_c</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">Nmin</span><span class="p">),</span>
+        <span class="n">a</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">OUT_FLAG</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
+        <span class="n">verbose</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+
+<span class="c1"># Compute the positions and velocities of particles given a grid using LPT</span>
+<div class="viewcode-block" id="Displace_LPT">
+<a class="viewcode-back" href="../../modules/utils.html#pyexshalos.utils.Displace_LPT">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Displace_LPT</span><span class="p">(</span>
+    <span class="n">grid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">Om0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.31</span><span class="p">,</span>
+    <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">k_smooth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10000.0</span><span class="p">,</span>
+    <span class="n">DO_2LPT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">OUT_VEL</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">Input_k</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">OUT_POS</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the displacement of particles using Lagrangian Perturbation Theory (LPT).</span>
+
+<span class="sd">    :param grid: Density grid where the halos will be found.</span>
+<span class="sd">    :type grid: numpy.ndarray</span>
+<span class="sd">    :param Lc: Size of each cell in Mpc/h. Fiducial value: 2.0</span>
+<span class="sd">    :type Lc: float</span>
+<span class="sd">    :param Om0: Value of the matter overdensity today. Fiducial value: 0.31</span>
+<span class="sd">    :type Om0: float</span>
+<span class="sd">    :param z: Redshift of the density grid and final halo catalogue. Fiducial value: 0.0</span>
+<span class="sd">    :type z: float</span>
+<span class="sd">    :param k_smooth: Scale used to smooth the displacements. Fiducial value: 10000.0</span>
+<span class="sd">    :type k_smooth: float</span>
+<span class="sd">    :param DO_2LPT: Whether to use the second-order LPT. Fiducial value: False</span>
+<span class="sd">    :type DO_2LPT: bool</span>
+<span class="sd">    :param OUT_VEL: Whether to output the velocities of the particles. Fiducial value: False</span>
+<span class="sd">    :type OUT_VEL: bool</span>
+<span class="sd">    :param Input_k: Whether the input density grid is in real space (or Fourier). Fiducial value: False</span>
+<span class="sd">    :type Input_k: bool</span>
+<span class="sd">    :param OUT_POS: Whether to output the positions or just the displacements. Fiducial value: True</span>
+<span class="sd">    :type OUT_POS: bool</span>
+<span class="sd">    :param verbose: Whether to output information in the C code. Fiducial value: False</span>
+<span class="sd">    :type verbose: bool</span>
+
+<span class="sd">    :return: Dictionary with keys:</span>
+<span class="sd">             - &quot;pos&quot;: Ndarray with particle positions (displacements)</span>
+<span class="sd">             - &quot;vel&quot;: Ndarray with particle velocities (if OUT_VEL is True)</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check the precision and convert the arrays</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_precision</span>
+
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">check_precision</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">precision</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">k_smooth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">k_smooth</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">k_smooth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">k_smooth</span><span class="p">)</span>
+
+    <span class="c1"># Call the C function to compute the displacements using LPT</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">lpt_compute</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">lpt_compute</span><span class="p">(</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">Lc</span><span class="p">,</span>
+        <span class="n">Om0</span><span class="p">,</span>
+        <span class="n">z</span><span class="p">,</span>
+        <span class="n">k_smooth</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">DO_2LPT</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">OUT_VEL</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">Input_k</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">OUT_POS</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">verbose</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+
+<span class="c1"># Fit the parameters of the barrier given a mass function</span>
+<div class="viewcode-block" id="Fit_Barrier">
+<a class="viewcode-back" href="../../modules/utils.html#pyexshalos.utils.Fit_Barrier">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Fit_Barrier</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">P</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">M</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">dndlnM</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">dn_err</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">grid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">R_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100000.0</span><span class="p">,</span>
+    <span class="n">Mmin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">Mmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">Nm</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
+    <span class="n">nd</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">Om0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.31</span><span class="p">,</span>
+    <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">delta_c</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">Nmin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">12345</span><span class="p">,</span>
+    <span class="n">x0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">nthreads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">Max_inter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">tol</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit the parameters of the barrier given a mass function.</span>
+
+<span class="sd">    :param k: Wavenumbers of the power spectrum</span>
+<span class="sd">    :type k: numpy.ndarray</span>
+<span class="sd">    :param P: Power spectrum</span>
+<span class="sd">    :type P: numpy.ndarray</span>
+<span class="sd">    :param M: Mass of the mass function to be approximated.</span>
+<span class="sd">    :type M: numpy.ndarray</span>
+<span class="sd">    :param dndlnM: Mass function to be approximated.</span>
+<span class="sd">    :type dndlnM: numpy.ndarray</span>
+<span class="sd">    :param dn_err: Errors on the mass function. Fiducial value: None</span>
+<span class="sd">    :type dn_err: Optional[numpy.ndarray]</span>
+<span class="sd">    :param grid: Pre-computed Gaussian density grid. Fiducial value: None</span>
+<span class="sd">    :type grid: Optional[numpy.ndarray]</span>
+<span class="sd">    :param R_max: Maximum size used to compute the correlation function in Mpc/h. Fiducial value: 100000.0</span>
+<span class="sd">    :type R_max: float</span>
+<span class="sd">    :param Mmin: Minimum mass used to construct the mass bins. Fiducial value: None</span>
+<span class="sd">    :type Mmin: Optional[float]</span>
+<span class="sd">    :param Mmax: Maximum mass used to construct the mass bins. Fiducial value: None</span>
+<span class="sd">    :type Mmax: Optional[float]</span>
+<span class="sd">    :param Nm: Number of mass bins. Fiducial value: 25</span>
+<span class="sd">    :type Nm: int</span>
+<span class="sd">    :param nd: Number of cells in each direction. Fiducial value: 256</span>
+<span class="sd">    :type nd: int</span>
+<span class="sd">    :param Lc: Size of each cell in Mpc/h. Fiducial value: 2.0</span>
+<span class="sd">    :type Lc: float</span>
+<span class="sd">    :param Om0: Value of the matter overdensity today. Fiducial value: 0.31</span>
+<span class="sd">    :type Om0: float</span>
+<span class="sd">    :param z: Redshift of the density grid and final halo catalogue. Fiducial value: 0.0</span>
+<span class="sd">    :type z: float</span>
+<span class="sd">    :param delta_c: Critical density, for the halo formation, linearly extrapolated to z. Fiducial value: None</span>
+<span class="sd">    :type delta_c: Optional[float]</span>
+<span class="sd">    :param Nmin: Minimum number of particles in each halo. Fiducial value: 10</span>
+<span class="sd">    :type Nmin: int</span>
+<span class="sd">    :param seed: Seed used to generate the random numbers. Fiducial value: 12345</span>
+<span class="sd">    :type seed: int</span>
+<span class="sd">    :param x0: Initial guess for the parameters of the barrier. Fiducial value: None</span>
+<span class="sd">    :type x0: Optional[numpy.ndarray]</span>
+<span class="sd">    :param verbose: Whether to output  information in the C code. Fiducial value: False</span>
+<span class="sd">    :type verbose: bool</span>
+<span class="sd">    :param nthreads: Number of threads used by OpenMP. Fiducial value: 1</span>
+<span class="sd">    :type nthreads: int</span>
+<span class="sd">    :param Max_inter: Maximum number of iterations used in the minimization. Fiducial value: 100</span>
+<span class="sd">    :type Max_inter: int</span>
+<span class="sd">    :param tol: Tolerance for the minimization. Fiducial value: None</span>
+<span class="sd">    :type tol: Optional[float]</span>
+
+<span class="sd">    :return: Best fit of the values of the parameters of the ellipsoidal barrier.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Construct the Gaussian density grid</span>
+    <span class="k">if</span> <span class="n">grid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">Generate_Density_Grid</span><span class="p">(</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">R_max</span><span class="p">,</span> <span class="n">nd</span><span class="o">=</span><span class="n">nd</span><span class="p">,</span> <span class="n">Lc</span><span class="o">=</span><span class="n">Lc</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Check if the mass function has an error</span>
+    <span class="k">if</span> <span class="n">dn_err</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dn_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">M</span><span class="p">))</span>
+
+    <span class="c1"># Interpolate the given mass function</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
+
+    <span class="n">fdn</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">M</span><span class="p">[</span><span class="n">M</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">]),</span> <span class="n">dndlnM</span><span class="p">[</span><span class="n">M</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span>
+    <span class="p">)</span>
+    <span class="n">fdn_err</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">M</span><span class="p">[</span><span class="n">M</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">]),</span> <span class="n">dn_err</span><span class="p">[</span><span class="n">M</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Set the value of delta_c</span>
+    <span class="k">if</span> <span class="n">delta_c</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.theory</span><span class="w"> </span><span class="kn">import</span> <span class="n">Get_deltac</span>
+
+        <span class="n">delta_c</span> <span class="o">=</span> <span class="n">Get_deltac</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">Om0</span><span class="p">)</span>
+
+    <span class="c1"># Define the function to be minimized to find the best parameters of the barrier</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Chi2</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">theta</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">Find_Halos_from_Grid</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">k</span><span class="p">,</span>
+            <span class="n">P</span><span class="p">,</span>
+            <span class="n">Lc</span><span class="o">=</span><span class="n">Lc</span><span class="p">,</span>
+            <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span>
+            <span class="n">delta_c</span><span class="o">=</span><span class="n">delta_c</span><span class="p">,</span>
+            <span class="n">Nmin</span><span class="o">=</span><span class="n">Nmin</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
+            <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">dnh</span> <span class="o">=</span> <span class="n">Compute_Abundance</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">],</span> <span class="n">Mmin</span><span class="o">=</span><span class="n">Mmin</span><span class="p">,</span> <span class="n">Mmax</span><span class="o">=</span><span class="n">Mmax</span><span class="p">,</span> <span class="n">Nm</span><span class="o">=</span><span class="n">Nm</span><span class="p">,</span> <span class="n">Lc</span><span class="o">=</span><span class="n">Lc</span><span class="p">,</span> <span class="n">nd</span><span class="o">=</span><span class="n">nd</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+        <span class="p">)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">dnh</span><span class="p">[</span><span class="s2">&quot;dn&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+        <span class="n">chi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">dnh</span><span class="p">[</span><span class="s2">&quot;dn&quot;</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="n">fdn</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">dnh</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">][</span><span class="n">mask</span><span class="p">]))),</span> <span class="mf">2.0</span><span class="p">)</span>
+            <span class="o">/</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dnh</span><span class="p">[</span><span class="s2">&quot;dn_err&quot;</span><span class="p">][</span><span class="n">mask</span><span class="p">],</span> <span class="mf">2.0</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">fdn_err</span><span class="p">(</span><span class="n">dnh</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">][</span><span class="n">mask</span><span class="p">]),</span> <span class="mf">2.0</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Nm</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Current try: (</span><span class="si">%f</span><span class="s2">, </span><span class="si">%f</span><span class="s2">, </span><span class="si">%f</span><span class="s2">) with chi2 = </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span>
+              <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">chi2</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">chi2</span>
+
+    <span class="c1"># Define the initial position</span>
+    <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.55</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">]</span>
+
+    <span class="c1"># Minimize the Chi2 to get the best fit parameters</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Compute_Abundance</span>
+
+    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+        <span class="n">Chi2</span><span class="p">,</span>
+        <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span>
+        <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;Nelder-Mead&quot;</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;maxiter&quot;</span><span class="p">:</span> <span class="n">Max_inter</span><span class="p">},</span>
+        <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">x</span></div>
+
+
+
+<span class="c1"># Fit the parameters of the HOD</span>
+<div class="viewcode-block" id="Fit_HOD">
+<a class="viewcode-back" href="../../modules/utils.html#pyexshalos.utils.Fit_HOD">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Fit_HOD</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">P</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">nbar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">posh</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">Mh</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">velh</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">Ch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">nd</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span>
+    <span class="n">ndx</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ndy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ndz</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">Om0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.31</span><span class="p">,</span>
+    <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">x0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">Deltah</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">12345</span><span class="p">,</span>
+    <span class="n">USE_VEL</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">l_max</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span>
+    <span class="n">window</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cic&quot;</span><span class="p">,</span>
+    <span class="n">R</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
+    <span class="n">R_times</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
+    <span class="n">interlacing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">Nk</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
+    <span class="n">k_min</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">k_max</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">nthreads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">Max_inter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">tol</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit the parameters of the Halo Occupation Distribution (HOD).</span>
+
+<span class="sd">    :param k: Wavenumbers of the galaxy power spectrum.</span>
+<span class="sd">    :type k: numpy.ndarray</span>
+<span class="sd">    :param P: Galaxy power spectrum.</span>
+<span class="sd">    :type P: numpy.ndarray</span>
+<span class="sd">    :param nbar: Mean number density of galaxies. Fiducial value: None</span>
+<span class="sd">    :type nbar: Optional[float]</span>
+<span class="sd">    :param posh: Positions of the halos. Fiducial value: None</span>
+<span class="sd">    :type posh: Optional[numpy.ndarray]</span>
+<span class="sd">    :param Mh: Mass of the halos. Fiducial value: None</span>
+<span class="sd">    :type Mh: Optional[numpy.ndarray]</span>
+<span class="sd">    :param velh: Velocities of the halos. Fiducial value: None</span>
+<span class="sd">    :type velh: Optional[numpy.ndarray]</span>
+<span class="sd">    :param Ch: Concentration of the halos. Fiducial value: None</span>
+<span class="sd">    :type Ch: Optional[numpy.ndarray]</span>
+<span class="sd">    :param nd: Number of cells in each direction. Fiducial value: 256</span>
+<span class="sd">    :type nd: int</span>
+<span class="sd">    :param ndx: Number of cells in the x direction. Fiducial value: None</span>
+<span class="sd">    :type ndx: Optional[int]</span>
+<span class="sd">    :param ndy: Number of cells in the y direction. Fiducial value: None</span>
+<span class="sd">    :type ndy: Optional[int]</span>
+<span class="sd">    :param ndz: Number of cells in the z direction. Fiducial value: None</span>
+<span class="sd">    :type ndz: Optional[int]</span>
+<span class="sd">    :param Lc: Size of each cell in Mpc/h. Fiducial value: 2.0</span>
+<span class="sd">    :type Lc: float</span>
+<span class="sd">    :param Om0: Value of the matter overdensity today. Fiducial value: 0.31</span>
+<span class="sd">    :type Om0: float</span>
+<span class="sd">    :param z: Redshift of the density grid and final halo catalogue. Fiducial value: 0.0</span>
+<span class="sd">    :type z: float</span>
+<span class="sd">    :param x0: Initial guess for the best fit parameters of the HOD. Fiducial value: None</span>
+<span class="sd">    :type x0: Optional[numpy.ndarray]</span>
+<span class="sd">    :param sigma: Parameter of the exclusion term of the halo density profile. Fiducial value: 0.5</span>
+<span class="sd">    :type sigma: float</span>
+<span class="sd">    :param Deltah: Overdensity of the halos. Fiducial value: None</span>
+<span class="sd">    :type Deltah: Optional[float]</span>
+<span class="sd">    :param seed: Seed used to generate the density field. Fiducial value: 12345</span>
+<span class="sd">    :type seed: int</span>
+<span class="sd">    :param USE_VEL: Whether to use the power spectrum in redshift space. Fiducial value: False</span>
+<span class="sd">    :type USE_VEL: bool</span>
+<span class="sd">    :param l_max: Maximum multipole to consider. Fiducial value: 0</span>
+<span class="sd">    :type l_max: int</span>
+<span class="sd">    :param direction: Direction for redshift space distortions. Fiducial value: &quot;z&quot;</span>
+<span class="sd">    :type direction: str</span>
+<span class="sd">    :param window: Type of window function to use. Fiducial value: &quot;cic&quot;</span>
+<span class="sd">    :type window: Union[str, int]</span>
+<span class="sd">    :param R: Smoothing radius. Fiducial value: 4.0</span>
+<span class="sd">    :type R: float</span>
+<span class="sd">    :param R_times: Smoothing factor for the radius. Fiducial value: 5.0</span>
+<span class="sd">    :type R_times: float</span>
+<span class="sd">    :param interlacing: Whether to use interlacing to reduce aliasing effects. Fiducial value: True</span>
+<span class="sd">    :type interlacing: bool</span>
+<span class="sd">    :param Nk: Number of bins in k for the power spectrum. Fiducial value: 25</span>
+<span class="sd">    :type Nk: int</span>
+<span class="sd">    :param k_min: Minimum wavenumber for the power spectrum. Fiducial value: None</span>
+<span class="sd">    :type k_min: Optional[float]</span>
+<span class="sd">    :param k_max: Maximum wavenumber for the power spectrum. Fiducial value: None</span>
+<span class="sd">    :type k_max: Optional[float]</span>
+<span class="sd">    :param verbose: Whether to output information in the C code. Fiducial value: False</span>
+<span class="sd">    :type verbose: bool</span>
+<span class="sd">    :param nthreads: Number of threads used by OpenMP. Fiducial value: 1</span>
+<span class="sd">    :type nthreads: int</span>
+<span class="sd">    :param Max_inter: Maximum number of iterations used in the minimization. Fiducial value: 100</span>
+<span class="sd">    :type Max_inter: int</span>
+<span class="sd">    :param tol: Tolerance for the minimization. Fiducial value: None</span>
+<span class="sd">    :type tol: Optional[float]</span>
+
+<span class="sd">    :return: The best fit parameters of the HOD.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Interpolate the given power spectrum</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
+
+    <span class="n">fP</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span>
+
+    <span class="c1"># Define the function to be minimized</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Chi2</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+        <span class="n">logMmin</span><span class="p">,</span> <span class="n">siglogM</span><span class="p">,</span> <span class="n">logM0</span><span class="p">,</span> <span class="n">logM1</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">theta</span>
+
+        <span class="n">gals</span> <span class="o">=</span> <span class="n">Generate_Galaxies_from_Halos</span><span class="p">(</span>
+            <span class="n">posh</span><span class="p">,</span>
+            <span class="n">Mh</span><span class="p">,</span>
+            <span class="n">velh</span><span class="o">=</span><span class="n">velh</span><span class="p">,</span>
+            <span class="n">Ch</span><span class="o">=</span><span class="n">Ch</span><span class="p">,</span>
+            <span class="n">nd</span><span class="o">=</span><span class="n">nd</span><span class="p">,</span>
+            <span class="n">ndx</span><span class="o">=</span><span class="n">ndx</span><span class="p">,</span>
+            <span class="n">ndy</span><span class="o">=</span><span class="n">ndy</span><span class="p">,</span>
+            <span class="n">ndz</span><span class="o">=</span><span class="n">ndz</span><span class="p">,</span>
+            <span class="n">Lc</span><span class="o">=</span><span class="n">Lc</span><span class="p">,</span>
+            <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span>
+            <span class="n">logMmin</span><span class="o">=</span><span class="n">logMmin</span><span class="p">,</span>
+            <span class="n">siglogM</span><span class="o">=</span><span class="n">siglogM</span><span class="p">,</span>
+            <span class="n">logM0</span><span class="o">=</span><span class="n">logM0</span><span class="p">,</span>
+            <span class="n">logM1</span><span class="o">=</span><span class="n">logM1</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+            <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+            <span class="n">Deltah</span><span class="o">=</span><span class="n">Deltah</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">OUT_VEL</span><span class="o">=</span><span class="n">USE_VEL</span><span class="p">,</span>
+            <span class="n">OUT_FLAG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">USE_VEL</span><span class="p">:</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="n">Compute_Density_Grid</span><span class="p">(</span>
+                <span class="n">gals</span><span class="p">[</span><span class="s2">&quot;posg&quot;</span><span class="p">],</span>
+                <span class="n">vel</span><span class="o">=</span><span class="n">gals</span><span class="p">[</span><span class="s2">&quot;velg&quot;</span><span class="p">],</span>
+                <span class="n">mass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">nd</span><span class="o">=</span><span class="n">nd</span><span class="p">,</span>
+                <span class="n">L</span><span class="o">=</span><span class="n">nd</span> <span class="o">*</span> <span class="n">Lc</span><span class="p">,</span>
+                <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span>
+                <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span>
+                <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
+                <span class="n">window</span><span class="o">=</span><span class="s2">&quot;CIC&quot;</span><span class="p">,</span>
+                <span class="n">R</span><span class="o">=</span><span class="n">R</span><span class="p">,</span>
+                <span class="n">R_times</span><span class="o">=</span><span class="n">R_times</span><span class="p">,</span>
+                <span class="n">interlacing</span><span class="o">=</span><span class="n">interlacing</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="n">Compute_Density_Grid</span><span class="p">(</span>
+                <span class="n">gals</span><span class="p">[</span><span class="s2">&quot;posg&quot;</span><span class="p">],</span>
+                <span class="n">vel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">mass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">nd</span><span class="o">=</span><span class="n">nd</span><span class="p">,</span>
+                <span class="n">L</span><span class="o">=</span><span class="n">nd</span> <span class="o">*</span> <span class="n">Lc</span><span class="p">,</span>
+                <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span>
+                <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span>
+                <span class="n">direction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">window</span><span class="o">=</span><span class="s2">&quot;CIC&quot;</span><span class="p">,</span>
+                <span class="n">R</span><span class="o">=</span><span class="n">R</span><span class="p">,</span>
+                <span class="n">R_times</span><span class="o">=</span><span class="n">R_times</span><span class="p">,</span>
+                <span class="n">interlacing</span><span class="o">=</span><span class="n">interlacing</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">Pk</span> <span class="o">=</span> <span class="n">Compute_Power_Spectrum</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">L</span><span class="o">=</span><span class="n">nd</span> <span class="o">*</span> <span class="n">Lc</span><span class="p">,</span>
+            <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span>
+            <span class="n">R</span><span class="o">=</span><span class="n">R</span><span class="p">,</span>
+            <span class="n">Nk</span><span class="o">=</span><span class="n">Nk</span><span class="p">,</span>
+            <span class="n">k_min</span><span class="o">=</span><span class="n">k_min</span><span class="p">,</span>
+            <span class="n">k_max</span><span class="o">=</span><span class="n">k_max</span><span class="p">,</span>
+            <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+            <span class="n">ntypes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nbar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">chi2</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">Pk</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">fP</span><span class="p">(</span><span class="n">Pk</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]))</span> <span class="o">/</span>
+                        <span class="p">(</span><span class="n">Pk</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Pk</span><span class="p">[</span><span class="s2">&quot;Nk&quot;</span><span class="p">])),</span> <span class="mf">2.0</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Nk</span> <span class="o">-</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">chi2</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">Pk</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">fP</span><span class="p">(</span><span class="n">Pk</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]))</span> <span class="o">/</span>
+                        <span class="p">(</span><span class="n">Pk</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Pk</span><span class="p">[</span><span class="s2">&quot;Nk&quot;</span><span class="p">])),</span> <span class="mf">2.0</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span>
+                    <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gals</span><span class="p">[</span><span class="s2">&quot;posg&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">nbar</span> <span class="o">*</span> <span class="p">(</span><span class="n">Lc</span> <span class="o">*</span> <span class="n">nd</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+                    <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gals</span><span class="p">[</span><span class="s2">&quot;posg&quot;</span><span class="p">])),</span>
+                    <span class="mf">2.0</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Nk</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">chi2</span>
+
+    <span class="c1"># Define the inital position</span>
+    <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">13.25424743</span><span class="p">,</span> <span class="mf">0.26461332</span><span class="p">,</span> <span class="mf">13.28383025</span><span class="p">,</span> <span class="mf">14.32465146</span><span class="p">,</span> <span class="mf">1.00811277</span><span class="p">]</span>
+
+    <span class="c1"># Minimaze the Chi2 to get the best fit parameters</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Compute_Power_Spectrum</span><span class="p">,</span> <span class="n">Compute_Density_Grid</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generate_Galaxies_from_Halos</span>
+
+    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">9.0</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">9.0</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">9.0</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+        <span class="n">Chi2</span><span class="p">,</span>
+        <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span>
+        <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;Nelder-Mead&quot;</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;maxiter&quot;</span><span class="p">:</span> <span class="n">Max_inter</span><span class="p">},</span>
+        <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">x</span></div>
+
+
+
+<span class="c1"># Compute the higher order local operators up to a given order</span>
+
+
+<div class="viewcode-block" id="Compute_High_Order_Operators">
+<a class="viewcode-back" href="../../modules/utils.html#pyexshalos.utils.Compute_High_Order_Operators">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Compute_High_Order_Operators</span><span class="p">(</span>
+    <span class="n">grid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">nl_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">Galileons</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">Renormalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">nthreads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the higher order operators up to a given order.</span>
+
+<span class="sd">    :param grid: Lagrangian density grid.</span>
+<span class="sd">    :type grid: numpy.ndarray</span>
+<span class="sd">    :param order: Order to be used to compute the local operators. Fiducial value: 2</span>
+<span class="sd">    :type order: int</span>
+<span class="sd">    :param nl_order: Order to be used to compute the non-local operators. Fiducial value: 0</span>
+<span class="sd">    :type nl_order: int</span>
+<span class="sd">    :param Galileons: Whether to use the Galileons operators. Fiducial value: False</span>
+<span class="sd">    :type Galileons: bool</span>
+<span class="sd">    :param Renormalized: Whether to use renormalized operators. Fiducial value: False</span>
+<span class="sd">    :type Renormalized: bool</span>
+<span class="sd">    :param Lc: Size of each cell in Mpc/h. Fiducial value: 2.0</span>
+<span class="sd">    :type Lc: float</span>
+<span class="sd">    :param verbose: Whether to output information in the C code. Fiducial value: False</span>
+<span class="sd">    :type verbose: bool</span>
+<span class="sd">    :param nthreads: Number of threads used by OpenMP. Fiducial value: 1</span>
+<span class="sd">    :type nthreads: int</span>
+
+<span class="sd">    :return: Dictionary with keys:</span>
+<span class="sd">             - &quot;delta2&quot;: Ndarray with delta^2</span>
+<span class="sd">             - &quot;K2&quot;: Ndarray with K^2 or G_2</span>
+<span class="sd">             - &quot;delta3&quot;: Ndarray with delta^3</span>
+<span class="sd">             - &quot;K3&quot;: Ndarray with K^3 or G_3</span>
+<span class="sd">             - &quot;deltaK2&quot;: Ndarray with delta*K^2 or delta*G_2</span>
+<span class="sd">             - &quot;laplacian&quot;: Ndarray with Laplacian(delta)</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Define the parameters used in the case (or not) of Galileons.</span>
+    <span class="c1"># The operators are: K2 = K^2 - params[0]*delta^2, K3 = K_ij*K_jk*K_ki - params[1]*K^2*delta + params[2]*delta^3</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">Galileons</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="mf">9.0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">])</span>
+
+    <span class="c1"># Check the precision and convert the arrays</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_precision</span>
+
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">check_precision</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">precision</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+
+    <span class="c1"># Call the c function to compute the operators</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">operators_compute</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">operators_compute</span><span class="p">(</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">order</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">nl_order</span><span class="p">),</span>
+        <span class="n">params</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">Renormalized</span><span class="p">),</span>
+        <span class="n">Lc</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">nthreads</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<span class="c1"># Smooth a given field (or fields) in a given scale</span>
+
+
+<div class="viewcode-block" id="Smooth_Fields">
+<a class="viewcode-back" href="../../modules/utils.html#pyexshalos.utils.Smooth_Fields">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Smooth_Fields</span><span class="p">(</span>
+    <span class="n">grid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">k_smooth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10000.0</span><span class="p">,</span>
+    <span class="n">Input_k</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">Nfields</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">nthreads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Smooth a given field (or fields) on a given scale.</span>
+
+<span class="sd">    :param grid: Lagrangian density grid.</span>
+<span class="sd">    :type grid: numpy.ndarray</span>
+<span class="sd">    :param Lc: Size of each cell in Mpc/h. Fiducial value: 2.0</span>
+<span class="sd">    :type Lc: float</span>
+<span class="sd">    :param k_smooth: Scale used to smooth the fields. Fiducial value: 10000.0</span>
+<span class="sd">    :type k_smooth: float</span>
+<span class="sd">    :param Input_k: Whether the density grid is in real or Fourier space. Fiducial value: False</span>
+<span class="sd">    :type Input_k: bool</span>
+<span class="sd">    :param Nfields: Number of fields. Fiducial value: 1</span>
+<span class="sd">    :type Nfields: int</span>
+<span class="sd">    :param verbose: Whether to output information in the C code. Fiducial value: False</span>
+<span class="sd">    :type verbose: bool</span>
+<span class="sd">    :param nthreads: Number of threads used by OpenMP. Fiducial value: 1</span>
+<span class="sd">    :type nthreads: int</span>
+
+<span class="sd">    :return: A dictionary with all fields (excluding the linear) up to the given order or a single smoothed field.</span>
+<span class="sd">    :rtype: np.ndarray </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check the precision and convert the arrays</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_precision</span>
+
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">check_precision</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">precision</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+        <span class="n">k_smooth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">k_smooth</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+        <span class="n">k_smooth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">k_smooth</span><span class="p">)</span>
+
+    <span class="c1"># Call the c function to smooth the fields</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">smooth_field</span>
+
+    <span class="k">if</span> <span class="n">Nfields</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nfields</span><span class="p">):</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">smooth_field</span><span class="p">(</span>
+                    <span class="n">grid</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">Lc</span><span class="p">,</span> <span class="n">k_smooth</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span>
+                        <span class="n">Input_k</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">nthreads</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">smooth_field</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">Lc</span><span class="p">,</span> <span class="n">k_smooth</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">Input_k</span><span class="p">),</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">nthreads</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">verbose</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+
+<span class="c1"># Smooth a given field (or fields) in a given scale</span>
+
+
+<div class="viewcode-block" id="Smooth_and_Reduce_Fields">
+<a class="viewcode-back" href="../../modules/utils.html#pyexshalos.utils.Smooth_and_Reduce_Fields">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Smooth_and_Reduce_Fields</span><span class="p">(</span>
+    <span class="n">grid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">k_smooth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10000.0</span><span class="p">,</span>
+    <span class="n">Input_k</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">Nfields</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">nthreads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Smooth a given field (or fields) on a given scale and reduce it.</span>
+
+<span class="sd">    :param grid: Lagrangian density grid. </span>
+<span class="sd">    :type grid: numpy.ndarray</span>
+<span class="sd">    :param Lc: Size of each cell in Mpc/h. Fiducial value: 2.0</span>
+<span class="sd">    :type Lc: float</span>
+<span class="sd">    :param k_smooth: Scale used to smooth the fields. Fiducial value: 10000.0</span>
+<span class="sd">    :type k_smooth: float</span>
+<span class="sd">    :param Input_k: Whether the density grid is in real or Fourier space. Fiducial value: False</span>
+<span class="sd">    :type Input_k: bool</span>
+<span class="sd">    :param Nfields: Number of fields. Fiducial value: 1</span>
+<span class="sd">    :type Nfields: int</span>
+<span class="sd">    :param verbose: Whether to output information in the C code. Fiducial value: False</span>
+<span class="sd">    :type verbose: bool</span>
+<span class="sd">    :param nthreads: Number of threads used by OpenMP. Fiducial value: 1</span>
+<span class="sd">    :type nthreads: int</span>
+
+<span class="sd">    :return: Smoothed and reduced fields.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check the precision and convert the arrays</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_precision</span>
+
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">check_precision</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">precision</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+        <span class="n">k_smooth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">k_smooth</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">Lc</span><span class="p">)</span>
+        <span class="n">k_smooth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">k_smooth</span><span class="p">)</span>
+
+    <span class="c1"># Call the c function to smooth and reduce the fields</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.exshalos</span><span class="w"> </span><span class="kn">import</span> <span class="n">smooth_and_reduce_field</span>
+
+    <span class="k">if</span> <span class="n">Nfields</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nfields</span><span class="p">):</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">smooth_and_reduce_field</span><span class="p">(</span>
+                    <span class="n">grid</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">Lc</span><span class="p">,</span> <span class="n">k_smooth</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span>
+                        <span class="n">Input_k</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">nthreads</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">smooth_and_reduce_field</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span> <span class="n">Lc</span><span class="p">,</span> <span class="n">k_smooth</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">Input_k</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span>
+                <span class="n">nthreads</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+
+
+<span class="c1"># Compute the correlation function given the power spectrum or the power spectrum given the correlation function</span>
+<div class="viewcode-block" id="Compute_Correlation">
+<a class="viewcode-back" href="../../modules/utils.html#pyexshalos.utils.Compute_Correlation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Compute_Correlation</span><span class="p">(</span>
+    <span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">P</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pk2xi&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the correlation function given the power spectrum or the power spectrum given the correlation function.</span>
+
+<span class="sd">    :param k: Wavenumbers of the power spectrum or the distance of the correlation function.</span>
+<span class="sd">    :type k: numpy.ndarray</span>
+<span class="sd">    :param P: Power spectrum or the correlation function.</span>
+<span class="sd">    :type P: numpy.ndarray</span>
+<span class="sd">    :param direction: Direction to compute the fftlog (&quot;pk2xi&quot; or &quot;xi2pk&quot;). Fiducial value: &quot;pk2xi&quot;</span>
+<span class="sd">    :type direction: str</span>
+<span class="sd">    :param verbose: Whether to output information in the C code. Fiducial value: False</span>
+<span class="sd">    :type verbose: bool</span>
+
+<span class="sd">    :return: Dictionary with keys:</span>
+<span class="sd">             - &quot;R&quot; or &quot;k&quot;: Ndarray with k or r </span>
+<span class="sd">             - &quot;Xi&quot; or &quot;Pk&quot;: Ndarray with Xi(r) or P(k)</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check the precision and convert the arrays</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.analytical</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_precision</span>
+
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">check_precision</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">precision</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Call the c function to compute the correlation function</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.analytical</span><span class="w"> </span><span class="kn">import</span> <span class="n">correlation_compute</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">correlation_compute</span><span class="p">(</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">direction</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Rodrigo Voivodic
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Rodrigo Voivodic.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
