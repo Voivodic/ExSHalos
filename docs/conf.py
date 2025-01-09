@@ -26,6 +26,7 @@ extensions = [
     "sphinx.ext.autosummary",
 ]
 
+autosummary_generate = True
 todo_include_todos = True
 
 templates_path = ["_templates"]
