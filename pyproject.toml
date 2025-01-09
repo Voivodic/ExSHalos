@@ -3,24 +3,22 @@ requires = ["setuptools>=75", "wheel", "numpy"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "exshalos"
+name = "pyexshalos"
 version = "0.1.0"
 description = "A pyhon package for ExSHalos"
 authors = [
     {name = "Rodrigo Voivodic", email = "rodrigo.voivodic@gmail.com"}
 ]
 dependencies = [
-    "numpy",
     "scipy",
-    "matplotlib",
-    "h5py",
-    "setuptools",    
+    "typing",
 ]
 
-[took.setutools]
+[tool.setutools]
 ext-modules = [
-    "exshalos.spectrum.spectrum",
-    "exshalos.exshalos.exshalos",
-    "exshalos.hod.hod",
-    "exshalos.finder.finder",
+    "pyexshalos.lib.spectrum",
+    "pyexshalos.lib.exshalos",
+    "pyexshalos.lib.hod",
+    "pyexshalos.lib.finder",
+    "pyexshalos.lib.analytical",
 ]
