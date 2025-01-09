@@ -11,9 +11,7 @@ on:
 jobs:
   generate_docs:
     runs-on: ubuntu-latest
-    envs:
-      GITHUB_PAT: ${{secrets.GITHUB_TOKEN}}
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
