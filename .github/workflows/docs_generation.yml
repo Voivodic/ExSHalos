@@ -1,38 +1,39 @@
-name: docs_generation_workflow
+name: Deploy Sphinx Docs
 
-# Execute automatically when pushed to main
 on:
   push:
-    branches: [main]
-
+    branches:
+      - main
   # Trigger manually on demand
   workflow_dispatch:
-
+  
 jobs:
-  generate_docs:
+  build:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Check out the repository
+      uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.13
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install sphinx sphinx_book_theme
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install sphinx sphinx-book-theme
+        # Add any other dependencies here, e.g.,
+        # pip install -r requirements.txt
 
-      - name: Build documentation
-        run: sphinx-build -b html docs build/html
+    - name: Build the documentation
+      run: |
+        cd docs  # Adjust this if your docs are in a different directory
+        make html
 
-      - name: Upload documentation to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with: 
-          branch: gh-pages  # Target branch for deployment
-          folder: build/html  # Path to your built documentation
-          clean: true  # Clean the existing contents before deploying
-          commit_message: 'Automated documentation deployment [skip ci]'  # Commit message
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/_build/html  # Adjust this if your build directory is different
