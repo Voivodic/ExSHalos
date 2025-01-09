@@ -1,8 +1,0 @@
-# Building stuff
-pyexshalos/__pycache__/
-pyexshalos/lib/*
-!pyexshalos/lib/
-
-# In development modules
-src/sampler/
-include/sampler/
