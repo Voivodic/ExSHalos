@@ -94,21 +94,6 @@ extensions = [
         extra_link_args=extra_link_args,
         extra_compile_args=extra_compile_args,
     ),
-    # Module that find voids and halos
-    Extension(
-        "pyexshalos.lib.finder",
-        sources=[
-            "src/finder/finder_h.cpp",
-            "src/finder/voronoi.cpp",
-            "src/finder/finder.cpp",
-        ],
-        language="c++",
-        include_dirs=include_dirs + ["include/finder"],
-        library_dirs=library_dirs,
-        libraries=["m", "voro++"],
-        extra_link_args=extra_link_args,
-        extra_compile_args=extra_compile_args,
-    ),
     # Module that computes some analytical quantities
     Extension(
         "pyexshalos.lib.analytical",

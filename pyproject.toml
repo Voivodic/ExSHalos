@@ -19,6 +19,5 @@ ext-modules = [
     "pyexshalos.lib.spectrum",
     "pyexshalos.lib.exshalos",
     "pyexshalos.lib.hod",
-    "pyexshalos.lib.finder",
     "pyexshalos.lib.analytical",
 ]
