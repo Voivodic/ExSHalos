@@ -22,7 +22,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install sphinx sphinx-book-theme sphinx-autoapi
+          pip install numpy sphinx sphinx-book-theme 
+          
+      - name: Install dependencies for exshalos
+        run: |
+          apt install -u -y libfftw3-dev libgsl-dev libgslcblas0 libomp-dev
+
+      - name: Install exshalos
+        run: |
+          pip install -e .
 
       - name: Build documentation
         run: sphinx-build -b html ./docs ./docs/build/html
