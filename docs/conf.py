@@ -23,10 +23,10 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
-    'autoapi.extension',
+    #"autoapi.extension",
 ]
 
-autoapi_dirs = ['../pyexshalos']
+#autoapi_dirs = ['../pyexshalos']
 source_suffix = [".rst", ".md"]
 master_doc = "index"
 templates_path = ["_templates"]
