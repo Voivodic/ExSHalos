@@ -26,7 +26,7 @@ jobs:
           
       - name: Install dependencies for exshalos
         run: |
-          apt install -u -y libfftw3-dev libgsl-dev libgslcblas0 libomp-dev
+          sudo apt install -u -y libfftw3-dev libgsl-dev libgslcblas0 libomp-dev
 
       - name: Install exshalos
         run: |
