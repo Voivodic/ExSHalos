@@ -42,7 +42,7 @@ html_theme_options = {
     "home_page_in_toc": True,
     "show_navbar_depth": 2,
     "max_navbar_depth": 4,
-    "collapse_navbar": False,
+    "collapse_navbar": True,
 }
 html_logo = "Xhalo.png"
 html_title = "ExSHalos"
