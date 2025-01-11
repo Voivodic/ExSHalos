@@ -44,3 +44,5 @@ html_theme_options = {
     "max_navbar_depth": 4,
     "collapse_navbar": False,
 }
+html_logo = "Xhalo.png"
+html_title = "ExSHalos"

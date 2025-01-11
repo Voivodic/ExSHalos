@@ -1,4 +1,4 @@
-simulation
+Simulation
 ==========
 
 .. automodule:: pyexshalos.simulation

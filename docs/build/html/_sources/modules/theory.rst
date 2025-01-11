@@ -1,4 +1,4 @@
-theory
+Theory
 ======
 
 .. automodule:: pyexshalos.theory

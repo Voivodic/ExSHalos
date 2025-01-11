@@ -1,4 +1,4 @@
-mock
+Mock
 ====
 
 .. automodule:: pyexshalos.mock

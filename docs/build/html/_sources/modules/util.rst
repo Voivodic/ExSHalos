@@ -1,4 +1,4 @@
-utils
+Utils
 =====
 
 .. automodule:: pyexshalos.utils
