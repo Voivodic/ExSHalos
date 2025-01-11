@@ -39,10 +39,11 @@ Not necessarily in the priority order
 ### Code
 
 - [ ] **Creation of more examples**
-- [ ] **Completion of documentation**
+- [ ] **Completion of the documentation**
 - [ ] **Integration with the zig's building system**
-- [ ] **Compilation of the C/C++ libraries**
-- [ ] **Creation of the zig wrappers**
+- [ ] **Compilation of C/C++ libraries**
+- [ ] **Creation of zig wrappers**
+- [ ] **Creation of a Dockerfile, apptainer's definition file and nix's shell.nix file**
 
 ### Physics
 
