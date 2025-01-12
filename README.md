@@ -33,7 +33,7 @@ in the root folder of the project.
 
 ## Documentation
 
-More information about the installation, the API and some examples can be found at the [documentation](voivodic.github.io/ExSHalos/).
+More information about the installation, the API and some examples can be found at the [documentation](https://voivodic.github.io/ExSHalos/).
 
 ## TODO
 Not necessarily in the priority order
