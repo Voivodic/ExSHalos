@@ -35,7 +35,7 @@ Once you have all depences, installing ExSHalos is as simple as:
    cd ExSHalos/
    pip install . 
 
-For more detailed installatino instruction check :doc:`installation`
+For more detailed installation instructions check :doc:`installation`
 
 .. toctree::
    :hidden:
@@ -43,6 +43,4 @@ For more detailed installatino instruction check :doc:`installation`
    Installation
    Examples
    Python_API
-   C_API
-   Zig_API
-   TODO.rst
+   TODO
