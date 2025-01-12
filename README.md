@@ -31,7 +31,9 @@ pip install .
 ```
 in the root folder of the project.
 
-Detailed instruction for the installation can be found in the [documentation](voivodic.github.io/ExSHalos/).
+## Documentation
+
+More information about the installation, the API and some examples can be found at the [documentation](voivodic.github.io/ExSHalos/).
 
 ## TODO
 Not necessarily in the priority order
