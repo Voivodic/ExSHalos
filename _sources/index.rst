@@ -49,13 +49,13 @@ Using the python interface for ExSHalos is as simple as:
    import pylab as pl
 
    # Load a linear matter power spectrum
-   k, Pk = np.loadtxt("", unpack = True)
+   k, Pk = np.loadtxt("matter_power_spectrum.dat", unpack = True)
 
    # Create the halo catalogue using exshalos
    halos = exh.mock.Generate_Halos_Box_from_Pk(k, Pk, nd = 256, Lc = 4.0, Om0 = 0.31)
 
    # Measure the power spectrum
-   grid = exh.simulation.Compute_Density_Grid(x["posh"], nd = 256, L = 1024.0)
+   grid = exh.simulation.Compute_Density_Grid(halos["posh"], nd = 256, L = 1024.0)
    Ph = exh.simulation.Compute_Power_Spectrum(grid, L = 1024.0)
 
     # Plot the power spectrum
