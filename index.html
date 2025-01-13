@@ -302,7 +302,8 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-installation">Quick installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-start">Quick start</a></li>
 </ul>
             </nav>
         </div>
@@ -327,8 +328,8 @@
 </ul>
 <p>At this point, only a python library is exported, but all code is written in C.</p>
 <p>This library follows the functional programing paradigm! There are no classes, random operators nor custom types.</p>
-<section id="quick-installation">
-<h2>Quick installation<a class="headerlink" href="#quick-installation" title="Link to this heading">#</a></h2>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
 <p>You can download the package with:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Voivodic/ExSHalos.git
 </pre></div>
@@ -339,6 +340,35 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 </pre></div>
 </div>
 <p>For more detailed installation instructions check <span class="xref std std-doc">installation</span></p>
+</section>
+<section id="quick-start">
+<h2>Quick start<a class="headerlink" href="#quick-start" title="Link to this heading">#</a></h2>
+<p>Using the python interface for ExSHalos is as simple as:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyexshalos</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">exh</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pylab</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+
+<span class="c1"># Load a linear matter power spectrum</span>
+<span class="n">k</span><span class="p">,</span> <span class="n">Pk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">unpack</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Create the halo catalogue using exshalos</span>
+<span class="n">halos</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Generate_Halos_Box_from_Pk</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Pk</span><span class="p">,</span> <span class="n">nd</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="n">Lc</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span> <span class="n">Om0</span> <span class="o">=</span> <span class="mf">0.31</span><span class="p">)</span>
+
+<span class="c1"># Measure the power spectrum</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Compute_Density_Grid</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;posh&quot;</span><span class="p">],</span> <span class="n">nd</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="mf">1024.0</span><span class="p">)</span>
+<span class="n">Ph</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Compute_Power_Spectrum</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="mf">1024.0</span><span class="p">)</span>
+
+ <span class="c1"># Plot the power spectrum</span>
+ <span class="n">pl</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">Ph</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">],</span> <span class="n">Ph</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">],</span> <span class="n">yerr</span> <span class="o">=</span> <span class="n">Ph</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Ph</span><span class="p">[</span><span class="s2">&quot;Nk&quot;</span><span class="p">]),</span> <span class="n">lw</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
+
+ <span class="n">pl</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+ <span class="n">pl</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+ <span class="n">pl</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;k [$h/$Mpc]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+ <span class="n">pl</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;P(k)  [Mpc/$h/$]$^</span><span class="si">{3}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+
+ <span class="n">pl</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Ph_example.pdf&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 <div class="toctree-wrapper compound">
 </div>
 </section>
@@ -381,7 +411,8 @@ pip<span class="w"> </span>install<span class="w"> </span>.
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-installation">Quick installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-start">Quick start</a></li>
 </ul>
   </nav></div>
 
