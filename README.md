@@ -31,6 +31,36 @@ pip install .
 ```
 in the root folder of the project.
 
+## Quick start
+
+Using the python interface for ExSHalos is as simple as:
+
+```python
+   import numpy as np
+   import pyexshalos as exh
+   import pylab as pl
+
+   # Load a linear matter power spectrum
+   k, Pk = np.loadtxt("", unpack = True)
+
+   # Create the halo catalogue using exshalos
+   halos = exh.mock.Generate_Halos_Box_from_Pk(k, Pk, nd = 256, Lc = 4.0, Om0 = 0.31)
+
+   # Measure the power spectrum
+   grid = exh.simulation.Compute_Density_Grid(x["posh"], nd = 256, L = 1024.0)
+   Ph = exh.simulation.Compute_Power_Spectrum(grid, L = 1024.0)
+
+    # Plot the power spectrum
+    pl.errorbar(Ph["k"], Ph["Pk"], yerr = Ph["Pk"]/np.sqrt(Ph["Nk"]), lw = 3)
+
+    pl.xscale("log")
+    pl.yscale("log")
+    pl.xlabel("k [$h/$Mpc]", fontsize=15)
+    pl.ylabel("P(k)  [Mpc/$h/$]$^{3}$", fontsize=15)
+
+    pl.savefig("Ph_example.pdf")
+```
+
 ## Documentation
 
 More information about the installation, the API and some examples can be found at the [documentation](https://voivodic.github.io/ExSHalos/).
