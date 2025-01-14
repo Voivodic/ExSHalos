@@ -6,6 +6,8 @@ from typing import Dict, Optional, Union
 import numpy as np
 
 # Compute the density grid
+
+
 def Compute_Density_Grid(
     pos: np.ndarray,
     vel: Optional[np.ndarray] = None,
@@ -753,6 +755,12 @@ def Compute_Abundance(
     # Check the precision and convert the arrays
     from .lib.spectrum import check_precision
 
+    # Set the maximum and minimum masses to -1 if no value was given
+    if Mmin is None:
+        Mmin = -1.0
+    if Mmax is None:
+        Mmax = -1.0
+
     precision = check_precision()
     if precision == 4:
         Mh = Mh.astype("float32")
@@ -906,6 +914,7 @@ def Compute_Bias_Jens(
     # Normalize the histograms
     if Normalized == True:
         x["Unmasked"] = x["Unmasked"] / np.sum(x["Unmasked"])
-        x["Masked"] = x["Masked"] / np.sum(x["Masked"], axis=1).reshape([Nm, 1])
+        x["Masked"] = x["Masked"] / \
+            np.sum(x["Masked"], axis=1).reshape([Nm, 1])
 
     return x

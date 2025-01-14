@@ -249,7 +249,7 @@ def Compute_sigma(
         kt = k[k <= 2.0 * np.pi / R[j]]
         Pt = P[k <= 2.0 * np.pi / R[j]]
         
-        sigma[j] = np.sqrt(simpson(Pt * kt * kt * np.power(Wth(kt, R[j]), 2.0), kt) / (2.0 * np.pi * np.pi))
+        sigma[j] = np.sqrt(simpson(Pt * kt * kt * np.power(Wth(kt, R[j]), 2.0), x = kt) / (2.0 * np.pi * np.pi))
 
     return sigma
 
@@ -361,7 +361,7 @@ def fh(
     return resp
 
 # Compute the halo mass function
-def dlnndlnm(
+def Get_dndlnm(
     M: np.ndarray,
     sigma: Optional[np.ndarray] = None,
     model: Union[int, str] = "PS",

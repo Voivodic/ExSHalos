@@ -305,7 +305,7 @@ def Fit_Barrier(
     x0: Optional[np.ndarray] = None,
     verbose: bool = False,
     nthreads: int = 1,
-    Max_inter: int = 100,
+    Max_iter: int = 100,
     tol: Optional[float] = None,
 ) -> np.ndarray:
     """
@@ -317,7 +317,7 @@ def Fit_Barrier(
     :type P: numpy.ndarray
     :param M: Mass of the mass function to be approximated.
     :type M: numpy.ndarray
-    :param dndlnM: Mass function to be approximated.
+    :param dndlnM: Differential mass function to be approximated.
     :type dndlnM: numpy.ndarray
     :param dn_err: Errors on the mass function. Fiducial value: None
     :type dn_err: Optional[numpy.ndarray]
@@ -351,8 +351,8 @@ def Fit_Barrier(
     :type verbose: bool
     :param nthreads: Number of threads used by OpenMP. Fiducial value: 1
     :type nthreads: int
-    :param Max_inter: Maximum number of iterations used in the minimization. Fiducial value: 100
-    :type Max_inter: int
+    :param Max_iter: Maximum number of iterations used in the minimization. Fiducial value: 100
+    :type Max_iter: int
     :param tol: Tolerance for the minimization. Fiducial value: None
     :type tol: Optional[float]
 
@@ -362,12 +362,18 @@ def Fit_Barrier(
     # Construct the Gaussian density grid
     if grid is None:
         grid = Generate_Density_Grid(
-            k, P, R_max, nd=nd, Lc=Lc, seed=seed, verbose=verbose, nthreads=nthreads
-        )
+            k, P, R_max, nd=nd, Lc=Lc, seed=seed, verbose=False, nthreads=nthreads
+        )["grid"]
 
     # Check if the mass function has an error
     if dn_err is None:
         dn_err = np.zeros(len(M))
+
+    # Set Mmin and Mmax
+    if Mmin is None:
+        Mmin = -1.0
+    if Mmax is None:
+        Mmax = -1.0
 
     # Interpolate the given mass function
     from scipy.interpolate import interp1d
@@ -401,11 +407,11 @@ def Fit_Barrier(
             a=a,
             beta=beta,
             alpha=alpha,
-            verbose=verbose,
+            verbose=False,
         )
 
         dnh = Compute_Abundance(
-            x["Mh"], Mmin=Mmin, Mmax=Mmax, Nm=Nm, Lc=Lc, nd=nd, verbose=verbose
+            x["Mh"], Mmin=Mmin, Mmax=Mmax, Nm=Nm, Lc=Lc, nd=nd, verbose=False
         )
 
         mask = dnh["dn"] > 0.0
@@ -416,8 +422,10 @@ def Fit_Barrier(
                 + np.power(fdn_err(dnh["Mh"][mask]), 2.0)
             )
         ) / (Nm - 4)
-        print("Current try: (%f, %f, %f) with chi2 = %f" %
-              (a, beta, alpha, chi2))
+
+        if verbose:
+            print("Current try: (%f, %f, %f) with chi2 = %f" %
+                  (a, beta, alpha, chi2))
 
         return chi2
 
@@ -435,7 +443,7 @@ def Fit_Barrier(
         x0=x0,
         bounds=bounds,
         method="Nelder-Mead",
-        options={"maxiter": Max_inter},
+        options={"maxiter": Max_iter},
         tol=tol,
     )
 
