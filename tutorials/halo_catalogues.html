@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Generating halos &#8212; ExSHalos</title>
+    <title>Generating a halo catalogue &#8212; ExSHalos</title>
   
   
   
@@ -154,7 +154,7 @@
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../Tutorials.html">Tutorials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Generating halos</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Generating a halo catalogue</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../Python_API.html">Python API</a></li>
@@ -292,7 +292,7 @@
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Generating halos</h1>
+    <h1>Generating a halo catalogue</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -306,15 +306,17 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="generating-halos">
-<h1>Generating halos<a class="headerlink" href="#generating-halos" title="Link to this heading">#</a></h1>
+  <section id="generating-a-halo-catalogue">
+<h1>Generating a halo catalogue<a class="headerlink" href="#generating-a-halo-catalogue" title="Link to this heading">#</a></h1>
 <p>In this tutorial, we will present, for the first time, how to generate a (appoximated) halo catalogue using ExSHalos. We will use the cosmology of the <a class="reference external" href="https://www.cosmosim.org/metadata/mdpl2/">MDPL2</a> simulation as an example. We will also fit the parameters of the barrier such that the mass function approximates the <a class="reference external" href="https://arxiv.org/abs/1001.3162">Tinker’s one</a>.</p>
-<p>After reading this, you will learn:
-- How to compute a theoretical mass function (<code class="docutils literal notranslate"><span class="pre">pyexshalos.theory.Get_dndlnm</span></code>);
-- How to fit the ellipsoidal barrier (<code class="docutils literal notranslate"><span class="pre">pyexshalos.utils.Fit_Barrier</span></code>);
-- How to generate a halo catologue for a given barrier (<code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Generate_Halos_Box_from_Pk</span></code>);
-- How to measure the mass function of a halo catalogue (<code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Compute_Abundance</span></code>).</p>
-<p>The <cite>.py</cite> file with the full code is in the <a class="reference external" href="https://github.com/Voivodic/ExSHalos/blob/main/tutorials/Halo_cataloques.py">github page</a>.</p>
+<p>After reading this, you will learn:</p>
+<ul class="simple">
+<li><p>How to compute a theoretical mass function (<code class="docutils literal notranslate"><span class="pre">pyexshalos.theory.Get_dndlnm</span></code>);</p></li>
+<li><p>How to fit the ellipsoidal barrier (<code class="docutils literal notranslate"><span class="pre">pyexshalos.utils.Fit_Barrier</span></code>);</p></li>
+<li><p>How to generate a halo catologue for a given barrier (<code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Generate_Halos_Box_from_Pk</span></code>);</p></li>
+<li><p>How to measure the mass function of a halo catalogue (<code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Compute_Abundance</span></code>).</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">.py</span></code> file with the full code is in the <a class="reference external" href="https://github.com/Voivodic/ExSHalos/blob/main/tutorials/Halo_cataloques.py">github page</a>.</p>
 <p>First of all, we need to import numpy, for the manipulation of arrays, pylab, to plot the results, and pyexshalos.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import the libraries used in this tutorial</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -322,11 +324,13 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyexshalos</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">exh</span>
 </pre></div>
 </div>
-<p>Then, we set the parameters that we want for the box and load the linear matter power spectrum. The main parameters here are:
-- <code class="docutils literal notranslate"><span class="pre">nd</span></code>: The number of divisions (number of cells) along each direction. You can also pass (nx, ny, nz) to use a different number of cells for each direction;
-- <code class="docutils literal notranslate"><span class="pre">Lc</span></code>: The size of each cubic cell in Mpc/h;
-- <code class="docutils literal notranslate"><span class="pre">Nmin</span></code>: The minimum number of particles in each halo. As we will see, Nmin might be any positive integer (even 1!) because all halos in ExSHalos are well resolved;
-- <code class="docutils literal notranslate"><span class="pre">seed</span></code>: The seed used for the random number generator. This makes the results reproducible.</p>
+<p>Then, we set the parameters that we want for the box and load the linear matter power spectrum. The main parameters here are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">nd</span></code>: The number of divisions (number of cells) along each direction. You can also pass (nx, ny, nz) to use a different number of cells for each direction;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Lc</span></code>: The size of each cubic cell in Mpc/h;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Nmin</span></code>: The minimum number of particles in each halo. As we will see, Nmin might be any positive integer (even 1!) because all halos in ExSHalos are well resolved;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">seed</span></code>: The seed used for the random number generator. This makes the results reproducible.</p></li>
+</ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set the parameters for the halo catalogue</span>
 <span class="n">Om0</span> <span class="o">=</span> <span class="mf">0.307115</span>
 <span class="n">z</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -351,10 +355,12 @@
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>Now, we use a utility function in <em>pyexshalos.utils</em> to fit the parameters of the barrier to reproduce a given mass fucntion. We can especify some parameters here:
-- <code class="docutils literal notranslate"><span class="pre">x0</span></code>: The initial guess for the parameters of the barrier;
-- <code class="docutils literal notranslate"><span class="pre">Max_iter</span></code>: The maximum number of iterations allowed for the optimization;
-- <code class="docutils literal notranslate"><span class="pre">tol</span></code>: Tolerance of the error in the fit;</p>
+<p>Now, we use a utility function in <em>pyexshalos.utils</em> to fit the parameters of the barrier to reproduce a given mass fucntion. We can especify some parameters here:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">x0</span></code>: The initial guess for the parameters of the barrier;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Max_iter</span></code>: The maximum number of iterations allowed for the optimization;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tol</span></code>: Tolerance of the error in the fit;</p></li>
+</ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fit the parameters of the barrier to reproduce the mass function computed above</span>
 <span class="n">params</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">Fit_Barrier</span><span class="p">(</span>
     <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
