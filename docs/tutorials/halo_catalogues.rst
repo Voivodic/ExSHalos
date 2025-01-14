@@ -1,15 +1,16 @@
-Generating halos
-================
+Generating a halo catalogue
+===========================
 
 In this tutorial, we will present, for the first time, how to generate a (appoximated) halo catalogue using ExSHalos. We will use the cosmology of the `MDPL2 <https://www.cosmosim.org/metadata/mdpl2/>`_ simulation as an example. We will also fit the parameters of the barrier such that the mass function approximates the `Tinker's one <https://arxiv.org/abs/1001.3162>`_. 
 
 After reading this, you will learn:
+
 - How to compute a theoretical mass function (``pyexshalos.theory.Get_dndlnm``);
 - How to fit the ellipsoidal barrier (``pyexshalos.utils.Fit_Barrier``);
 - How to generate a halo catologue for a given barrier (``pyexshalos.mock.Generate_Halos_Box_from_Pk``);
 - How to measure the mass function of a halo catalogue (``pyexshalos.simulation.Compute_Abundance``).
 
-The `.py` file with the full code is in the `github page <https://github.com/Voivodic/ExSHalos/blob/main/tutorials/Halo_cataloques.py>`_.
+The ``.py`` file with the full code is in the `github page <https://github.com/Voivodic/ExSHalos/blob/main/tutorials/Halo_cataloques.py>`_.
 
 First of all, we need to import numpy, for the manipulation of arrays, pylab, to plot the results, and pyexshalos.
 
@@ -21,6 +22,7 @@ First of all, we need to import numpy, for the manipulation of arrays, pylab, to
     import pyexshalos as exh
 
 Then, we set the parameters that we want for the box and load the linear matter power spectrum. The main parameters here are:
+
 - ``nd``: The number of divisions (number of cells) along each direction. You can also pass (nx, ny, nz) to use a different number of cells for each direction;
 - ``Lc``: The size of each cubic cell in Mpc/h;
 - ``Nmin``: The minimum number of particles in each halo. As we will see, Nmin might be any positive integer (even 1!) because all halos in ExSHalos are well resolved;
@@ -54,6 +56,7 @@ To fit the parameters used in the `ellipsoidal barrier <https://arxiv.org/abs/as
     )
 
 Now, we use a utility function in *pyexshalos.utils* to fit the parameters of the barrier to reproduce a given mass fucntion. We can especify some parameters here:
+
 - ``x0``: The initial guess for the parameters of the barrier;
 - ``Max_iter``: The maximum number of iterations allowed for the optimization;
 - ``tol``: Tolerance of the error in the fit;
