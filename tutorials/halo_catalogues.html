@@ -1,0 +1,513 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Generating halos &#8212; ExSHalos</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=a1637f0b"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/halo_catalogues';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Python API" href="../Python_API.html" />
+    <link rel="prev" title="Tutorials" href="../Tutorials.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/Xhalo.png" class="logo__image only-light" alt="ExSHalos - Home"/>
+    <img src="../_static/Xhalo.png" class="logo__image only-dark pst-js-only" alt="ExSHalos - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    ExSHalos
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../Tutorials.html">Tutorials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Generating halos</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../Python_API.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TODO.html">TODO</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/tutorials/halo_catalogues.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Generating halos</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="generating-halos">
+<h1>Generating halos<a class="headerlink" href="#generating-halos" title="Link to this heading">#</a></h1>
+<p>In this tutorial, we will present, for the first time, how to generate a (appoximated) halo catalogue using ExSHalos. We will use the cosmology of the <a class="reference external" href="https://www.cosmosim.org/metadata/mdpl2/">MDPL2</a> simulation as an example. We will also fit the parameters of the barrier such that the mass function approximates the <a class="reference external" href="https://arxiv.org/abs/1001.3162">Tinker’s one</a>.</p>
+<p>After reading this, you will learn:
+* How to compute a theoretical mass function (<code class="docutils literal notranslate"><span class="pre">pyexshalos.theory.Get_dndlnm</span></code>);
+* How to fit the ellipsoidal barrier (<code class="docutils literal notranslate"><span class="pre">pyexshalos.utils.Fit_Barrier</span></code>);
+* How to generate a halo catologue for a given barrier (<code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Generate_Halos_Box_from_Pk</span></code>);
+* How to measure the mass function of a halo catalogue (<code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Compute_Abundance</span></code>).</p>
+<p>First of all, we need to import numpy, for the manipulation of arrays, pylab, to plot the results, and pyexshalos.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import the libraries used in this tutorial</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pylab</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyexshalos</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">exh</span>
+</pre></div>
+</div>
+<p>Then, we set the parameters that we want for the box and load the linear matter power spectrum. The main parameters here are:
+* <code class="docutils literal notranslate"><span class="pre">nd</span></code>: The number of divisions (number of cells) along each direction. You can also pass (nx, ny, nz) to use a different number of cells for each direction;
+* <code class="docutils literal notranslate"><span class="pre">Lc</span></code>: The size of each cubic cell in Mpc/h;
+* <code class="docutils literal notranslate"><span class="pre">Nmin</span></code>: The minimum number of particles in each halo. As we will see, Nmin might be any positive integer (even 1!) because all halos in ExSHalos are well resolved;
+* <code class="docutils literal notranslate"><span class="pre">seed</span></code>: The seed used for the random number generator. This makes the results reproducible.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set the parameters for the halo catalogue</span>
+<span class="n">Om0</span> <span class="o">=</span> <span class="mf">0.307115</span>
+<span class="n">z</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">nd</span> <span class="o">=</span> <span class="mi">256</span>
+<span class="n">Lc</span> <span class="o">=</span> <span class="mf">4.0</span>
+<span class="n">L</span> <span class="o">=</span> <span class="n">Lc</span> <span class="o">*</span> <span class="n">nd</span>
+<span class="n">Nmin</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">12345</span>
+<span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">Max_iter</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">verbose</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># Load the linear matter power spectrum of the MDPL2 simulation</span>
+<span class="n">k</span><span class="p">,</span> <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;MDPL2_z00_matterpower.dat&quot;</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To fit the parameters used in the <a href="#id1"><span class="problematic" id="id2">`ellipsoidal barrier`&lt;https://arxiv.org/abs/astro-ph/0105113&gt;`_</span></a>, we can provide a halo mass function. As an exemple here, we will use the <em>pyexshalos.theory</em> module to compute the Tinker’s mass function. However, note that any mass function can be used, even a non-smooth one from your favorite simulation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compute the theoretical mass function (used as the target mass function here)</span>
+<span class="n">Mh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+<span class="n">dn_theory</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">theory</span><span class="o">.</span><span class="n">Get_dndlnm</span><span class="p">(</span>
+    <span class="n">M</span><span class="o">=</span><span class="n">Mh</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;Tinker&quot;</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">P</span><span class="o">=</span><span class="n">P</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, we use a utility function in <em>pyexshalos.utils</em> to fit the parameters of the barrier to reproduce a given mass fucntion. We can especify some parameters here:
+* <code class="docutils literal notranslate"><span class="pre">x0</span></code>: The initial guess for the parameters of the barrier;
+* <code class="docutils literal notranslate"><span class="pre">Max_iter</span></code>: The maximum number of iterations allowed for the optimization;
+* <code class="docutils literal notranslate"><span class="pre">tol</span></code>: Tolerance of the error in the fit;</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fit the parameters of the barrier to reproduce the mass function computed above</span>
+<span class="n">params</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">Fit_Barrier</span><span class="p">(</span>
+    <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
+    <span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">,</span>
+    <span class="n">M</span><span class="o">=</span><span class="n">Mh</span><span class="p">,</span>
+    <span class="n">dndlnM</span><span class="o">=</span><span class="n">dn_theory</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="o">=</span><span class="n">Lc</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+    <span class="n">Nmin</span><span class="o">=</span><span class="n">Nmin</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+    <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span>
+    <span class="n">Max_iter</span><span class="o">=</span><span class="n">Max_iter</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>With the parameters of the barrier chosen, we proceed to the generation of the halo catalogue.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate a halo catalogue with the barrier found above</span>
+<span class="n">halos</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Generate_Halos_Box_from_Pk</span><span class="p">(</span>
+    <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
+    <span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">,</span>
+    <span class="n">nd</span><span class="o">=</span><span class="n">nd</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="o">=</span><span class="n">Lc</span><span class="p">,</span>
+    <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span>
+    <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span>
+    <span class="n">Nmin</span><span class="o">=</span><span class="n">Nmin</span><span class="p">,</span>
+    <span class="n">a</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">beta</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+    <span class="n">seed</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">seed</span><span class="o">*</span><span class="mi">23</span><span class="o">/</span><span class="mi">17</span><span class="p">),</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Just to check that the halo catalogue generated has a halo mass function close to the used, we can measure it using a function in <em>pyexshalos.simulation</em>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Measure the abundance of the halos</span>
+<span class="n">dn_sim</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Compute_Abundance</span><span class="p">(</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">],</span> <span class="n">Nm</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">Lc</span><span class="o">=</span><span class="n">Lc</span><span class="p">,</span> <span class="n">nd</span><span class="o">=</span><span class="n">nd</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To finish, we plot both the theoretical and simulated mass function to compare them.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot the halo mass function</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">Mh</span><span class="p">,</span> <span class="n">dn_theory</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Theory&quot;</span>
+<span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span>
+    <span class="n">dn_sim</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">],</span>
+    <span class="n">dn_sim</span><span class="p">[</span><span class="s2">&quot;dn&quot;</span><span class="p">],</span>
+    <span class="n">yerr</span><span class="o">=</span><span class="n">dn_sim</span><span class="p">[</span><span class="s2">&quot;dn_err&quot;</span><span class="p">],</span>
+    <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+    <span class="n">markersize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Simulation&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">]))</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dn_sim</span><span class="p">[</span><span class="s2">&quot;dn&quot;</span><span class="p">][</span><span class="n">dn_sim</span><span class="p">[</span><span class="s2">&quot;dn&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">])</span>
+        <span class="o">*</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dn_sim</span><span class="p">[</span><span class="s2">&quot;dn&quot;</span><span class="p">]))</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$M_</span><span class="si">{h}</span><span class="s2">$ $[M_{\odot}/h]$&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$d\, n_{\rm h}/d\, ln M_{\rm h}$ $[h/{\rm Mpc}]^</span><span class="si">{3}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/Abundance.png" src="../_images/Abundance.png" />
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../Tutorials.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Tutorials</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../Python_API.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Python API</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Rodrigo Voivodic
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Rodrigo Voivodic.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
