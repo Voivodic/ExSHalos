@@ -1,7 +1,7 @@
 Python API
 ==========
 
-In this section, all functions in the python APi are described.
+In this section, all functions in the python API are described.
 
 .. toctree::
    :maxdepth: 2
