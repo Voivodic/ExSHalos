@@ -377,6 +377,10 @@
 <span class="p">)</span>
 </pre></div>
 </div>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>Because the effective window used in the halo definition of ExSHalos is not standard (union of top-hat functions in Cartesian coordinates) and the mass discretization is non-uniform (discretazed by the number of cells equidistant to the peak), this function should always be re-run for a new geometry (<code class="docutils literal notranslate"><span class="pre">Lc</span></code> and <code class="docutils literal notranslate"><span class="pre">nc</span></code>) of the grid.</p>
+</div>
 <p>With the parameters of the barrier chosen, we proceed to the generation of the halo catalogue through the <code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Generate_Halos_Box_from_Pk</span></code> function. (Note that we are using other seed here).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate a halo catalogue with the barrier found above</span>
 <span class="n">halos</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Generate_Halos_Box_from_Pk</span><span class="p">(</span>
@@ -394,6 +398,10 @@
     <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note that the halos have any mass value and not just intenger mutipliers of the cell mass!</p>
 </div>
 <p>Just to check that the halo catalogue generated has a halo mass function close to the used, we can measure it using the function <code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Compute_Abundance</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Measure the abundance of the halos</span>
@@ -431,6 +439,10 @@
 </pre></div>
 </div>
 <img alt="../_images/Abundance.png" src="../_images/Abundance.png" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note that the mass function is fine even for the halos with just one particle. This happens because of the semi-analytical nature of ExSHalos. Once we have the barrier, we can give masses to the halos following the mass function of this barrier and the mass interval that the halo belongs. Therefore, to create a halo catalogue with halos resolved (not internally) up to a mass of M, we only need to have a grid with cells/particles with mass M.</p>
+</div>
 </section>
 
 

@@ -1,7 +1,11 @@
 Installation
 ============
 
-ExSHalos is wirtten in C/C++ and need some libraries.
+ExSHalos is wirtten in C/C++ and need some external libraries to work.
+
+Even with the dependence list being small and composed of standard libraries (likely present in clusters), the installation instructions, for each library, is given below.
+
+Suport for containers and ephemeral nix shells will be given in the future.
 
 C/C++ dependencies:
 -------------------
@@ -181,8 +185,8 @@ Once you have pip (or conda), these libraries can be installed with:
 
 Where you have to choose between pip or conda denpending of your prefered python package manager.
 
-Package installatin
--------------------
+Package installation
+--------------------
 
 Once all dependencies are installed, ExSHalos can be install with:
 

@@ -43,6 +43,7 @@
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/halo_bias';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -363,6 +364,10 @@
 <span class="p">)</span>
 </pre></div>
 </div>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>Outputting the positions of the particles displaced with LPT will increase the running time and memory! It happens because ExSHalos, by default, compute the displacement only of the particles/cells that belong to a halo with more than <code class="docutils literal notranslate"><span class="pre">Nmin</span></code> particles.</p>
+</div>
 <p>With the catalogue of halos and particles in hand, we split the halos in different mass bins to simulate the existence of many tracers. The important quantity here is the <code class="docutils literal notranslate"><span class="pre">types</span></code> array that must have the same size of the total number of tracers and contain intengers that discriminate between the different types of tracers. The mean mass and the number of halos, in each bin, is also computed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the mass bins to measure the power spectrum</span>
 <span class="n">Nh_bins</span> <span class="o">=</span> <span class="mi">7</span>
@@ -388,8 +393,8 @@
 <p>With the type of each halo determined, we compute the density grid of the particles and of each type of halo.
 We use the <code class="docutils literal notranslate"><span class="pre">pyexshalos.simualation.Compute_Density_Grid</span></code> function for it. Relevant options available are:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ẁindow</span></code>: This sets the mass assigment used for the construction of the density grid;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ìnterlacing</span></code>: This sets whether or not to use interlaced grids to alleviate the alising created because of the finite resolution of the grid.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">window</span></code>: This sets the mass assigment used for the construction of the density grid;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">interlacing</span></code>: This sets whether or not to use interlaced grids to alleviate the alising created because of the finite resolution of the grid.</p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Measure the density grids</span>
 <span class="n">nd</span> <span class="o">=</span> <span class="mi">128</span>
@@ -422,8 +427,8 @@ We use the <code class="docutils literal notranslate"><span class="pre">pyexshal
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">k_min</span></code>: The left of the k bins used in the measurement;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">k_max</span></code>: The right of the k bins used in the measurement;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Ǹk</span></code>: The number of k bins used in the measurement;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ǹtypes</span></code>: The number of types of tracers. This quantity does not need to be given in case of only one tracer without interlacing or multiples tracers with interlacing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Nk</span></code>: The number of k bins used in the measurement;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ntypes</span></code>: The number of types of tracers. This quantity does not need to be given in case of only one tracer without interlacing or multiples tracers with interlacing.</p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Put the density grid of particles into the same array of halos</span>
 <span class="n">grids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">grid_p</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span> <span class="n">grids_h</span><span class="p">])</span>
@@ -498,6 +503,10 @@ We use the <code class="docutils literal notranslate"><span class="pre">pyexshal
     <span class="n">bhh_err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">hess_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">bhh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
     <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
 </pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <span class="math notranslate nohighlight">\(\chi {2}\)</span> define above is wrong! It is not taking into account the fact that the halo and particle fields are generated from the same initial conditions. Therefore, the errorbars are expected to be overestimated. We could also consider all power spectra in the estimation of <span class="math notranslate nohighlight">\(b_{1}\)</span> to get smaller errorbars and use the error cancelation properties of multi tracers.</p>
 </div>
 <p>For matter of comparison, we also compute the theoretical linear halo bias, using three standard methods, with the <code class="docutils literal notranslate"><span class="pre">pyexshalos.theory.Get_bh1</span></code> function.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compute the theoretical linear biases for a few models</span>

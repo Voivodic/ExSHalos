@@ -65,6 +65,10 @@ Now, we use the parameters above to generate a halo catalogue. Note the inclusio
         verbose=verbose,
     )
 
+.. attention::
+
+   Outputting the positions of the particles displaced with LPT will increase the running time and memory! It happens because ExSHalos, by default, compute the displacement only of the particles/cells that belong to a halo with more than ``Nmin`` particles.
+
 With the catalogue of halos and particles in hand, we split the halos in different mass bins to simulate the existence of many tracers. The important quantity here is the ``types`` array that must have the same size of the total number of tracers and contain intengers that discriminate between the different types of tracers. The mean mass and the number of halos, in each bin, is also computed.
 
 .. code-block:: python
@@ -92,8 +96,8 @@ With the catalogue of halos and particles in hand, we split the halos in differe
 With the type of each halo determined, we compute the density grid of the particles and of each type of halo.
 We use the ``pyexshalos.simualation.Compute_Density_Grid`` function for it. Relevant options available are:
 
-- ``ẁindow``: This sets the mass assigment used for the construction of the density grid;
-- ``ìnterlacing``: This sets whether or not to use interlaced grids to alleviate the alising created because of the finite resolution of the grid.
+- ``window``: This sets the mass assigment used for the construction of the density grid;
+- ``interlacing``: This sets whether or not to use interlaced grids to alleviate the alising created because of the finite resolution of the grid.
 
 .. code-block:: python
 
@@ -127,8 +131,8 @@ Having the density grid of each tracer, we can compute all possible power spectr
 
 - ``k_min``: The left of the k bins used in the measurement;
 - ``k_max``: The right of the k bins used in the measurement;
-- ``Ǹk``: The number of k bins used in the measurement;
-- ``ǹtypes``: The number of types of tracers. This quantity does not need to be given in case of only one tracer without interlacing or multiples tracers with interlacing.
+- ``Nk``: The number of k bins used in the measurement;
+- ``ntypes``: The number of types of tracers. This quantity does not need to be given in case of only one tracer without interlacing or multiples tracers with interlacing.
 
 .. code-block:: python
 
@@ -206,6 +210,10 @@ Now, as a way to visualize the measurements, we fit the linear halo bias, for ea
         bhh.append(np.sqrt(x.x[0]))
         bhh_err.append(x.hess_inv[0, 0]/(2.0*bhh[-1]))
         count += 1
+
+.. warning::
+
+   The :math:`\chi {2}` define above is wrong! It is not taking into account the fact that the halo and particle fields are generated from the same initial conditions. Therefore, the errorbars are expected to be overestimated. We could also consider all power spectra in the estimation of :math:`b_{1}` to get smaller errorbars and use the error cancelation properties of multi tracers.
 
 For matter of comparison, we also compute the theoretical linear halo bias, using three standard methods, with the ``pyexshalos.theory.Get_bh1`` function.
 
