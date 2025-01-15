@@ -1,0 +1,623 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Power spectrum for multiple tracers &#8212; ExSHalos</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=a1637f0b"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/halo_bias';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Generating a halo catalogue" href="halo_catalogues.html" />
+    <link rel="prev" title="Tutorials" href="../Tutorials.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/Xhalo.png" class="logo__image only-light" alt="ExSHalos - Home"/>
+    <img src="../_static/Xhalo.png" class="logo__image only-dark pst-js-only" alt="ExSHalos - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    ExSHalos
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../Tutorials.html">Tutorials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Power spectrum for multiple tracers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="halo_catalogues.html">Generating a halo catalogue</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../Python_API.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TODO.html">TODO</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/tutorials/halo_bias.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Power spectrum for multiple tracers</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="power-spectrum-for-multiple-tracers">
+<h1>Power spectrum for multiple tracers<a class="headerlink" href="#power-spectrum-for-multiple-tracers" title="Link to this heading">#</a></h1>
+<p id="tutorials-halo-bias">In this tutorial, we will generate a (approximated) halo catalogue with ExSHalos, split the halos into different types of tracers (using their masses), compute all density grids with these tracers, measure all possible power spectra and fit the linear bias using the auto and cross spectra.</p>
+<p>After reading this, you will learn:</p>
+<ul class="simple">
+<li><p>How to generate a halo catalogue and get the particles displaced with LPT (<code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Generate_Halos_Box_from_Pk</span></code>);</p></li>
+<li><p>How to compute the density grid from a list of tracers with their respective types (<code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Compute_Density_Grid</span></code>);</p></li>
+<li><p>How to compute all possible power spectra from a list of density grids (<code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Compute_Power_Spectrum</span></code>);</p></li>
+<li><p>How to compute a theoretical linear halo bias (<code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Get_bh1</span></code>).</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">.py</span></code> file with the full code is in the <a class="reference external" href="https://github.com/Voivodic/ExSHalos/blob/main/tutorials/Halo_bias.py">github page</a>.</p>
+<p>First of all, we need to import numpy, for the manipulation of arrays, pylab, to plot the results, scipy.optimize.minimize, to find the best fit linear biases, and pyexshalos.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import the libraries used in this tutorial</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pylab</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyexshalos</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">exh</span>
+</pre></div>
+</div>
+<p>Then, we set the parameters of our box and load the linear matter power spectrum from <a class="reference external" href="https://www.cosmosim.org/metadata/mdpl2/">MDPL2 simulation</a>. We also set the parameters of the barrier to the ones found with <code class="docutils literal notranslate"><span class="pre">pyexshalos.utils.Fit_Barrier</span></code> (described in the <a class="reference internal" href="halo_catalogues.html#tutorials-generating-halos"><span class="std std-ref">generating a halo catalogue</span></a> tutorial).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set parameters for the halo catalogue</span>
+<span class="n">Om0</span> <span class="o">=</span> <span class="mf">0.307115</span>
+<span class="n">z</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">nd</span> <span class="o">=</span> <span class="mi">256</span>
+<span class="n">Lc</span> <span class="o">=</span> <span class="mf">4.0</span>
+<span class="n">L</span> <span class="o">=</span> <span class="n">Lc</span> <span class="o">*</span> <span class="n">nd</span>
+<span class="n">Nmin</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">12345</span>
+<span class="n">verbose</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># Load the linear matter power spectrum from the MDPL2 simulation</span>
+<span class="n">klin</span><span class="p">,</span> <span class="n">Plin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;MDPL2_z00_matterpower.dat&quot;</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Best fit parameters found with pyexshalos.utils.Fit_Barrier</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.803958</span><span class="p">,</span> <span class="mf">0.288991</span><span class="p">,</span> <span class="mf">0.525464</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Now, we use the parameters above to generate a halo catalogue. Note the inclusion of the <code class="docutils literal notranslate"><span class="pre">OUT_LPT</span></code> flag. This flag will ask ExSHalos include in the outputed dictionary a field called “pos” with the position of particles displaced with the Lagrangian perturbation theory.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate a halo catalogue with the barrier define above</span>
+<span class="n">halos</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Generate_Halos_Box_from_Pk</span><span class="p">(</span>
+    <span class="n">k</span><span class="o">=</span><span class="n">klin</span><span class="p">,</span>
+    <span class="n">P</span><span class="o">=</span><span class="n">Plin</span><span class="p">,</span>
+    <span class="n">nd</span><span class="o">=</span><span class="n">nd</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="o">=</span><span class="n">Lc</span><span class="p">,</span>
+    <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span>
+    <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span>
+    <span class="n">Nmin</span><span class="o">=</span><span class="n">Nmin</span><span class="p">,</span>
+    <span class="n">a</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">beta</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+    <span class="n">OUT_LPT</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>With the catalogue of halos and particles in hand, we split the halos in different mass bins to simulate the existence of many tracers. The important quantity here is the <code class="docutils literal notranslate"><span class="pre">types</span></code> array that must have the same size of the total number of tracers and contain intengers that discriminate between the different types of tracers. The mean mass and the number of halos, in each bin, is also computed.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the mass bins to measure the power spectrum</span>
+<span class="n">Nh_bins</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="n">Mh_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">]))</span> <span class="o">*</span>
+    <span class="mf">0.99</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">]))</span> <span class="o">*</span> <span class="mf">1.01</span><span class="p">,</span> <span class="n">Nh_bins</span>
+<span class="p">)</span>
+
+<span class="c1"># Compute the mean mass and the number of halos in each bin</span>
+<span class="n">Mh_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nh_bins</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Nh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nh_bins</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nh_bins</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">Mh_bins</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">Mh_bins</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">Mh_mean</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">][</span><span class="n">mask</span><span class="p">])</span>
+    <span class="n">Nh</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+<span class="c1"># Define the types of halos using the mass bins</span>
+<span class="n">types</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Mh_bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">//</span> <span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Mh_bins</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Mh_bins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>With the type of each halo determined, we compute the density grid of the particles and of each type of halo.
+We use the <code class="docutils literal notranslate"><span class="pre">pyexshalos.simualation.Compute_Density_Grid</span></code> function for it. Relevant options available are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ẁindow</span></code>: This sets the mass assigment used for the construction of the density grid;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ìnterlacing</span></code>: This sets whether or not to use interlaced grids to alleviate the alising created because of the finite resolution of the grid.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Measure the density grids</span>
+<span class="n">nd</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">window</span> <span class="o">=</span> <span class="s2">&quot;CIC&quot;</span>
+<span class="n">interlacing</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># Particles</span>
+<span class="n">grid_p</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Compute_Density_Grid</span><span class="p">(</span>
+    <span class="n">pos</span><span class="o">=</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">],</span>
+    <span class="n">nd</span><span class="o">=</span><span class="n">nd</span><span class="p">,</span>
+    <span class="n">L</span><span class="o">=</span><span class="n">L</span><span class="p">,</span>
+    <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span>
+    <span class="n">interlacing</span><span class="o">=</span><span class="n">interlacing</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Halos</span>
+<span class="n">grids_h</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Compute_Density_Grid</span><span class="p">(</span>
+    <span class="n">pos</span><span class="o">=</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;posh&quot;</span><span class="p">],</span>
+    <span class="n">types</span><span class="o">=</span><span class="n">types</span><span class="p">,</span>
+    <span class="n">nd</span><span class="o">=</span><span class="n">nd</span><span class="p">,</span>
+    <span class="n">L</span><span class="o">=</span><span class="n">L</span><span class="p">,</span>
+    <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span>
+    <span class="n">interlacing</span><span class="o">=</span><span class="n">interlacing</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Having the density grid of each tracer, we can compute all possible power spectra [N(N+1)/2 for N tracers]. For this we use the function <code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Compute_Power_Spectrum</span></code>. This function can chooses reasonablevalues for the k bins based on the geometry of the grid. However, some options can also be set:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">k_min</span></code>: The left of the k bins used in the measurement;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">k_max</span></code>: The right of the k bins used in the measurement;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ǹk</span></code>: The number of k bins used in the measurement;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ǹtypes</span></code>: The number of types of tracers. This quantity does not need to be given in case of only one tracer without interlacing or multiples tracers with interlacing.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Put the density grid of particles into the same array of halos</span>
+<span class="n">grids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">grid_p</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span> <span class="n">grids_h</span><span class="p">])</span>
+<span class="k">del</span> <span class="n">grid_p</span>
+<span class="k">del</span> <span class="n">grids_h</span>
+<span class="n">nh</span> <span class="o">=</span> <span class="n">Nh</span> <span class="o">/</span> <span class="n">L</span><span class="o">**</span><span class="mi">3</span>
+
+<span class="c1"># Measure the Nh_bins*(Nh_bin+1)/2 power spectra</span>
+<span class="n">Nk</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="n">k_min</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">k_max</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">P_sim</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Compute_Power_Spectrum</span><span class="p">(</span>
+    <span class="n">grid</span><span class="o">=</span><span class="n">grids</span><span class="p">,</span>
+    <span class="n">L</span><span class="o">=</span><span class="n">L</span><span class="p">,</span>
+    <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span>
+    <span class="n">Nk</span><span class="o">=</span><span class="n">Nk</span><span class="p">,</span>
+    <span class="n">k_min</span><span class="o">=</span><span class="n">k_min</span><span class="p">,</span>
+    <span class="n">k_max</span><span class="o">=</span><span class="n">k_max</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+    <span class="n">ntypes</span><span class="o">=</span><span class="n">Nh_bins</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, as a way to visualize the measurements, we fit the linear halo bias, for each mass bin, using the auto power spectrum and the cross spectrum with matter.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define some quantities for the computation of chi2</span>
+<span class="n">k_NL</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">b0</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="n">c0</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">kdata</span> <span class="o">=</span> <span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]</span>
+<span class="n">Pm</span> <span class="o">=</span> <span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">Pdata</span> <span class="o">=</span> <span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">]</span>
+<span class="n">Nk</span> <span class="o">=</span> <span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Nk&quot;</span><span class="p">]</span>
+
+<span class="c1"># Define the chi2 for fitting the b1</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">chi2</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">r</span> <span class="o">-</span> <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">k</span><span class="o">/</span><span class="n">k_NL</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">err2</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+
+<span class="c1"># Define the gradient of the chi2 above</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">chi2_grad</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">k</span><span class="o">/</span><span class="n">k_NL</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">pred</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span><span class="o">/</span><span class="n">err2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">pred</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">k</span><span class="o">/</span><span class="n">k_NL</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">err2</span><span class="p">)])</span>
+
+<span class="c1"># Fit b1 using Phh and Phm</span>
+<span class="n">bhh</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">bhh_err</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">bhm</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">bhm_err</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Nh_bins</span><span class="p">):</span>
+    <span class="c1"># Using Phm</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Pdata</span><span class="p">[</span><span class="n">count</span><span class="p">]</span><span class="o">/</span><span class="n">Pm</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">kdata</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">err2</span> <span class="o">=</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">Nk</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="n">chi2</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="n">chi2_grad</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="n">b0</span><span class="p">,</span> <span class="n">c0</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;BFGS&quot;</span><span class="p">,</span>
+                 <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;maxiter&quot;</span><span class="p">:</span> <span class="mi">1_000</span><span class="p">})</span>
+    <span class="n">bhm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">bhm_err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">hess_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">count</span> <span class="o">+=</span> <span class="n">i</span>
+
+    <span class="c1"># Using Phh</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">Pdata</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">nh</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Pm</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">kdata</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">err2</span> <span class="o">=</span> <span class="p">(</span><span class="n">Pdata</span><span class="p">[</span><span class="n">count</span><span class="p">,</span> <span class="n">mask</span><span class="p">]</span><span class="o">/</span><span class="n">Pm</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">Nk</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="n">chi2</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="n">chi2_grad</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="n">b0</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">c0</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;BFGS&quot;</span><span class="p">,</span>
+                 <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;maxiter&quot;</span><span class="p">:</span> <span class="mi">1_000</span><span class="p">})</span>
+    <span class="n">bhh</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">bhh_err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">hess_inv</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">bhh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>For matter of comparison, we also compute the theoretical linear halo bias, using three standard methods, with the <code class="docutils literal notranslate"><span class="pre">pyexshalos.theory.Get_bh1</span></code> function.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compute the theoretical linear biases for a few models</span>
+<span class="n">Mh_theory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Mh_bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Mh_bins</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">600</span><span class="p">)</span>
+<span class="n">b_ps</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">theory</span><span class="o">.</span><span class="n">Get_bh1</span><span class="p">(</span><span class="n">M</span><span class="o">=</span><span class="n">Mh_theory</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;PS&quot;</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">klin</span><span class="p">,</span> <span class="n">P</span><span class="o">=</span><span class="n">Plin</span><span class="p">)</span>
+<span class="n">b_tinker</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">theory</span><span class="o">.</span><span class="n">Get_bh1</span><span class="p">(</span><span class="n">M</span><span class="o">=</span><span class="n">Mh_theory</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;Tinker&quot;</span><span class="p">,</span>
+                          <span class="n">theta</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">klin</span><span class="p">,</span> <span class="n">P</span><span class="o">=</span><span class="n">Plin</span><span class="p">)</span>
+<span class="n">b_st</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">theory</span><span class="o">.</span><span class="n">Get_bh1</span><span class="p">(</span><span class="n">M</span><span class="o">=</span><span class="n">Mh_theory</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;ST&quot;</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">klin</span><span class="p">,</span> <span class="n">P</span><span class="o">=</span><span class="n">Plin</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To finish, we plot the measurements and the theoretical models.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot the linear biases</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Mh_theory</span><span class="p">,</span> <span class="n">b_ps</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;PS&quot;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Mh_theory</span><span class="p">,</span> <span class="n">b_st</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;ST&quot;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Mh_theory</span><span class="p">,</span> <span class="n">b_tinker</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Tinker&quot;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">Mh_mean</span><span class="p">,</span> <span class="n">bhh</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">bhh_err</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Auto&quot;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">Mh_mean</span><span class="p">,</span> <span class="n">bhm</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">bhm_err</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Cross&quot;</span><span class="p">)</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">Mh_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">Mh_mean</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mf">2.0</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$M_</span><span class="si">{h}</span><span class="s2">$ $[M_{\odot}/h]$&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$b_</span><span class="si">{1}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Linear_bias.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/Linear_bias.png" src="../_images/Linear_bias.png" />
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../Tutorials.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Tutorials</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="halo_catalogues.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Generating a halo catalogue</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Rodrigo Voivodic
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Rodrigo Voivodic.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

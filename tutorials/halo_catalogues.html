@@ -47,7 +47,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Python API" href="../Python_API.html" />
-    <link rel="prev" title="Tutorials" href="../Tutorials.html" />
+    <link rel="prev" title="Power spectrum for multiple tracers" href="halo_bias.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -154,6 +154,7 @@
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../Tutorials.html">Tutorials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="halo_bias.html">Power spectrum for multiple tracers</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Generating a halo catalogue</a></li>
 </ul>
 </details></li>
@@ -308,7 +309,7 @@
                   
   <section id="generating-a-halo-catalogue">
 <h1>Generating a halo catalogue<a class="headerlink" href="#generating-a-halo-catalogue" title="Link to this heading">#</a></h1>
-<p>In this tutorial, we will present, for the first time, how to generate a (appoximated) halo catalogue using ExSHalos. We will use the cosmology of the <a class="reference external" href="https://www.cosmosim.org/metadata/mdpl2/">MDPL2</a> simulation as an example. We will also fit the parameters of the barrier such that the mass function approximates the <a class="reference external" href="https://arxiv.org/abs/1001.3162">Tinker’s one</a>.</p>
+<p id="tutorials-generating-halos">In this tutorial, we will present, for the first time, how to generate a (appoximated) halo catalogue using ExSHalos. We will use the cosmology of the <a class="reference external" href="https://www.cosmosim.org/metadata/mdpl2/">MDPL2</a> simulation as an example. We will also fit the parameters of the barrier such that the mass function approximates the <a class="reference external" href="https://arxiv.org/abs/1001.3162">Tinker’s one</a>.</p>
 <p>After reading this, you will learn:</p>
 <ul class="simple">
 <li><p>How to compute a theoretical mass function (<code class="docutils literal notranslate"><span class="pre">pyexshalos.theory.Get_dndlnm</span></code>);</p></li>
@@ -376,7 +377,7 @@
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>With the parameters of the barrier chosen, we proceed to the generation of the halo catalogue.</p>
+<p>With the parameters of the barrier chosen, we proceed to the generation of the halo catalogue. (Note that we are using other seed here)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate a halo catalogue with the barrier found above</span>
 <span class="n">halos</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Generate_Halos_Box_from_Pk</span><span class="p">(</span>
     <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
@@ -444,12 +445,12 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../Tutorials.html"
+       href="halo_bias.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Tutorials</p>
+        <p class="prev-next-title">Power spectrum for multiple tracers</p>
       </div>
     </a>
     <a class="right-next"

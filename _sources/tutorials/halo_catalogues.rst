@@ -1,6 +1,8 @@
 Generating a halo catalogue
 ===========================
 
+.. _tutorials/generating_halos:
+
 In this tutorial, we will present, for the first time, how to generate a (appoximated) halo catalogue using ExSHalos. We will use the cosmology of the `MDPL2 <https://www.cosmosim.org/metadata/mdpl2/>`_ simulation as an example. We will also fit the parameters of the barrier such that the mass function approximates the `Tinker's one <https://arxiv.org/abs/1001.3162>`_. 
 
 After reading this, you will learn:
@@ -77,7 +79,7 @@ Now, we use a utility function in *pyexshalos.utils* to fit the parameters of th
         Max_iter=Max_iter,
     )
 
-With the parameters of the barrier chosen, we proceed to the generation of the halo catalogue.
+With the parameters of the barrier chosen, we proceed to the generation of the halo catalogue. (Note that we are using other seed here)
 
 .. code-block:: python
 
