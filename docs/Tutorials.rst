@@ -5,6 +5,6 @@ Here we present simple tutorials using the main functionalities in the python AP
 
 .. toctree::
    :maxdepth: 1
-   :glob:
 
-   tutorials/*
+   tutorials/halo_catalogues.rst
+   tutorials/halo_bias.rst
