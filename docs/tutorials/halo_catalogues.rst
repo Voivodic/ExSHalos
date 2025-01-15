@@ -79,6 +79,10 @@ Now, we use the utility function ``pyexshalos.utils.Fit_Barrier`` to fit the par
         Max_iter=Max_iter,
     )
 
+.. attention::
+
+   Because the effective window used in the halo definition of ExSHalos is not standard (union of top-hat functions in Cartesian coordinates) and the mass discretization is non-uniform (discretazed by the number of cells equidistant to the peak), this function should always be re-run for a new geometry (``Lc`` and ``nc``) of the grid. 
+
 With the parameters of the barrier chosen, we proceed to the generation of the halo catalogue through the ``pyexshalos.mock.Generate_Halos_Box_from_Pk`` function. (Note that we are using other seed here).
 
 .. code-block:: python
@@ -98,6 +102,10 @@ With the parameters of the barrier chosen, we proceed to the generation of the h
         seed=int(seed*23/17),
         verbose=verbose,
     )
+
+.. note::
+
+   Note that the halos have any mass value and not just intenger mutipliers of the cell mass!
 
 Just to check that the halo catalogue generated has a halo mass function close to the used, we can measure it using the function ``pyexshalos.simulation.Compute_Abundance``.
 
@@ -140,4 +148,6 @@ To finish, we plot both the theoretical and simulated mass function to compare t
 
 .. image:: Abundance.png
 
+.. note::
 
+   Note that the mass function is fine even for the halos with just one particle. This happens because of the semi-analytical nature of ExSHalos. Once we have the barrier, we can give masses to the halos following the mass function of this barrier and the mass interval that the halo belongs. Therefore, to create a halo catalogue with halos resolved (not internally) up to a mass of M, we only need to have a grid with cells/particles with mass M.

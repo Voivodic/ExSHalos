@@ -5,6 +5,7 @@ Not necessarily in the priority order
 
 Code
 ----
+.. todo::
 
 - [ ] **Creation of more examples**
 - [ ] **Completion of the documentation**
@@ -15,6 +16,8 @@ Code
 
 Physics
 -------
+
+.. todo::
 
 - [ ] **Functions for the halo/void finder (simulation module)**
 - [ ] **Function for the halo/void profile (simulation module)**
