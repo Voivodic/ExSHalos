@@ -27,7 +27,7 @@ dn_theory = exh.theory.Get_dndlnm(
 
 # Fit the parameters of the barrier to reproduce the mass function computed above, for a particular seed
 print("Fitting the barrier")
-"""params = exh.utils.Fit_Barrier(
+params = exh.utils.Fit_Barrier(
     k=k,
     P=P,
     M=Mh,
@@ -38,8 +38,7 @@ print("Fitting the barrier")
     verbose=verbose,
     x0=x0,
     Max_iter=Max_iter,
-)"""
-params = [0.803958, 0.288991, 0.525464]
+)
 
 # Generate a halo catalogue with the barrier found above
 print("Generating the halo catalogue")

@@ -410,7 +410,7 @@ def Get_dndlnm(
     return -fh(sigma, model, theta, delta_c, Om0, z) * rhom / M * dlnsdlnm(M, sigma)
 
 # Halo bias of first order
-def bh1(
+def Get_bh1(
     M: np.ndarray,
     s: Optional[np.ndarray] = None,
     model: Union[int, str] = "PS",
@@ -510,10 +510,10 @@ def bh1(
         dt = delta_c + dv
 
         # Halos
-        for n in range(1, J_max + 1):
+        for n in range(1, int(J_max) + 1):
             resp -= (n * np.pi / (dt * dt)) * np.sin(n * np.pi * delta_c / dt) * np.exp(-n * n * np.pi * np.pi * s * s * (1.0 + D) / (2.0 * dt * dt)) * (np.power(np.tan(n * np.pi * delta_c / dt), -1.0) * (n * np.pi / dt) - b / (1.0 + D))
 
-        for n in range(1, J_max + 1):
+        for n in range(1, int(J_max) + 1):
             tmp += (n * np.pi / (dt * dt)) * np.sin(n * np.pi * delta_c / dt) * np.exp(-n * n * np.pi * np.pi * s * s * (1.0 + D) / (2.0 * dt * dt))
 
         resp = np.ones(len(s)) + resp / tmp
@@ -525,7 +525,7 @@ def bh1(
     return resp
 
 # Halo bias of second order
-def bh2(
+def Get_bh2(
     M: np.ndarray,
     s: Optional[np.ndarray] = None,
     model: Union[int, str] = "PS",
@@ -621,7 +621,7 @@ def bh2(
     return resp
 
 # Halo bias of third order
-def bh3(
+def Get_bh3(
     M: np.ndarray,
     s: Optional[np.ndarray] = None,
     model: Union[int, str] = "PS",
