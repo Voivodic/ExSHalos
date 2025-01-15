@@ -1,7 +1,7 @@
+.. _tutorials/halo_bias:
+
 Power spectrum for multiple tracers
 ===================================
-
-.. _tutorials/halo_bias:
 
 In this tutorial, we will generate a (approximated) halo catalogue with ExSHalos, split the halos into different types of tracers (using their masses), compute all density grids with these tracers, measure all possible power spectra and fit the linear bias using the auto and cross spectra.
 

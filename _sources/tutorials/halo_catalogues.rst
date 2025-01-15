@@ -1,7 +1,7 @@
+.. _tutorials/generating_halos:
+
 Generating a halo catalogue
 ===========================
-
-.. _tutorials/generating_halos:
 
 In this tutorial, we will present, for the first time, how to generate a (appoximated) halo catalogue using ExSHalos. We will use the cosmology of the `MDPL2 <https://www.cosmosim.org/metadata/mdpl2/>`_ simulation as an example. We will also fit the parameters of the barrier such that the mass function approximates the `Tinker's one <https://arxiv.org/abs/1001.3162>`_. 
 
@@ -47,7 +47,7 @@ Then, we set the parameters that we want for the box and load the linear matter 
     # Load the linear matter power spectrum of the MDPL2 simulation
     k, P = np.loadtxt("MDPL2_z00_matterpower.dat", unpack=True)
 
-To fit the parameters used in the `ellipsoidal barrier <https://arxiv.org/abs/astro-ph/0105113>`_, we can provide a halo mass function. As an exemple here, we will use the *pyexshalos.theory* module to compute the Tinker's mass function. However, note that any mass function can be used, even a non-smooth one from your favorite simulation.
+To fit the parameters used in the `ellipsoidal barrier <https://arxiv.org/abs/astro-ph/0105113>`_, we can provide a halo mass function. As an exemple here, we will use the ``pyexshalos.theory.Get_dndlnm`` function to compute the Tinker's mass function. However, note that any mass function can be used, even a non-smooth one from your favorite simulation.
 
 .. code-block:: python
 
@@ -57,7 +57,7 @@ To fit the parameters used in the `ellipsoidal barrier <https://arxiv.org/abs/as
         M=Mh, model="Tinker", theta=300, Om0=Om0, z=0.0, k=k, P=P
     )
 
-Now, we use a utility function in *pyexshalos.utils* to fit the parameters of the barrier to reproduce a given mass fucntion. We can especify some parameters here:
+Now, we use the utility function ``pyexshalos.utils.Fit_Barrier`` to fit the parameters of the barrier to reproduce a given mass function. We can especify some parameters here:
 
 - ``x0``: The initial guess for the parameters of the barrier;
 - ``Max_iter``: The maximum number of iterations allowed for the optimization;
@@ -79,7 +79,7 @@ Now, we use a utility function in *pyexshalos.utils* to fit the parameters of th
         Max_iter=Max_iter,
     )
 
-With the parameters of the barrier chosen, we proceed to the generation of the halo catalogue. (Note that we are using other seed here)
+With the parameters of the barrier chosen, we proceed to the generation of the halo catalogue through the ``pyexshalos.mock.Generate_Halos_Box_from_Pk`` function. (Note that we are using other seed here).
 
 .. code-block:: python
 
@@ -99,7 +99,7 @@ With the parameters of the barrier chosen, we proceed to the generation of the h
         verbose=verbose,
     )
 
-Just to check that the halo catalogue generated has a halo mass function close to the used, we can measure it using a function in *pyexshalos.simulation*.
+Just to check that the halo catalogue generated has a halo mass function close to the used, we can measure it using the function ``pyexshalos.simulation.Compute_Abundance``.
 
 .. code-block:: python
 
