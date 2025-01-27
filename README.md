@@ -37,7 +37,7 @@ pip install .
 
 You have three main options, to install ExSHalos, for the case you do not want to handle the dependencies manually and want an isolated working space:
 
-#### Docker
+#### [Docker](https://www.docker.com/)
 
 To create a Docker image you only need to
 ```bash
@@ -51,7 +51,7 @@ Then, to create a Docker container and enter into its shell
 docker run -it --name your_container_name your_image_name
 ```
 
-#### Apptainer
+#### [Apptainer](https://apptainer.org/)
 
 An opensource alternative to Docker (usually used in scientific clusters) is Apptainer. You can create similar images doing
 ```bash
@@ -65,7 +65,7 @@ Then, to enter in an isolated shell
 apptainer shell your_image_name.sif
 ```
 
-#### Nix
+#### [Nix](https://nixos.org/)
 
 Last but not least, you can also create an ephemeral shell using Nix with flakes. For this, you only need to run
 ```bash
