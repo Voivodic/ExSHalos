@@ -15,10 +15,11 @@
         voroPP = pkgs.stdenv.mkDerivation {
             name = "voro++";
 
-            src = pkgs.fetchurl {
-                url = "https://github.com/chr1shr/voro/archive/refs/heads/master.zip";
-                sha256 = "sha256-UBHCMmz0o7tQQWAlQnuX4qD1ycenxPgsvyXyBJtz9Wg";
-            };
+            src = "./";
+            #src = pkgs.fetchurl {
+            #    url = "https://github.com/chr1shr/voro/archive/refs/heads/master.zip";
+            #    sha256 = "sha256-UBHCMmz0o7tQQWAlQnuX4qD1ycenxPgsvyXyBJtz9Wg";
+            #};
             
             buildInputs = [ 
                 pkgs.unzip 
