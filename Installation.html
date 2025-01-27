@@ -508,16 +508,37 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 <section id="id3">
 <h3><a class="reference external" href="https://www.docker.com/">Docker</a><a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
 <p>To create a Docker image you only need to</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Voivodic/ExSHalos.git
+<span class="nb">cd</span><span class="w"> </span>ExSHalos
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>your_image_name<span class="w"> </span>.
+</pre></div>
+</div>
 <p>Then, to create a Docker container and enter into its shell</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--name<span class="w"> </span>your_container_name<span class="w"> </span>your_image_name
+</pre></div>
+</div>
 </section>
 <section id="id4">
 <h3><a class="reference external" href="https://apptainer.org/">Apptainer</a><a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
 <p>An opensource alternative to Docker (usually used in scientific clusters) is Apptainer. You can create similar images doing</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Voivodic/ExSHalos.git
+<span class="nb">cd</span><span class="w"> </span>ExSHalos
+apptainer<span class="w"> </span>build<span class="w"> </span>your_image_name.sif<span class="w"> </span>exshalos.def
+</pre></div>
+</div>
 <p>Then, to enter in an isolated shell</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>apptainer<span class="w"> </span>shell<span class="w"> </span>your_image_name.sif
+</pre></div>
+</div>
 </section>
 <section id="id5">
 <h3><a class="reference external" href="https://nixos.org/">Nix</a><a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
 <p>Last but not least, you can also create an ephemeral shell using Nix with flakes. For this, you only need to run</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Voivodic/ExSHalos.git
+<span class="nb">cd</span><span class="w"> </span>ExSHalos
+nix<span class="w"> </span>develop
+</pre></div>
+</div>
 </section>
 </section>
 </section>
