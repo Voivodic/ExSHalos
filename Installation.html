@@ -313,7 +313,7 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#automatic-and-isolated-installation">Automatic and isolated installation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Docker</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Apptainer</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nix-https-nixos-org">´Nix &lt;https://nixos.org/&gt;´_</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Nix</a></li>
 </ul>
 </li>
 </ul>
@@ -507,38 +507,17 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 <p>If you want a more isolated and segure installation, and do not want to handle the dependencies manually, ExSHalos makes available three options:</p>
 <section id="id3">
 <h3><a class="reference external" href="https://www.docker.com/">Docker</a><a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
-<p>To create a Docker image you only need to
-<code class="docutils literal notranslate"><span class="pre">`bash</span>
-<span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/Voivodic/ExSHalos.git</span>
-<span class="pre">cd</span> <span class="pre">ExSHalos</span>
-<span class="pre">docker</span> <span class="pre">build</span> <span class="pre">-t</span> <span class="pre">your_image_name</span> <span class="pre">.</span>
-<span class="pre">`</span></code></p>
-<p>Then, to create a Docker container and enter into its shell
-<code class="docutils literal notranslate"><span class="pre">`bash</span>
-<span class="pre">docker</span> <span class="pre">run</span> <span class="pre">-it</span> <span class="pre">--name</span> <span class="pre">your_container_name</span> <span class="pre">your_image_name</span>
-<span class="pre">`</span></code></p>
+<p>To create a Docker image you only need to</p>
+<p>Then, to create a Docker container and enter into its shell</p>
 </section>
 <section id="id4">
 <h3><a class="reference external" href="https://apptainer.org/">Apptainer</a><a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
-<p>An opensource alternative to Docker (usually used in scientific clusters) is Apptainer. You can create similar images doing
-<code class="docutils literal notranslate"><span class="pre">`bash</span>
-<span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/Voivodic/ExSHalos.git</span>
-<span class="pre">cd</span> <span class="pre">ExSHalos</span>
-<span class="pre">apptainer</span> <span class="pre">build</span> <span class="pre">your_image_name.sif</span> <span class="pre">exshalos.def</span>
-<span class="pre">`</span></code></p>
-<p>Then, to enter in an isolated shell
-<code class="docutils literal notranslate"><span class="pre">`bash</span>
-<span class="pre">apptainer</span> <span class="pre">shell</span> <span class="pre">your_image_name.sif</span>
-<span class="pre">`</span></code></p>
+<p>An opensource alternative to Docker (usually used in scientific clusters) is Apptainer. You can create similar images doing</p>
+<p>Then, to enter in an isolated shell</p>
 </section>
-<section id="nix-https-nixos-org">
-<h3>´Nix &lt;<a class="reference external" href="https://nixos.org/">https://nixos.org/</a>&gt;´_<a class="headerlink" href="#nix-https-nixos-org" title="Link to this heading">#</a></h3>
-<p>Last but not least, you can also create an ephemeral shell using Nix with flakes. For this, you only need to run
-<code class="docutils literal notranslate"><span class="pre">`bash</span>
-<span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/Voivodic/ExSHalos.git</span>
-<span class="pre">cd</span> <span class="pre">ExSHalos</span>
-<span class="pre">nix</span> <span class="pre">develop</span>
-<span class="pre">`</span></code></p>
+<section id="id5">
+<h3><a class="reference external" href="https://nixos.org/">Nix</a><a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>Last but not least, you can also create an ephemeral shell using Nix with flakes. For this, you only need to run</p>
 </section>
 </section>
 </section>
@@ -601,7 +580,7 @@ pip<span class="w"> </span>install<span class="w"> </span>.
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#automatic-and-isolated-installation">Automatic and isolated installation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Docker</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Apptainer</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nix-https-nixos-org">´Nix &lt;https://nixos.org/&gt;´_</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Nix</a></li>
 </ul>
 </li>
 </ul>
