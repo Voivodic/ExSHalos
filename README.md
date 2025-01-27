@@ -12,24 +12,67 @@ This library follows the functional programing paradigm! There are no classes, r
 
 ## Installation 
 
+### On your machine (not recommended)
+
 To install [pyExSHalos](https://github.com/Voivodic/ExSHalos) a few libraries are required:
 
-### C requirements:
+#### C requirements:
 - [FFTW3](https://www.fftw.org/) (required for installation)
 - [GSL/CBLAS](https://www.gnu.org/software/gsl/) (required for installation)
 - [OpenMP](https://www.openmp.org/) (required for installation)
-- [pip](https://pypi.org/project/pip/) (optional for building)
 
-### Python requirements:
+#### Python requirements:
 - [Numpy](https://numpy.org/) (required for installation)
 - [setuptools](https://setuptools.pypa.io/en/latest/) (required for installation)
+- [pip](https://pypi.org/project/pip/) (optional for building)
 - [scipy](https://scipy.org/) (required for running)
 
 After all libraries were installed, you just need to
 ```bash
+git clone https://github.com/Voivodic/ExSHalos.git
+cd ExSHalos
 pip install .
 ```
-in the root folder of the project.
+### On a container/ephemeral shell
+
+You have three main options, to install ExSHalos, for the case you do not want to handle the dependencies manually and want an isolated working space:
+
+#### Docker
+
+To create a Docker image you only need to
+```bash
+git clone https://github.com/Voivodic/ExSHalos.git
+cd ExSHalos
+docker build -t your_image_name .
+```
+
+Then, to create a Docker container and enter into its shell
+```bash
+docker run -it --name your_container_name your_image_name
+```
+
+#### Apptainer
+
+An opensource alternative to Docker (usually used in scientific clusters) is Apptainer. You can create similar images doing
+```bash
+git clone https://github.com/Voivodic/ExSHalos.git
+cd ExSHalos
+apptainer build your_image_name.sif exshalos.def
+```
+
+Then, to enter in an isolated shell
+```bash
+apptainer shell your_image_name.sif
+```
+
+#### Nix
+
+Last but not least, you can also create an ephemeral shell using Nix with flakes. For this, you only need to run
+```bash
+git clone https://github.com/Voivodic/ExSHalos.git
+cd ExSHalos
+nix develop
+```
 
 ## Quick start
 
@@ -70,12 +113,12 @@ Not necessarily in the priority order
 
 ### Code
 
-- [ ] **Creation of more examples**
-- [ ] **Completion of the documentation**
+- [-] **Creation of more tutorials**
+- [x] **Completion of the documentation**
 - [ ] **Integration with the zig's building system**
 - [ ] **Compilation of C/C++ libraries**
 - [ ] **Creation of zig wrappers**
-- [ ] **Creation of a Dockerfile, apptainer's definition file and nix's shell.nix file**
+- [x] **Creation of a Dockerfile, apptainer's definition file and nix's shell.nix file**
 
 ### Physics
 
