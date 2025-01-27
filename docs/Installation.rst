@@ -205,16 +205,16 @@ If you want a more isolated and segure installation, and do not want to handle t
 To create a Docker image you only need to
 
 .. code-block:: sh
+   
     git clone https://github.com/Voivodic/ExSHalos.git
     cd ExSHalos
     docker build -t your_image_name .
 
-
 Then, to create a Docker container and enter into its shell
 
 .. code-block:: sh
-    docker run -it --name your_container_name your_image_name
 
+    docker run -it --name your_container_name your_image_name
 
 `Apptainer <https://apptainer.org/>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -222,6 +222,7 @@ Then, to create a Docker container and enter into its shell
 An opensource alternative to Docker (usually used in scientific clusters) is Apptainer. You can create similar images doing
 
 .. code-block:: sh
+
     git clone https://github.com/Voivodic/ExSHalos.git
     cd ExSHalos
     apptainer build your_image_name.sif exshalos.def
@@ -229,6 +230,7 @@ An opensource alternative to Docker (usually used in scientific clusters) is App
 Then, to enter in an isolated shell
 
 .. code-block:: sh
+
     apptainer shell your_image_name.sif
 
 `Nix <https://nixos.org/>`_
@@ -237,7 +239,7 @@ Then, to enter in an isolated shell
 Last but not least, you can also create an ephemeral shell using Nix with flakes. For this, you only need to run
 
 .. code-block:: sh
+
     git clone https://github.com/Voivodic/ExSHalos.git
     cd ExSHalos
     nix develop
-
