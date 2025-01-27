@@ -52,7 +52,7 @@
                 owner = "Voivodic";
                 repo = "ExSHalos";
                 rev = "main";
-                sha256 = "sha256-DpGuwkk2/zg7I8ycAHx+0tP/jqP7et8z+ky5vy2T8ks";
+                sha256 = "sha256-VsQuvp6niwEIS3L+l5K5VEYGH7D4gTv91EJb1n3IcdY";
             };
 
             propagatedBuildInputs = [
