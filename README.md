@@ -114,11 +114,11 @@ Not necessarily in the priority order
 ### Code
 
 - 🔄 **Creation of more tutorials**
-- ✔️ **Completion of the documentation**
+- ✅ **Completion of the documentation**
 - 📝 **Integration with the zig's building system**
 - 📝 **Compilation of C/C++ libraries**
 - 📝 **Creation of zig wrappers**
-- ✔️ **Creation of a Dockerfile, apptainer's definition file and nix's shell.nix file**
+- ✅ **Creation of a Dockerfile, apptainer's definition file and nix's shell.nix file**
 
 ### Physics
 
