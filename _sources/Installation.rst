@@ -5,8 +5,6 @@ ExSHalos is wirtten in C/C++ and need some external libraries to work.
 
 Even with the dependence list being small and composed of standard libraries (likely present in clusters), the installation instructions, for each library, is given below.
 
-Suport for containers and ephemeral nix shells will be given in the future.
-
 C/C++ dependencies:
 -------------------
 
@@ -192,6 +190,51 @@ Once all dependencies are installed, ExSHalos can be install with:
 
 .. code-block:: sh
 
+    git clone https://github.com/Voivodic/ExSHalos.git
+    cd ExSHalos
     pip install .
 
-In the root directory.
+Automatic and isolated installation
+-----------------------------------
+
+If you want a more isolated and segure installation, and do not want to handle the dependencies manually, ExSHalos makes available three options:
+
+`Docker <https://www.docker.com/>`_
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To create a Docker image you only need to
+```bash
+git clone https://github.com/Voivodic/ExSHalos.git
+cd ExSHalos
+docker build -t your_image_name .
+```
+
+Then, to create a Docker container and enter into its shell
+```bash
+docker run -it --name your_container_name your_image_name
+```
+
+`Apptainer <https://apptainer.org/>`_
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An opensource alternative to Docker (usually used in scientific clusters) is Apptainer. You can create similar images doing
+```bash
+git clone https://github.com/Voivodic/ExSHalos.git
+cd ExSHalos
+apptainer build your_image_name.sif exshalos.def
+```
+
+Then, to enter in an isolated shell
+```bash
+apptainer shell your_image_name.sif
+```
+
+´Nix <https://nixos.org/>´_
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Last but not least, you can also create an ephemeral shell using Nix with flakes. For this, you only need to run
+```bash
+git clone https://github.com/Voivodic/ExSHalos.git
+cd ExSHalos
+nix develop
+```

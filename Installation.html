@@ -310,6 +310,12 @@
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-dependencies">Python dependencies</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#package-installation">Package installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#automatic-and-isolated-installation">Automatic and isolated installation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Docker</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Apptainer</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nix-https-nixos-org">´Nix &lt;https://nixos.org/&gt;´_</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -325,7 +331,6 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
 <p>ExSHalos is wirtten in C/C++ and need some external libraries to work.</p>
 <p>Even with the dependence list being small and composed of standard libraries (likely present in clusters), the installation instructions, for each library, is given below.</p>
-<p>Suport for containers and ephemeral nix shells will be given in the future.</p>
 <section id="c-c-dependencies">
 <h2>C/C++ dependencies:<a class="headerlink" href="#c-c-dependencies" title="Link to this heading">#</a></h2>
 <section id="fftw3-required-for-installation">
@@ -491,10 +496,50 @@ make<span class="w"> </span>install
 <section id="package-installation">
 <h2>Package installation<a class="headerlink" href="#package-installation" title="Link to this heading">#</a></h2>
 <p>Once all dependencies are installed, ExSHalos can be install with:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>.
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Voivodic/ExSHalos.git
+<span class="nb">cd</span><span class="w"> </span>ExSHalos
+pip<span class="w"> </span>install<span class="w"> </span>.
 </pre></div>
 </div>
-<p>In the root directory.</p>
+</section>
+<section id="automatic-and-isolated-installation">
+<h2>Automatic and isolated installation<a class="headerlink" href="#automatic-and-isolated-installation" title="Link to this heading">#</a></h2>
+<p>If you want a more isolated and segure installation, and do not want to handle the dependencies manually, ExSHalos makes available three options:</p>
+<section id="id3">
+<h3><a class="reference external" href="https://www.docker.com/">Docker</a><a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>To create a Docker image you only need to
+<code class="docutils literal notranslate"><span class="pre">`bash</span>
+<span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/Voivodic/ExSHalos.git</span>
+<span class="pre">cd</span> <span class="pre">ExSHalos</span>
+<span class="pre">docker</span> <span class="pre">build</span> <span class="pre">-t</span> <span class="pre">your_image_name</span> <span class="pre">.</span>
+<span class="pre">`</span></code></p>
+<p>Then, to create a Docker container and enter into its shell
+<code class="docutils literal notranslate"><span class="pre">`bash</span>
+<span class="pre">docker</span> <span class="pre">run</span> <span class="pre">-it</span> <span class="pre">--name</span> <span class="pre">your_container_name</span> <span class="pre">your_image_name</span>
+<span class="pre">`</span></code></p>
+</section>
+<section id="id4">
+<h3><a class="reference external" href="https://apptainer.org/">Apptainer</a><a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<p>An opensource alternative to Docker (usually used in scientific clusters) is Apptainer. You can create similar images doing
+<code class="docutils literal notranslate"><span class="pre">`bash</span>
+<span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/Voivodic/ExSHalos.git</span>
+<span class="pre">cd</span> <span class="pre">ExSHalos</span>
+<span class="pre">apptainer</span> <span class="pre">build</span> <span class="pre">your_image_name.sif</span> <span class="pre">exshalos.def</span>
+<span class="pre">`</span></code></p>
+<p>Then, to enter in an isolated shell
+<code class="docutils literal notranslate"><span class="pre">`bash</span>
+<span class="pre">apptainer</span> <span class="pre">shell</span> <span class="pre">your_image_name.sif</span>
+<span class="pre">`</span></code></p>
+</section>
+<section id="nix-https-nixos-org">
+<h3>´Nix &lt;<a class="reference external" href="https://nixos.org/">https://nixos.org/</a>&gt;´_<a class="headerlink" href="#nix-https-nixos-org" title="Link to this heading">#</a></h3>
+<p>Last but not least, you can also create an ephemeral shell using Nix with flakes. For this, you only need to run
+<code class="docutils literal notranslate"><span class="pre">`bash</span>
+<span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/Voivodic/ExSHalos.git</span>
+<span class="pre">cd</span> <span class="pre">ExSHalos</span>
+<span class="pre">nix</span> <span class="pre">develop</span>
+<span class="pre">`</span></code></p>
+</section>
 </section>
 </section>
 
@@ -553,6 +598,12 @@ make<span class="w"> </span>install
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-dependencies">Python dependencies</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#package-installation">Package installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#automatic-and-isolated-installation">Automatic and isolated installation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Docker</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Apptainer</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nix-https-nixos-org">´Nix &lt;https://nixos.org/&gt;´_</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
