@@ -164,10 +164,12 @@ def Get_Dz(Om0: float = 0.31, zmax: float = 1000, zmin: float = -0.5, nzs: int =
     :type nzs: int
 
     :return: Dictionary with the keys
+
              - "z": Ndarray with redshifts
              = "a": Ndarray with scale factors
              - "Dz" Ndarray with growth factors
              - "dDz": Ndarray with derivatives of the growth factor
+
     :rtype: dict
     """
     from scipy.integrate import odeint
@@ -732,9 +734,11 @@ def CLPT_Powers(
     :type verbose: bool
 
     :return: Dictionary with the power spectra of the operators:
+
              - "k": Ndarray with the wavenumbers
              - "Plin": Ndarray with linear power spectrum used as input
              - "P11": Ndarray with result for the 11 power spectrum
+
     :rtype: dict
     """
     # Call the c function that compute the CLPT

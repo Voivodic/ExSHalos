@@ -156,9 +156,11 @@ def Find_Halos_from_Grid(
     :type verbose: bool
 
     :return: Dictionay with keys:
+
              - "posh": Ndarray with halo positions
              - "Mh": Ndarray with halo masses
              - "flag": Ndarray with flags for each cell
+
     :rtype: dict
     """
     # Check the precision and convert the arrays
@@ -245,8 +247,10 @@ def Displace_LPT(
     :type verbose: bool
 
     :return: Dictionary with keys:
+
              - "pos": Ndarray with particle positions (displacements)
              - "vel": Ndarray with particle velocities (if OUT_VEL is True)
+             
     :rtype: dict
     """
     # Check the precision and convert the arrays
@@ -721,15 +725,16 @@ def Compute_High_Order_Operators(
     :type nthreads: int
 
     :return: Dictionary with keys:
+
              - "delta2": Ndarray with delta^2
              - "K2": Ndarray with K^2 or G_2
              - "delta3": Ndarray with delta^3
              - "K3": Ndarray with K^3 or G_3
              - "deltaK2": Ndarray with delta*K^2 or delta*G_2
              - "laplacian": Ndarray with Laplacian(delta)
+
     :rtype: dict
     """
-
     # Define the parameters used in the case (or not) of Galileons.
     # The operators are: K2 = K^2 - params[0]*delta^2, K3 = K_ij*K_jk*K_ki - params[1]*K^2*delta + params[2]*delta^3
     if not Galileons:
@@ -919,8 +924,10 @@ def Compute_Correlation(
     :type verbose: bool
 
     :return: Dictionary with keys:
+
              - "R" or "k": Ndarray with k or r 
              - "Xi" or "Pk": Ndarray with Xi(r) or P(k)
+
     :rtype: dict
     """
     # Check the precision and convert the arrays

@@ -3,7 +3,9 @@ This module create mocks of halos and galaxies.
 """
 
 from typing import Dict, Optional
+
 import numpy as np
+
 
 # Generate a halo catalogue from a linear power spectrum
 def Generate_Halos_Box_from_Pk(
@@ -94,6 +96,7 @@ def Generate_Halos_Box_from_Pk(
     :type nthreads: int
 
     :return: Dictionary with the following keys:
+
              - "posh": ndarray with halo positions
              - "velh": ndarray with halo velocities
              - "Mh": ndarray with halo masses
@@ -103,6 +106,7 @@ def Generate_Halos_Box_from_Pk(
              - "grid": ndarray with the Gaussian density grid
              - "Prof": ndarray with the density profile of the Lagrangian halos
              - "ProfM": ndarray with the mass in each shell of the profile
+
     :rtype: dict
     """
     # Check the precision and convert the arrays
@@ -250,12 +254,14 @@ def Generate_Halos_Box_from_Grid(
     :param nthreads: Number of threads to be used in some computations. Fiducial value: 1
     :type nthreads: int
     :return: Dictionary with the following keys:
+    
              - "posh": ndarray with halo positions
              - "velh": ndarray with halo velocities
              - "Mh": ndarray with halo masses
              - "pos": ndarray with particle positions
              - "vel": ndarray with particle velocities
              - "flag": ndarray with particle flags
+
     :rtype: dict
     """
     # Check some of the imputs
@@ -421,9 +427,11 @@ def Generate_Galaxies_from_Halos(
     :type verbose: bool
 
     :return: Dictionary with the following keys:
+
              - "posg": ndarray with galaxy positions
              - "velg": ndarray with galaxy velocities
              - "flag": ndarray with galaxy flags
+
     :rtype: dict
     """
     # Get the precision and convert the arrays

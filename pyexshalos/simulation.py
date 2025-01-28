@@ -6,8 +6,6 @@ from typing import Dict, Optional, Union
 import numpy as np
 
 # Compute the density grid
-
-
 def Compute_Density_Grid(
     pos: np.ndarray,
     vel: Optional[np.ndarray] = None,
@@ -215,9 +213,11 @@ def Compute_Power_Spectrum(
     :type ntypes: int
 
     :return: Dictionary with the following keys:
+
              - "k": Ndarray with the mean wavenumbers
              - "Pk": Ndarray with all possible power spectra
              - "Nk": Ndarray with the number of independent modes per bin
+
     :rtype: dict
     """
     # Compute some parameters
@@ -361,9 +361,11 @@ def Compute_Power_Spectrum_individual(
     :type ntypes: int
 
     :return: Dictionary with the following keys:
+
              - "k": Ndarray with the mean wavenumbers
              - "Pk": Ndarray with all possible power spectra
              - "Nk": Ndarray with the number of independent modes per bin
+
     :rtype: dict
     """
     # Compute some parameters
@@ -502,12 +504,14 @@ def Compute_BiSpectrum(
     :type ntypes: int
 
     :return: Dictionary with the following keys:
+
              - "kP": Ndarray with the mean wavenumbers
              - "Pk": Ndarray with all possible power spectra
              - "Nk": Ndarray with the number of independent modes per bin
              - "kB": Ndarray with the mean tripets of k for the bispectra
              - "Bk": Ndarray with all possible bispectra
              - "Ntri": Number of independent triangles in each bin
+
     :rtype: dict
     """
     # Compute some parameters
@@ -625,6 +629,7 @@ def Compute_TriSpectrum(
     :type ntypes: int
 
     :return: Dictionary with the following keys:
+
              - "kP": Ndarray with the mean wavenumbers
              - "Pk": Ndarray with all possible power spectra
              - "Nk": Ndarray with the number of independent modes per bin
@@ -632,6 +637,7 @@ def Compute_TriSpectrum(
              - "Tk": Ndarray with all possible trispectra
              - "Tuk": Ndarray with all possible unconnected trispectr
              - "Nsq": Number of independent tetrahedra in each bin
+
     :rtype: dict
     """
     # Compute some parameters
@@ -747,9 +753,11 @@ def Compute_Abundance(
     :type verbose: bool
 
     :return: Dictionary with the following keys:
+
              - "Mh": Ndarray with the mean mass in the bin
              - "dn": Ndarray with differential abundance in the bin
              - "dn_err": Ndarray with the error in the differential abundance in the bin
+
     :rtype: dict
     """
     # Check the precision and convert the arrays
@@ -846,10 +854,12 @@ def Compute_Bias_Jens(
     :type Normalized: bool
 
     :return: Dictionay with the following keys:
+
              - "delta": Ndarray
              - "Mh": Ndarray
              - "Unmasked": Ndarray
              - "Masked": Ndarray
+             
     :rtype: dict
     """
     # Smooth the density field
