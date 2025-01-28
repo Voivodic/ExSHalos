@@ -54,6 +54,7 @@
                 pkgs.fftw
                 pkgs.fftwFloat
                 pkgs.gsl
+                voroPP
             ];
             meta = {
                 description = "Python interface to ExSHalos";
