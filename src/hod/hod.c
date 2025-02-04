@@ -13,12 +13,14 @@
 /*This declares the compute function*/
 static PyObject *hod_check_precision(PyObject * self, PyObject * args);
 static PyObject *populate_halos(PyObject *self, PyObject *args, PyObject *kwargs);
+static PyObject *populate_halos_particles(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject *split_galaxies(PyObject *self, PyObject *args, PyObject *kwargs);
 
 /*This tells Python what methods this module has. See the Python-C API for more information.*/
 static PyMethodDef hod_methods[] = {
     {"check_precision", (PyCFunction)hod_check_precision, METH_VARARGS, "Returns precision used by the estimators of the spectra"},
     {"populate_halos", (PyCFunction)populate_halos, METH_VARARGS | METH_KEYWORDS, "Populate a list of halos with galaxies"},
+    {"populate_halos_particles", (PyCFunction)populate_halos_particles, METH_VARARGS | METH_KEYWORDS, "Populate a list of halos with particles"},
     {"split_galaxies", (PyCFunction)split_galaxies, METH_VARARGS | METH_KEYWORDS, "Split the galaxies between red and blue"},
     {NULL, NULL, 0, NULL}
 };
@@ -66,7 +68,7 @@ static PyObject *populate_halos(PyObject *self, PyObject *args, PyObject *kwargs
     set_cosmology(Om0, redshift, -1.0);  
     set_box(ndx, ndy, ndz, Lc);
     set_hod(logMmin, siglogM, logM0, logM1, alpha, sigma);
-    set_out((char) OUT_VEL, 1, (char) IN_C, (char) verbose);
+    set_out((char) OUT_VEL, (char) OUT_FLAG, 1, (char) IN_C, (char) verbose);
     if(Deltah > 0.0)
         cosmo.Dv = Deltah;
     cosmo.Mstar = 4.638211e+12;     //CHANGE IT!!!
@@ -81,46 +83,37 @@ static PyObject *populate_halos(PyObject *self, PyObject *args, PyObject *kwargs
     posg = (fft_real *) malloc(Ng_max*nh*3*sizeof(fft_real));
     if(OUT_VEL == TRUE)
         velg = (fft_real *) malloc(Ng_max*nh*3*sizeof(fft_real));
-    gal_type = (long *) malloc(Ng_max*nh*sizeof(long));
+    if(OUT_FLAG == TRUE) 
+        gal_type = (long *) malloc(Ng_max*nh*sizeof(long));
 
     /*Populate the halos*/
     ng = Populate_total(nh, posh, velh, Mh, Ch, posg, velg, gal_type, rng_ptr);
-    if(OUT_FLAG == FALSE)
-        free(gal_type);
 
-    /*Define the variables for the output*/
-    npy_intp dims_pos[] = {(npy_intp) ng, (npy_intp) 3};
-    npy_intp dims_flag[] = {(npy_intp) ng};
-    fft_real *posg_out, *velg_out;
-    long *flag_out;
-    PyArrayObject *np_pos, *np_vel, *np_flag;
-
-    np_pos = (PyArrayObject *) PyArray_ZEROS(2, dims_pos, NP_OUT_TYPE, 0);
-    posg_out = (fft_real *) PyArray_DATA(np_pos);
-    if(OUT_VEL == TRUE){
-        np_vel = (PyArrayObject *) PyArray_ZEROS(2, dims_pos, NP_OUT_TYPE, 0);
-        velg_out = (fft_real *) PyArray_DATA(np_vel);
-    }
-    if(OUT_FLAG == TRUE){
-        np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_flag, NPY_LONG, 0);
-        flag_out = (long *) PyArray_DATA(np_flag);
-    }
-
-    /*Put the positions and velocities in the output arrays*/
-    for(i=0;i<ng;i++){
-        for(j=0;j<3;j++){
-            posg_out[3*i+j] = posg[3*i+j];
-            if(OUT_VEL == TRUE)
-                velg_out[3*i+j] = velg[3*i+j];
-        }
-        if(OUT_FLAG == TRUE)
-            flag_out[i] = gal_type[i];
-    }
-    free(posg);
+    // Realloca the arrays to have only the needed size
+    posg = (fft_real *) realloc(posg, 3*ng*sizeof(fft_real));
     if(OUT_VEL == TRUE)
-        free(velg);
+        velg = (fft_real *) realloc(velg, 3*ng*sizeof(fft_real));
     if(OUT_FLAG == TRUE)
-        free(gal_type);
+        gal_type = (long *) realloc(gal_type, ng*sizeof(long);
+
+    // Create the numpy array with the positions and give the ownership to Python
+    npy_intp dims_pos[] = {(npy_in) ng, (npy_intp) 3};
+    PyArrayObject *np_pos = (PyArrayObject *) PyArray_SimpleNewFromData(2, dims_pos, NP_OUT_TYPE, (void *)posg);
+    PyArray_ENABLEFLAGS(np_pos, NPY_ARRAY_OWNDATA);
+    
+    if(OUT_VEL == TRUE){
+        // Create the numpy array with the positions and give the ownership to Python
+        npy_intp dims_vel[] = {(npy_in) ng, (npy_intp) 3};
+        PyArrayObject *np_vel = (PyArrayObject *) PyArray_SimpleNewFromData(2, dims_vel, NP_OUT_TYPE, (void *)velg);
+        PyArray_ENABLEFLAGS(np_vel, NPY_ARRAY_OWNDATA);
+    }
+
+    if(OUT_FLAG == TRUE){
+        // Create the numpy array with the positions and give the ownership to Python
+        npy_intp dims_flag[] = {(npy_in) ng};
+        PyArrayObject *np_flag = (PyArrayObject *) PyArray_SimpleNewFromData(1, dims_flag, NP_OUT_TYPE, (void *)gal_type);
+        PyArray_ENABLEFLAGS(np_flag, NPY_ARRAY_OWNDATA);
+    }
 
     /*Construct the output tuple for each case*/
     PyObject *dict = PyDict_New();
@@ -150,6 +143,114 @@ static PyObject *populate_halos(PyObject *self, PyObject *args, PyObject *kwargs
     return dict; 
 }
 
+/*Populate the halos with particles*/
+static PyObject *populate_halos_particles(PyObject *self, PyObject *args, PyObject *kwargs){
+    size_t i, j, nh, np, ng;
+    int verbose, ndx, ndy, ndz, OUT_VEL, IN_C, seed_in, OUT_FLAG;
+    long *part_type;
+    fft_real Om0, redshift, Lc, *posh, *velh, *Mh, *Ch, *posp, *velp, Deltah, sigma, M_frac, massp;
+    double Mh_total;
+
+	/*Define the list of parameters*/
+	static char *kwlist[] = {"posh_array", "velh_array", "Mh_array", "Ch_array", "Lc", "Om0", "redshift", "ndx", "ndy", "ndz", "Deltah", "sigma", "seed", "OUT_VEL", "OUT_FLAG", "IN_C", "verbose", NULL};
+	import_array();
+
+	/*Define the pyobject with the 3D position of the tracers*/
+	PyArrayObject *posh_array, *velh_array, *Mh_array, *Ch_array;  
+
+	/*Read the input arguments*/
+	#ifdef DOUBLEPRECISION_FFTW
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOdddiiiddiiiiii", kwlist, &posh_array, &velh_array, &Mh_array, &Ch_array, &Lc, &Om0, &redshift, &ndx, &ndy, &ndz, &np, &Deltah, &sigma, &seed_in, &OUT_VEL, &OUT_FLAG, &IN_C, &verbose))
+			return NULL;
+	#else
+		if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOfffiiiffiiiiii", kwlist, &posh_array, &velh_array, &Mh_array, &Ch_array, &Lc, &Om0, &redshift, &ndx, &ndy, &ndz, &np, &Deltah, &sigma, &seed_in, &OUT_VEL, &OUT_FLAG, &IN_C, &verbose))
+			return NULL;
+	#endif
+
+    /*Convert PyObjects to C arrays*/
+    nh = (size_t) PyArray_DIMS(Mh_array)[0];
+    posh = (fft_real *) PyArray_DATA(posh_array);
+    if(OUT_VEL == TRUE)
+        velh = (fft_real *) PyArray_DATA(velh_array);
+    Mh = (fft_real *) PyArray_DATA(Mh_array);
+    if(IN_C == TRUE)
+        Ch = (fft_real *) PyArray_DATA(Ch_array);
+    else
+        Ch = (fft_real *) malloc(nh*sizeof(fft_real));
+
+    /*Set the box structure*/
+    set_cosmology(Om0, redshift, -1.0);  
+    set_box(ndx, ndy, ndz, Lc);    
+    set_hod(0.0, 0.0, 0.0, 0.0, 0.0, sigma);
+    set_out((char) OUT_VEL, (char) OUT_FLAG, 1, (char) IN_C, (char) verbose);
+    if(Deltah > 0.0)
+        cosmo.Dv = Deltah;
+    seed = seed_in;
+
+    /*Initialize the randonm seed*/
+    gsl_rng *rng_ptr;
+    rng_ptr = gsl_rng_alloc (gsl_rng_taus);
+    gsl_rng_set(rng_ptr, seed);
+
+    // Compute the fraction of mass in halos
+    for(i=0; i<nh; i++)
+        Mh_total += Mh[i];
+    M_frac = box.Mtot/((fft_real) Mh_total);
+
+    // Compute the mass of each particle
+    massp = box.Mtot/((fft_real) np);
+
+    // Create the numpy array for the positions
+    npy_intp dims_pos[] = {(npy_in) np, (npy_intp) 3};
+    PyArrayObject *np_pos = (PyArrayObject *) PyArray_ZEROS(2, dims_pos, NP_OUT_TYPE, 0);
+    posp = (fft_real *) PyArray_DATA(np_pos);
+
+    // Create the numpy array for the velocities
+    if(OUT_VEL == TRUE){
+        // Create the numpy array for the positions
+        npy_intp dims_vel[] = {(npy_in) np, (npy_intp) 3};
+        PyArrayObject *np_vel = (PyArrayObject *) PyArray_ZEROS(2, dims_vel, NP_OUT_TYPE, 0);
+        velp = (fft_real *) PyArray_DATA(np_vel);
+    }
+
+    // Create the numpy array for the flags
+    if(OUT_FLAG == TRUE){
+        // Create the numpy array for the positions
+        npy_intp dims_flag[] = {(npy_in) np};
+        PyArrayObject *np_flag = (PyArrayObject *) PyArray_ZEROS(1, dims_pos, NPY_LONG, 0);
+        gal_type = (long *) PyArray_DATA(np_flag);
+    }
+
+    /*Populate the halos*/
+    ng = Populate_Particles(nh, posh, velh, Mh, Ch, posg, velg, gal_type, massp, M_frac, np, rng_ptr);
+
+    /*Construct the output tuple for each case*/
+    PyObject *dict = PyDict_New();
+
+    /*Output the mesurements in PyObject format*/
+    if(OUT_VEL == TRUE){
+        if(OUT_FLAG == FALSE){
+            PyDict_SetItemString(dict, "posg", PyArray_Return(np_pos));
+            PyDict_SetItemString(dict, "velg", PyArray_Return(np_vel));
+        }
+        else{
+            PyDict_SetItemString(dict, "posg", PyArray_Return(np_pos));
+            PyDict_SetItemString(dict, "velg", PyArray_Return(np_vel));
+            PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));      
+        }
+    }
+    else{
+        if(OUT_FLAG == FALSE){
+            PyDict_SetItemString(dict, "posg", PyArray_Return(np_pos));
+        }
+        else{
+            PyDict_SetItemString(dict, "posg", PyArray_Return(np_pos));
+            PyDict_SetItemString(dict, "flag", PyArray_Return(np_flag));        
+        }  
+    }
+
+    return dict; 
+}
 /*Split the galaxies between red and blue*/
 static PyObject *split_galaxies(PyObject *self, PyObject *args, PyObject *kwargs){
     size_t ng;

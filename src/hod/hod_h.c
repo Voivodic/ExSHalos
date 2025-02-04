@@ -110,8 +110,9 @@ void set_split(fft_real *params_cen, fft_real *params_sat, int ntypes, int order
 }
 
 /*Set the parameters of the outputs*/
-void set_out(char OUT_VEL, char DO_HOD, char IN_C, char VERBOSE){
+void set_out(char OUT_VEL, char OUT_TYPE, char DO_HOD, char IN_C, char VERBOSE){
 	out.OUT_VEL = OUT_VEL;		//Output the velocities?
+    out.OUT_TYPE = OUT_TYPE;	//Output the galaxy types?
 	out.DO_HOD = DO_HOD;      	//Populate the halos with no galaxies (0), one type of galaxy (1) or multiple types (2)?
 	out.IN_C = IN_C;			//There were concentrations given
 	out.VERBOSE = VERBOSE;		//Print the information about the current state of the catalogue generation: yes (1) or no (0)?

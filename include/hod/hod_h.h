@@ -86,6 +86,7 @@ typedef struct Split{
 /*Structure with the output options*/
 typedef struct Output{
 	char OUT_VEL;		//Output the velocities?
+    char OUT_TYPE;		//Output the flags of the galaxies?
 	char DO_HOD;      	//Populate the halos with no galaxies (0), one type of galaxy (1) or multiple types (2)?
 	char IN_C;			//There were concentrations given
 	char VERBOSE; 		//Print the information about the current state of the catalogue generation: yes (1) or no (0)?
@@ -118,6 +119,6 @@ void set_hod(fft_real logMmin, fft_real siglogM, fft_real logM0, fft_real logM1,
 void set_split(fft_real *params_cen, fft_real *params_sat, int ntypes, int order_cen, int order_sat);
 
 /*Set the parameters of the outputs*/
-void set_out(char OUT_VEL, char DO_HOD, char IN_C, char VERBOSE);
+void set_out(char OUT_VEL, char OUT_TYPE, char DO_HOD, char IN_C, char VERBOSE);
 
 #endif
