@@ -8,7 +8,7 @@ This is a python package that implements [ExSHalos](https://arxiv.org/abs/1906.0
 - Computation of EFTofLSS, for multi-tracers, using [CLASS-PT](https://github.com/Michalychforever/CLASS-PT);
 - Computation of simple theoretical quantities (e.g. growth function, growth rate, mass function, ...).
 
-This library follows the functional programing paradigm! There are no classes, random operators nor custom types.
+This library follows the functional programming paradigm! There are no classes, random operators nor custom types.
 
 ## Installation 
 
@@ -22,9 +22,9 @@ To install [pyExSHalos](https://github.com/Voivodic/ExSHalos) a few libraries ar
 - [OpenMP](https://www.openmp.org/) (required for installation)
 
 #### Python requirements:
-- [Numpy](https://numpy.org/) (required for installation)
+- [Numpy](https://numpy.org/) (required for installation and running)
 - [setuptools](https://setuptools.pypa.io/en/latest/) (required for installation)
-- [pip](https://pypi.org/project/pip/) (optional for building)
+- [pip](https://pypi.org/project/pip/) (required for building)
 - [scipy](https://scipy.org/) (required for running)
 
 After all libraries were installed, you just need to
@@ -33,9 +33,10 @@ git clone https://github.com/Voivodic/ExSHalos.git
 cd ExSHalos
 pip install .
 ```
+
 ### On a container/ephemeral shell
 
-You have three main options, to install ExSHalos, for the case you do not want to handle the dependencies manually and want an isolated working space:
+You have three main options to install ExSHalos. For the case you do not want to handle the dependencies manually and want an isolated working space:
 
 #### [Docker](https://www.docker.com/)
 
@@ -43,7 +44,7 @@ To create a Docker image you only need to
 ```bash
 git clone https://github.com/Voivodic/ExSHalos.git
 cd ExSHalos
-docker build -t your_image_name .
+docker build -t your_image_name -f install/
 ```
 
 Then, to create a Docker container and enter into its shell
@@ -53,11 +54,11 @@ docker run -it --name your_container_name your_image_name
 
 #### [Apptainer](https://apptainer.org/)
 
-An opensource alternative to Docker (usually used in scientific clusters) is Apptainer. You can create similar images doing
+An open source alternative to Docker (usually used in scientific clusters) is Apptainer. You can create similar images doing:
 ```bash
 git clone https://github.com/Voivodic/ExSHalos.git
 cd ExSHalos
-apptainer build your_image_name.sif exshalos.def
+apptainer build your_image_name.sif install/exshalos.def
 ```
 
 Then, to enter in an isolated shell
@@ -67,11 +68,11 @@ apptainer shell your_image_name.sif
 
 #### [Nix](https://nixos.org/)
 
-Last but not least, you can also create an ephemeral shell using Nix with flakes. For this, you only need to run
+Last but not least, you can also create an ephemeral shell using Nix with flakes. For this, you only need to run:
 ```bash
 git clone https://github.com/Voivodic/ExSHalos.git
 cd ExSHalos
-nix develop
+nix develop install/
 ```
 
 ## Quick start
@@ -106,9 +107,10 @@ Using the python interface for ExSHalos is as simple as:
 
 ## Documentation
 
-More information about the installation, the API and some examples can be found at the [documentation](https://voivodic.github.io/ExSHalos/).
+More information about the installation, the API, and some tutorials can be found at the [documentation](https://voivodic.github.io/ExSHalos/).
 
 ## TODO
+
 Not necessarily in the priority order
 
 ### Code
