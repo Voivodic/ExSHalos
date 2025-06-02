@@ -41,13 +41,12 @@
         pyexshalos =  pkgs.python313Packages.buildPythonPackage {
             pname = "pyexshalos";
             version = "0.1.0";
-            src = ./..;
-            #src = pkgs.fetchFromGitHub{
-            #    owner = "Voivodic";
-            #    repo = "ExSHalos";
-            #    rev = "main";
-            #    sha256 = "sha256-VsQuvp6niwEIS3L+l5K5VEYGH7D4gTv91EJb1n3IcdY";
-            #};
+            src = pkgs.fetchFromGitHub{
+                owner = "Voivodic";
+                repo = "ExSHalos";
+                rev = "main";
+                sha256 = "sha256-GKIoIS92ZUCFzhq28S3+3dW8MbtyvMWfoFToI3wkwLQ=";
+            };
             propagatedBuildInputs = [
                 pkgs.python313Packages.numpy
                 pkgs.python313Packages.scipy
