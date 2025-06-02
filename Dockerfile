@@ -1,5 +1,5 @@
 #Start from a ubuntu image with cuda
-FROM ubuntu:22.04 
+FROM ubuntu:24.04 
 
 #Update the image
 RUN apt update
