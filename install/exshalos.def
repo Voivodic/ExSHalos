@@ -1,0 +1,35 @@
+#Start from a ubuntu with cuda
+Bootstrap: docker
+From: docker.io/library/ubuntu:24.04 
+
+#Install all libraries inside the container
+%post
+    #Create the folder for the libraries and python env
+    mkdir -p /home/Libraries
+
+    #Update the system
+    apt update
+    apt upgrade -y
+
+    #Set the timezone
+    export TZ=Europe/Madrid
+
+    #Install some useful programs
+    apt install -y build-essential git libgsl-dev libfftw3-dev
+
+    # Install python and pip
+    apt install -y python3 python3-pip 
+    
+    # Install python libraries
+    pip3 install --upgrade numpy scipy setuptools --break-system-packages
+
+    #Install pyExSHalos
+    cd /home/Libraries
+    git clone https://github.com/Voivodic/ExSHalos.git
+    cd /home/Libraries/ExSHalos
+    pip3 install . --break-system-packages
+
+#Set the path to the libraries
+%environment
+    export HOME=/home
+    cd $HOME
