@@ -1,7 +1,10 @@
+"""
+Setup script for the pyexshalos package
+"""
 import os
 
 import numpy
-from setuptools import Extension, find_packages, setup
+from setuptools import Extension, setup
 
 # Set the compiler to be used
 os.environ["CC"] = "gcc"
@@ -116,12 +119,5 @@ extensions = [
 setup(
     name="pyexshalos",
     version="0.1.0",
-    packages=["pyexshalos"],
     ext_modules=extensions,
-    install_requires=[
-        "numpy",
-        "scipy",
-        "typing",
-    ],
-    setup_requires=["setuptools", "numpy"],
 )
