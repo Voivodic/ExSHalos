@@ -41,20 +41,36 @@
         pyexshalos =  pkgs.python313Packages.buildPythonPackage {
             pname = "pyexshalos";
             version = "0.1.0";
+            format = "pyproject";
+
             src = pkgs.fetchFromGitHub{
                 owner = "Voivodic";
                 repo = "ExSHalos";
                 rev = "main";
                 sha256 = "sha256-GKIoIS92ZUCFzhq28S3+3dW8MbtyvMWfoFToI3wkwLQ=";
             };
-            propagatedBuildInputs = [
+
+            nativeBuildInputs = [
+                pkgs.gcc
+            ];
+
+            buildInputs = [ 
+                pkgs.fftw 
+                pkgs.fftwFloat 
+                pkgs.gsl 
+                # voroPP 
+                pkgs.python313Packages.setuptools
+            ]; 
+
+            propagatedBuildInputs = [ 
+                pkgs.python313
                 pkgs.python313Packages.numpy
                 pkgs.python313Packages.scipy
-                pkgs.fftw
-                pkgs.fftwFloat
-                pkgs.gsl
-                # voroPP
-            ];
+                pkgs.python313Packages.matplotlib
+            ]; 
+
+            pythonImportsCheck = [ "pyexshalos" ];
+
             meta = {
                 description = "Python interface to ExSHalos";
                 homepage = "https://github.com/Voivodic/ExSHalos";

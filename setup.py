@@ -1,8 +1,8 @@
 """
 Setup script for the pyexshalos package
 """
+# Libraries used for the buildind process
 import os
-
 import numpy
 from setuptools import Extension, setup
 
@@ -69,6 +69,7 @@ extensions = [
             "src/exshalos/exshalos_h.c",
             "src/exshalos/density_grid.c",
             "src/exshalos/find_halos.c",
+            "src/exshalos/cells_in_spheres.c",
             "src/exshalos/lpt.c",
             "src/exshalos/box.c",
             "src/exshalos/exshalos.c",
@@ -79,7 +80,6 @@ extensions = [
         libraries=["m", "fftw3", "gsl", "gslcblas"] + fftw3_libs,
         extra_link_args=extra_link_args,
         extra_compile_args=extra_compile_args
-        + ['-DSPHERES_DIRC="%s/src/exshalos/"' % (os.getcwd())],
     ),
     # Module that populate the halos using a HOD
     Extension(
