@@ -847,11 +847,11 @@ static PyObject *halos_box_from_pk(PyObject *self, PyObject *args, PyObject *kwa
     char spheresfile[1000];
     if(out.OUT_PROF == TRUE){
         /*Read the number of grid cells inside each possible sphere*/
-        strcpy(spheresfile,  SPHERES_DIRC);
-        strcat(spheresfile, "Spheres.dat");
-        Read_Spheres(&spheres, spheresfile);
+        // strcpy(spheresfile,  SPHERES_DIRC);
+        // strcat(spheresfile, "Spheres.dat");
+        // Read_Spheres(&spheres, spheresfile);
         for(i=0;i<Nbins;i++)
-            profM_out[i] = spheres[i]*box.Mcell;
+            profM_out[i] = CELLS_IN_SPHERES[i]*box.Mcell;
     }
 
     /*Free the original arrays with the halo information*/

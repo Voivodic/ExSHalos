@@ -422,12 +422,12 @@ void Compute_Spheres(int Ncells, char *spheresfile){
 /*Read the number of grid cells inside each possible sphere*/
 void Read_Spheres(int **sphere, char *spheresfile){
     int m, i;
-    FILE *spheres;   
+    FILE *spheres;
 
     /*Open the file*/
     spheres = fopen(spheresfile, "rb");
     if (spheres == NULL) {
-        printf("Unable to open spheres.dat\n");
+        printf("Unable to open %s\n", spheresfile);
         exit(0);
     }
 
@@ -545,16 +545,16 @@ size_t Find_Halos(fft_real *delta, fft_real *K, fft_real *P, int Nk, long *flag,
     /*Compute the file with the number of grid cells in each possible sphere (used in the mass computation)*/
 	//Compute_Spheres(Ncells);
 
-	/*Read the number of grid cells inside each possible sphere*/
-    strcpy(spheresfile,  SPHERES_DIRC);
-    strcat(spheresfile, "Spheres.dat");
-	Read_Spheres(&spheres, spheresfile);
+    /*Read the number of grid cells inside each possible sphere*/
+    // strcpy(spheresfile,  SPHERES_DIRC);
+    // strcat(spheresfile, "Spheres.dat");
+    // Read_Spheres(&spheres, spheresfile);
    
     /*Compute the mass of each halo*/
-	Compute_Mass(nh, spheres, *halos, acc, spline_I, spline_InvI);
+	Compute_Mass(nh, CELLS_IN_SPHERES, *halos, acc, spline_I, spline_InvI);
 
     /*Free some arrays*/
-	free(spheres);
+	// free(spheres);
 	gsl_spline_free(spline_I);
 	gsl_spline_free(spline_InvI);
     gsl_interp_accel_free(acc);

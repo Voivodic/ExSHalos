@@ -3,6 +3,9 @@
 
 #include "exshalos_h.h"
 
+// Define the array with the number of cells in each sphere
+extern const int CELLS_IN_SPHERES[];
+
 /*Evaluate the square root of matter variance*/
 fft_real calc_sigma(fft_real *k, fft_real *P, int Nk, fft_real R);
 
