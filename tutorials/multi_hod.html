@@ -1,0 +1,573 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>HOD for multiple tracers &#8212; ExSHalos</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=a1637f0b"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/multi_hod';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Python API" href="../Python_API.html" />
+    <link rel="prev" title="Power spectrum for multiple tracers" href="halo_bias.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/Xhalo.png" class="logo__image only-light" alt="ExSHalos - Home"/>
+    <script>document.write(`<img src="../_static/Xhalo.png" class="logo__image only-dark" alt="ExSHalos - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    ExSHalos
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../Tutorials.html">Tutorials</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="halo_catalogues.html">Generating a halo catalogue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="halo_bias.html">Power spectrum for multiple tracers</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">HOD for multiple tracers</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../Python_API.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TODO.html">TODO</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/tutorials/multi_hod.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>HOD for multiple tracers</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="hod-for-multiple-tracers">
+<span id="tutorials-multi-hod"></span><h1>HOD for multiple tracers<a class="headerlink" href="#hod-for-multiple-tracers" title="Link to this heading">#</a></h1>
+<p>In this tutorial, we will generate a catalogue with two types of galaxies tracing the same density field. We are going to use the <a class="reference external" href="https://arxiv.org/abs/astro-ph/0408564">halo occupation distribution (HOD)</a> with the extension for two tracers presented in appendix C <a class="reference external" href="https://arxiv.org/abs/2108.11363">here</a>. We are going to use the best fit parameters that reproduces the red and blue galaxies of <a class="reference external" href="https://www.tng-project.org/">IllustrisTNG300</a>.</p>
+<p>After reading this, you will learn:</p>
+<ul class="simple">
+<li><p>How to generate a halo catalogue (<code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Generate_Halos_Box_from_Pk</span></code>);</p></li>
+<li><p>How to populate the halo catalogue with a HOD (<code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Generate_Galaxies_from_Halos</span></code>);</p></li>
+<li><p>How to split the galaxies into two populations (<code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Split_Galaxies</span></code>);</p></li>
+<li><p>How to compute the density grid from a list of tracers with their respective types (<code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Compute_Density_Grid</span></code>);</p></li>
+<li><p>How to compute all possible power spectra from a list of density grids (<code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Compute_Power_Spectrum</span></code>);</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">.py</span></code> file with the full code is in the <a class="reference external" href="https://github.com/Voivodic/ExSHalos/blob/main/tutorials/Multi_HOD.py">github page</a>.</p>
+<p>First of all, we need to import numpy, for the manipulation of arrays, pylab, to plot the results, and pyexshalos.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import the libraries used in this tutorial</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pylab</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyexshalos</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">exh</span>
+</pre></div>
+</div>
+<p>Then, we set the parameters of our box and load the linear matter power spectrum from <a class="reference external" href="https://www.cosmosim.org/metadata/mdpl2/">MDPL2 simulation</a>. We also set the parameters of the barrier to the ones found with <code class="docutils literal notranslate"><span class="pre">pyexshalos.utils.Fit_Barrier</span></code> (described in the <a class="reference internal" href="halo_catalogues.html#tutorials-generating-halos"><span class="std std-ref">generating a halo catalogue</span></a> tutorial).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set parameters for the halo catalogue</span>
+<span class="n">Om0</span> <span class="o">=</span> <span class="mf">0.307115</span>
+<span class="n">z</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">Nd</span> <span class="o">=</span> <span class="mi">256</span>
+<span class="n">Lc</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">L</span> <span class="o">=</span> <span class="n">Lc</span> <span class="o">*</span> <span class="n">Nd</span>
+<span class="n">N_MIN</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">SEED</span> <span class="o">=</span> <span class="mi">12345</span>
+<span class="n">VERBOSE</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># Load the linear matter power spectrum from the MDPL2 simulation</span>
+<span class="n">klin</span><span class="p">,</span> <span class="n">Plin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;MDPL2_z00_matterpower.dat&quot;</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Best fit parameters found with pyexshalos.utils.Fit_Barrier</span>
+<span class="n">PARAMS</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.803958</span><span class="p">,</span> <span class="mf">0.288991</span><span class="p">,</span> <span class="mf">0.525464</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Now, we use the parameters above to generate a halo catalogue.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate a halo catalogue with the barrier define above</span>
+<span class="n">halos</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Generate_Halos_Box_from_Pk</span><span class="p">(</span>
+    <span class="n">k</span><span class="o">=</span><span class="n">klin</span><span class="p">,</span>
+    <span class="n">P</span><span class="o">=</span><span class="n">Plin</span><span class="p">,</span>
+    <span class="n">nd</span><span class="o">=</span><span class="n">Nd</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="o">=</span><span class="n">Lc</span><span class="p">,</span>
+    <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span>
+    <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span>
+    <span class="n">Nmin</span><span class="o">=</span><span class="n">N_MIN</span><span class="p">,</span>
+    <span class="n">a</span><span class="o">=</span><span class="n">PARAMS</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">beta</span><span class="o">=</span><span class="n">PARAMS</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="n">PARAMS</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+    <span class="n">OUT_LPT</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Once we have the halo catalogue, we can populate it with galaxies. We use the <code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Generate_Galaxies_from_Halos</span></code> function to do so. We use the functional form and parameters from this <a class="reference external" href="https://arxiv.org/abs/astro-ph/0408564">paper</a>. Note that we set <code class="docutils literal notranslate"><span class="pre">OUT_FLAG=True</span></code>, this outputs the id of the host halo of each galaxy, using negative ids in the central galaxies. We also have the extra parameter <code class="docutils literal notranslate"><span class="pre">sigma</span></code> that sets how the density profile, <a class="reference external" href="https://arxiv.org/abs/astro-ph/9611107">NFW</a> here, is surpressed to enforce mass conservation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Populate the halos with galaxies</span>
+<span class="n">gals</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Generate_Galaxies_from_Halos</span><span class="p">(</span>
+    <span class="n">posh</span><span class="o">=</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;posh&quot;</span><span class="p">],</span>
+    <span class="n">Mh</span><span class="o">=</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">],</span>
+    <span class="n">nd</span><span class="o">=</span><span class="n">Nd</span><span class="p">,</span>
+    <span class="n">Lc</span><span class="o">=</span><span class="n">Lc</span><span class="p">,</span>
+    <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">,</span>
+    <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span>
+    <span class="n">logMmin</span><span class="o">=</span><span class="mf">13.25424743</span><span class="p">,</span>
+    <span class="n">siglogM</span><span class="o">=</span><span class="mf">0.26461332</span><span class="p">,</span>
+    <span class="n">logM0</span><span class="o">=</span><span class="mf">13.28383025</span><span class="p">,</span>
+    <span class="n">logM1</span><span class="o">=</span><span class="mf">14.32465146</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.00811277</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">,</span>
+    <span class="n">OUT_VEL</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">OUT_FLAG</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The galaxies are then split into two populations using the <code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Split_Galaxies</span></code> function. We use the parameters of the <a class="reference external" href="https://arxiv.org/abs/2108.11363">EFTofLSS analyses with multiple tracerrs</a> that reproduces the halo occupation distribution of blue and red galaxies of the high-resolution <a class="reference external" href="https://www.tng-project.org/">IllustrisTNG300</a> simulation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Split the galaxies into two populations</span>
+<span class="n">gals_types</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Split_Galaxies</span><span class="p">(</span>
+    <span class="n">Mh</span><span class="o">=</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;Mh&quot;</span><span class="p">],</span>
+    <span class="n">Flag</span><span class="o">=</span><span class="n">gals</span><span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">],</span>
+    <span class="n">params_cen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">37.10265321</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.07596644</span><span class="p">,</span> <span class="mf">0.17497771</span><span class="p">]),</span>
+    <span class="n">params_sat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">19.84341938</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.8352781</span><span class="p">,</span> <span class="mf">0.10443049</span><span class="p">]),</span>
+    <span class="n">seed</span> <span class="o">=</span> <span class="n">SEED</span><span class="p">,</span>
+    <span class="n">verbose</span> <span class="o">=</span> <span class="n">VERBOSE</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The density grids and spectra of the tracers are computed using the <code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Compute_Density_Grid</span></code> and <code class="docutils literal notranslate"><span class="pre">pyexshalos.simulation.Compute_Power_Spectrum</span></code> functions. As in the previous tutorials.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compute the density grids</span>
+<span class="n">WINDOW</span> <span class="o">=</span> <span class="s2">&quot;CIC&quot;</span>
+<span class="n">INTERLACING</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">grids</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Compute_Density_Grid</span><span class="p">(</span>
+    <span class="n">pos</span><span class="o">=</span><span class="n">gals</span><span class="p">[</span><span class="s2">&quot;posg&quot;</span><span class="p">],</span>
+    <span class="n">types</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">gals_types</span><span class="p">),</span>
+    <span class="n">nd</span><span class="o">=</span><span class="n">Nd</span><span class="p">,</span>
+    <span class="n">L</span><span class="o">=</span><span class="n">L</span><span class="p">,</span>
+    <span class="n">window</span><span class="o">=</span><span class="n">WINDOW</span><span class="p">,</span>
+    <span class="n">interlacing</span><span class="o">=</span><span class="n">INTERLACING</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Measure the power spectra</span>
+<span class="n">NK</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="n">K_MIN</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">K_MAX</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">P_sim</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">Compute_Power_Spectrum</span><span class="p">(</span>
+    <span class="n">grid</span><span class="o">=</span><span class="n">grids</span><span class="p">,</span>
+    <span class="n">L</span><span class="o">=</span><span class="n">L</span><span class="p">,</span>
+    <span class="n">window</span><span class="o">=</span><span class="n">WINDOW</span><span class="p">,</span>
+    <span class="n">Nk</span><span class="o">=</span><span class="n">NK</span><span class="p">,</span>
+    <span class="n">k_min</span><span class="o">=</span><span class="n">K_MIN</span><span class="p">,</span>
+    <span class="n">k_max</span><span class="o">=</span><span class="n">K_MAX</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span>
+    <span class="n">ntypes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, we plot the power spectra.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot the power spectra</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">],</span>
+            <span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">yerr</span><span class="o">=</span><span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Nk&quot;</span><span class="p">],</span>
+            <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$P_</span><span class="si">{11}</span><span class="s2">(k)$&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">],</span>
+            <span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">yerr</span><span class="o">=</span><span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Nk&quot;</span><span class="p">],</span>
+            <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$P_</span><span class="si">{12}</span><span class="s2">(k)$&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">],</span>
+            <span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">yerr</span><span class="o">=</span><span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Pk&quot;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="n">P_sim</span><span class="p">[</span><span class="s2">&quot;Nk&quot;</span><span class="p">],</span>
+            <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$P_</span><span class="si">{22}</span><span class="s2">(k)$&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$k$ [$h/$Mpc]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$P(k)$ [Mpc$/h]^</span><span class="si">{3}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Multi_hod.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/Multi_hod.png" src="../_images/Multi_hod.png" />
+<p>Note that the power spectra both tracers are very similar. It happens because our simulation has a very low mass resolution, in comarions to the IllustrisTNG300 simulation. For a fair comparison, we should use the same resolution of the original simulation.</p>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="halo_bias.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Power spectrum for multiple tracers</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../Python_API.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Python API</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Rodrigo Voivodic
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Rodrigo Voivodic.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

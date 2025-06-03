@@ -252,4 +252,4 @@ To finish, we plot the measurements and the theoretical models.
 
     pl.savefig("Linear_bias.png")
 
-.. image:: Linear_bias.png
+.. image:: figures/Linear_bias.png

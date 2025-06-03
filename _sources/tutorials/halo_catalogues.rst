@@ -3,7 +3,7 @@
 Generating a halo catalogue
 ===========================
 
-In this tutorial, we will present, for the first time, how to generate a (appoximated) halo catalogue using ExSHalos. We will use the cosmology of the `MDPL2 <https://www.cosmosim.org/metadata/mdpl2/>`_ simulation as an example. We will also fit the parameters of the barrier such that the mass function approximates the `Tinker's one <https://arxiv.org/abs/1001.3162>`_. 
+In this tutorial, we will present, for the first time, how to generate a (approximated) halo catalogue using ExSHalos. We will use the cosmology of the `MDPL2 <https://www.cosmosim.org/metadata/mdpl2/>`_ simulation as an example. We will also fit the parameters of the barrier such that the mass function approximates the `Tinker's one <https://arxiv.org/abs/1001.3162>`_. 
 
 After reading this, you will learn:
 
@@ -146,7 +146,7 @@ To finish, we plot both the theoretical and simulated mass function to compare t
 
     pl.show()
 
-.. image:: Abundance.png
+.. image:: figures/Abundance.png
 
 .. note::
 
