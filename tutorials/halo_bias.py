@@ -46,11 +46,11 @@ def chi2_grad(theta):
 
 
 # Set parameters for the halo catalogue
-OM0 = 0.307115
-Z = 0.0
-ND = 256
-LC = 4.0
-L = LC * ND
+Om0 = 0.307115
+z = 0.0
+Nd = 256
+Lc = 4.0
+L = Lc * Nd
 N_MIN = 1
 SEED = 12345
 VERBOSE = True
@@ -66,10 +66,10 @@ print("Generating the halo catalogue")
 halos = exh.mock.Generate_Halos_Box_from_Pk(
     k=klin,
     P=Plin,
-    nd=ND,
-    Lc=LC,
-    Om0=OM0,
-    z=Z,
+    nd=Nd,
+    Lc=Lc,
+    Om0=Om0,
+    z=z,
     Nmin=N_MIN,
     a=PARAMS[0],
     beta=PARAMS[1],
@@ -107,7 +107,7 @@ INTERLACING = True
 # Particles
 grid_p = exh.simulation.Compute_Density_Grid(
     pos=halos["pos"],
-    nd=ND,
+    nd=Nd,
     L=L,
     window=WINDOW,
     interlacing=INTERLACING,
@@ -118,7 +118,7 @@ grid_p = exh.simulation.Compute_Density_Grid(
 grids_h = exh.simulation.Compute_Density_Grid(
     pos=halos["posh"],
     types=types,
-    nd=ND,
+    nd=Nd,
     L=L,
     window=WINDOW,
     interlacing=INTERLACING,
@@ -191,11 +191,11 @@ for i in range(1, NH_BINS):
 
 # Compute the theoretical linear biases for a few models
 Mh_theory = np.logspace(np.log10(Mh_bins[0]), np.log10(Mh_bins[-1]), 600)
-b_ps = exh.theory.Get_bh1(M=Mh_theory, model="PS", Om0=OM0, k=klin, P=Plin)
+b_ps = exh.theory.Get_bh1(M=Mh_theory, model="PS", Om0=Om0, k=klin, P=Plin)
 b_tinker = exh.theory.Get_bh1(
-    M=Mh_theory, model="Tinker", theta=300, Om0=OM0, k=klin, P=Plin
+    M=Mh_theory, model="Tinker", theta=300, Om0=Om0, k=klin, P=Plin
 )
-b_st = exh.theory.Get_bh1(M=Mh_theory, model="ST", Om0=OM0, k=klin, P=Plin)
+b_st = exh.theory.Get_bh1(M=Mh_theory, model="ST", Om0=Om0, k=klin, P=Plin)
 
 # Plot the linear biases
 pl.clf()

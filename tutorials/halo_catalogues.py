@@ -8,11 +8,11 @@ import pylab as pl
 import pyexshalos as exh
 
 # Set parameters for the halo catalogue
-OM0 = 0.307115
-Z = 0.0
-ND = 256
-LC = 4.0
-L = LC * ND
+Om0 = 0.307115
+z = 0.0
+Nd = 256
+Lc = 4.0
+L = Lc * Nd
 N_MIN = 1
 SEED = 12345
 x0 = np.array([0.62, 0.45, 0.54])
@@ -25,7 +25,7 @@ k, P = np.loadtxt("MDPL2_z00_matterpower.dat", unpack=True)
 # Compute the theoretical mass function (used as the target mass function here)
 Mh = np.logspace(10, 16, 60)
 dn_theory = exh.theory.Get_dndlnm(
-    M=Mh, model="Tinker", theta=300, Om0=OM0, z=0.0, k=k, P=P
+    M=Mh, model="Tinker", theta=300, Om0=Om0, z=0.0, k=k, P=P
 )
 
 # Fit the parameters of the barrier to reproduce the mass function computed above
@@ -35,7 +35,7 @@ params = exh.utils.Fit_Barrier(
     P=P,
     M=Mh,
     dndlnM=dn_theory,
-    Lc=LC,
+    Lc=Lc,
     seed=SEED,
     Nmin=N_MIN,
     verbose=VERBOSE,
@@ -48,10 +48,10 @@ print("Generating the halo catalogue")
 halos = exh.mock.Generate_Halos_Box_from_Pk(
     k=k,
     P=P,
-    nd=ND,
-    Lc=LC,
-    Om0=OM0,
-    z=Z,
+    nd=Nd,
+    Lc=Lc,
+    Om0=Om0,
+    z=z,
     Nmin=N_MIN,
     a=params[0],
     beta=params[1],
@@ -62,7 +62,7 @@ halos = exh.mock.Generate_Halos_Box_from_Pk(
 
 # Measure the abundance of the halos
 print("Measuring and plotting the abundance")
-dn_sim = exh.simulation.Compute_Abundance(halos["Mh"], Nm=14, Lc=LC, nd=ND)
+dn_sim = exh.simulation.Compute_Abundance(halos["Mh"], Nm=14, Lc=Lc, nd=Nd)
 
 # Plot the halo mass function
 pl.clf()

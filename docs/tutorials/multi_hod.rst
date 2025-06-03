@@ -65,7 +65,10 @@ Now, we use the parameters above to generate a halo catalogue.
         verbose=VERBOSE,
     )
 
-Once we have the halo catalogue, we can populate it with galaxies. We use the ``pyexshalos.mock.Generate_Galaxies_from_Halos`` function to do so. We use the functional form and parameters from this `paper <https://arxiv.org/abs/astro-ph/0408564>`_. Note that we set ``OUT_FLAG=True``, this outputs the id of the host halo of each galaxy, using negative ids in the central galaxies. We also have the extra parameter ``sigma`` that sets how the density profile, `NFW <https://arxiv.org/abs/astro-ph/9611107>`_ here, is surpressed to enforce mass conservation. 
+Once we have the halo catalogue, we can populate it with galaxies. We use the ``pyexshalos.mock.Generate_Galaxies_from_Halos`` function to do so. We use the functional form and parameters from this `paper <https://arxiv.org/abs/astro-ph/0408564>`_. Note that we set ``OUT_FLAG=True``, this outputs the id of the host halo of each galaxy, using negative ids in the central galaxies. 
+
+.. note:: 
+    We also have the extra parameter ``sigma`` that sets how the density profile, `NFW <https://arxiv.org/abs/astro-ph/9611107>`_ here, is surpressed for large radii to enforce mass conservation. 
 
 .. code-block:: python
 
@@ -178,4 +181,6 @@ Finally, we plot the power spectra.
 
 .. image:: figures/Multi_hod.png
 
-Note that the power spectra both tracers are very similar. It happens because our simulation has a very low mass resolution, in comarions to the IllustrisTNG300 simulation. For a fair comparison, we should use the same resolution of the original simulation.
+.. attention::
+    
+    Note that the power spectra both tracers are very similar. It happens because our simulation has a very low mass resolution, in comarions to the IllustrisTNG300 simulation. For a fair comparison, we should use the same resolution of the original simulation.
