@@ -2,8 +2,8 @@
 This module create mocks of halos and galaxies.
 """
 
+# Import the libraries needed
 from typing import Dict, Optional
-
 import numpy as np
 
 
@@ -254,7 +254,7 @@ def Generate_Halos_Box_from_Grid(
     :param nthreads: Number of threads to be used in some computations. Fiducial value: 1
     :type nthreads: int
     :return: Dictionary with the following keys:
-    
+
              - "posh": ndarray with halo positions
              - "velh": ndarray with halo velocities
              - "Mh": ndarray with halo masses

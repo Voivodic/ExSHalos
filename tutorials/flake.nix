@@ -1,9 +1,4 @@
-{
-    description = "Flake for testing ExSHalos";
-
-    inputs = {
-        nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    };
+{ description = "Flake for testing ExSHalos"; inputs = { nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; };
 
     outputs = { self, nixpkgs, ... } @ inputs: 
     let
@@ -41,20 +36,38 @@
         pyexshalos =  pkgs.python313Packages.buildPythonPackage {
             pname = "pyexshalos";
             version = "0.1.0";
-            src = pkgs.fetchFromGitHub{
-                owner = "Voivodic";
-                repo = "ExSHalos";
-                rev = "main";
-                sha256 = "sha256-GKIoIS92ZUCFzhq28S3+3dW8MbtyvMWfoFToI3wkwLQ=";
-            };
-            propagatedBuildInputs = [
+            format = "pyproject";
+
+            src = ./../.;
+            # src = pkgs.fetchFromGitHub{
+            #     owner = "Voivodic";
+            #     repo = "ExSHalos";
+            #     rev = "main";
+            #     sha256 = "sha256-GKIoIS92ZUCFzhq28S3+3dW8MbtyvMWfoFToI3wkwLQ=";
+            # };
+
+            nativeBuildInputs = [
+                pkgs.gcc
+            ];
+
+            buildInputs = [ 
+                pkgs.fftw 
+                pkgs.fftwFloat 
+                pkgs.gsl 
+                # voroPP 
+                pkgs.python313Packages.setuptools
+            ]; 
+
+            propagatedBuildInputs = [ 
+                pkgs.python313
                 pkgs.python313Packages.numpy
                 pkgs.python313Packages.scipy
-                pkgs.fftw
-                pkgs.fftwFloat
-                pkgs.gsl
-                # voroPP
-            ];
+                pkgs.python313Packages.matplotlib
+                pkgs.python313Packages.typing
+            ]; 
+
+            pythonImportsCheck = [ "pyexshalos" ];
+
             meta = {
                 description = "Python interface to ExSHalos";
                 homepage = "https://github.com/Voivodic/ExSHalos";

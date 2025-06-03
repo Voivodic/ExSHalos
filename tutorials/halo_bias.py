@@ -1,11 +1,13 @@
 """
 Tutorial measuring the power spectrum of multiple bins of halo masses
 """
+
 # Import the libraries used in this tutorial
 import numpy as np
 import pylab as pl
 from scipy.optimize import minimize
 import pyexshalos as exh
+
 
 # Define the chi2 for fitting the b1
 def chi2(theta):
@@ -20,7 +22,8 @@ def chi2(theta):
     :rtype: float
 
     """
-    return np.mean((r - theta[0] - theta[1]*(k/k_NL)**2)**2/err2)/2.0
+    return np.mean((r - theta[0] - theta[1] * (k / K_NL) ** 2) ** 2 / err2) / 2.0
+
 
 # Define the gradient of the chi2 above
 def chi2_grad(theta):
@@ -35,9 +38,12 @@ def chi2_grad(theta):
     :rtype: numpy.ndarray
 
     """
-    pred = theta[0] + theta[1]*(k/k_NL)**2
+    pred = theta[0] + theta[1] * (k / K_NL) ** 2
 
-    return np.array([np.mean((pred - r)/err2), np.mean((pred - r)*(k/k_NL)**2/err2)])
+    return np.array(
+        [np.mean((pred - r) / err2), np.mean((pred - r) * (k / K_NL) ** 2 / err2)]
+    )
+
 
 # Set parameters for the halo catalogue
 OM0 = 0.307115
@@ -76,8 +82,7 @@ halos = exh.mock.Generate_Halos_Box_from_Pk(
 # Define the mass bins to measure the power spectrum
 NH_BINS = 7
 Mh_bins = np.logspace(
-    np.log10(np.min(halos["Mh"])) *
-    0.99, np.log10(np.max(halos["Mh"])) * 1.01, NH_BINS
+    np.log10(np.min(halos["Mh"])) * 0.99, np.log10(np.max(halos["Mh"])) * 1.01, NH_BINS
 )
 
 # Compute the mean mass and the number of halos in each bin
@@ -159,34 +164,37 @@ bhm_err = []
 count = 1
 for i in range(1, NH_BINS):
     # Using Phm
-    r = Pdata[count]/Pm
+    r = Pdata[count] / Pm
     mask = r > 0.0
     k = kdata[mask]
     r = r[mask]
-    err2 = r**2/Nk[mask]
-    x = minimize(chi2, jac=chi2_grad, x0=[b0, c0], method="BFGS",
-                 options={"maxiter": 1_000})
+    err2 = r**2 / Nk[mask]
+    x = minimize(
+        chi2, jac=chi2_grad, x0=[b0, c0], method="BFGS", options={"maxiter": 1_000}
+    )
     bhm.append(x.x[0])
     bhm_err.append(x.hess_inv[0, 0])
     count += i
 
     # Using Phh
-    r = (Pdata[count] - 1.0/nh[i-1])/Pm
+    r = (Pdata[count] - 1.0 / nh[i - 1]) / Pm
     mask = r > 0.0
     k = kdata[mask]
     r = r[mask]
-    err2 = (Pdata[count, mask]/Pm[mask])**2/Nk[mask]
-    x = minimize(chi2, jac=chi2_grad, x0=[b0**2, c0], method="BFGS",
-                 options={"maxiter": 1_000})
+    err2 = (Pdata[count, mask] / Pm[mask]) ** 2 / Nk[mask]
+    x = minimize(
+        chi2, jac=chi2_grad, x0=[b0**2, c0], method="BFGS", options={"maxiter": 1_000}
+    )
     bhh.append(np.sqrt(x.x[0]))
-    bhh_err.append(x.hess_inv[0, 0]/(2.0*bhh[-1]))
+    bhh_err.append(x.hess_inv[0, 0] / (2.0 * bhh[-1]))
     count += 1
 
 # Compute the theoretical linear biases for a few models
 Mh_theory = np.logspace(np.log10(Mh_bins[0]), np.log10(Mh_bins[-1]), 600)
 b_ps = exh.theory.Get_bh1(M=Mh_theory, model="PS", Om0=OM0, k=klin, P=Plin)
-b_tinker = exh.theory.Get_bh1(M=Mh_theory, model="Tinker",
-                          theta=300, Om0=OM0, k=klin, P=Plin)
+b_tinker = exh.theory.Get_bh1(
+    M=Mh_theory, model="Tinker", theta=300, Om0=OM0, k=klin, P=Plin
+)
 b_st = exh.theory.Get_bh1(M=Mh_theory, model="ST", Om0=OM0, k=klin, P=Plin)
 
 # Plot the linear biases
@@ -194,14 +202,15 @@ pl.clf()
 
 pl.plot(Mh_theory, b_ps, linestyle="-", linewidth=2, marker="", label="PS")
 pl.plot(Mh_theory, b_st, linestyle="-", linewidth=2, marker="", label="ST")
-pl.plot(Mh_theory, b_tinker, linestyle="-",
-        linewidth=2, marker="", label="Tinker")
-pl.errorbar(Mh_mean, bhh, yerr=bhh_err, linestyle="", marker="o",
-            markersize=6, label="Auto")
-pl.errorbar(Mh_mean, bhm, yerr=bhm_err, linestyle="", marker="o",
-            markersize=6, label="Cross")
+pl.plot(Mh_theory, b_tinker, linestyle="-", linewidth=2, marker="", label="Tinker")
+pl.errorbar(
+    Mh_mean, bhh, yerr=bhh_err, linestyle="", marker="o", markersize=6, label="Auto"
+)
+pl.errorbar(
+    Mh_mean, bhm, yerr=bhm_err, linestyle="", marker="o", markersize=6, label="Cross"
+)
 
-pl.xlim(Mh_mean[0]*0.5, Mh_mean[-1]*2.0)
+pl.xlim(Mh_mean[0] * 0.5, Mh_mean[-1] * 2.0)
 pl.ylim(0.0, 10.0)
 pl.xscale("log")
 pl.yscale("linear")
