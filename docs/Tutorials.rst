@@ -10,3 +10,4 @@ If you do not have any specific application in mind and only want to have an ove
 
    tutorials/halo_catalogues.rst
    tutorials/halo_bias.rst
+   tutorials/multi_hod.rst
