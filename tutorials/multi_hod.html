@@ -378,7 +378,11 @@ document.write(`
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>Once we have the halo catalogue, we can populate it with galaxies. We use the <code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Generate_Galaxies_from_Halos</span></code> function to do so. We use the functional form and parameters from this <a class="reference external" href="https://arxiv.org/abs/astro-ph/0408564">paper</a>. Note that we set <code class="docutils literal notranslate"><span class="pre">OUT_FLAG=True</span></code>, this outputs the id of the host halo of each galaxy, using negative ids in the central galaxies. We also have the extra parameter <code class="docutils literal notranslate"><span class="pre">sigma</span></code> that sets how the density profile, <a class="reference external" href="https://arxiv.org/abs/astro-ph/9611107">NFW</a> here, is surpressed to enforce mass conservation.</p>
+<p>Once we have the halo catalogue, we can populate it with galaxies. We use the <code class="docutils literal notranslate"><span class="pre">pyexshalos.mock.Generate_Galaxies_from_Halos</span></code> function to do so. We use the functional form and parameters from this <a class="reference external" href="https://arxiv.org/abs/astro-ph/0408564">paper</a>. Note that we set <code class="docutils literal notranslate"><span class="pre">OUT_FLAG=True</span></code>, this outputs the id of the host halo of each galaxy, using negative ids in the central galaxies.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We also have the extra parameter <code class="docutils literal notranslate"><span class="pre">sigma</span></code> that sets how the density profile, <a class="reference external" href="https://arxiv.org/abs/astro-ph/9611107">NFW</a> here, is surpressed for large radii to enforce mass conservation.</p>
+</div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Populate the halos with galaxies</span>
 <span class="n">gals</span> <span class="o">=</span> <span class="n">exh</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Generate_Galaxies_from_Halos</span><span class="p">(</span>
     <span class="n">posh</span><span class="o">=</span><span class="n">halos</span><span class="p">[</span><span class="s2">&quot;posh&quot;</span><span class="p">],</span>
@@ -482,7 +486,10 @@ document.write(`
 </pre></div>
 </div>
 <img alt="../_images/Multi_hod.png" src="../_images/Multi_hod.png" />
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
 <p>Note that the power spectra both tracers are very similar. It happens because our simulation has a very low mass resolution, in comarions to the IllustrisTNG300 simulation. For a fair comparison, we should use the same resolution of the original simulation.</p>
+</div>
 </section>
 
 
