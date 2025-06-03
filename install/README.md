@@ -40,4 +40,4 @@ cd ExSHalos
 nix develop . 
 ```
 
-
+The package can also be installed from my [GitHub repository](https://github.com/Voivodic/nix-derivations) of nix packages.
