@@ -118,6 +118,6 @@ extensions = [
 # Run the setup script to build the C extensions and install the package
 setup(
     name="pyexshalos",
-    version="0.1.0",
+    version="1.0.0",
     ext_modules=extensions,
 )
