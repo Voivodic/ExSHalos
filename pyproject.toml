@@ -5,10 +5,17 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pyexshalos"
 version = "0.1.0"
+description = "A pyhon package for ExSHalos"
+authors = [
+    {name = "Rodrigo Voivodic", email = "rodrigo.voivodic@gmail.com"}
+]
 dependencies = [
     "numpy",
     "scipy",
 ]
+
+[tool.setuptools]
+packages = ["pyexshalos"]
 
 [tool.setuptools.packages]
 find = {}
