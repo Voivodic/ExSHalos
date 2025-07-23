@@ -8,4 +8,11 @@ install/
 .git/
 .github/
 .gitignore
+
+# Ignore the documentation
 docs/
+
+# Ignore files not related to the installation
+LICENSE
+README.md
+tutorials/
