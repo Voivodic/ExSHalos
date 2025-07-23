@@ -1,0 +1,11 @@
+# Ignore the directory containing the installation scripts 
+install/
+
+# Ignore Docker-related files
+.dockerignore
+
+# Ignore git history and other development artifacts
+.git/
+.github/
+.gitignore
+docs/
