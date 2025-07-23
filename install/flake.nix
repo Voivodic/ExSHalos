@@ -1,92 +1,81 @@
+# This file should be located at the root of your project: app/flake.nix
 {
-    description = "Flake for creating a nix shell with ExSHalos";
+    description = "A development environment and runnable app for the ExSHalos Python library";
 
     inputs = {
         nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     };
 
-    outputs = { self, nixpkgs, ... } @ inputs: 
-    let
-        # Set the system and the pkgs used
-        system = "x86_64-linux";
-        pkgs = import nixpkgs { inherit system; };
+    outputs = { self, nixpkgs, ... } @ inputs:
+        let
+            # Helper to generate outputs for all common systems
+            forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
 
-        # Install voro++ library
-        # voroPP = pkgs.stdenv.mkDerivation {
-        #     name = "voro++";
-        #     src = pkgs.fetchurl {
-        #         url = "https://github.com/chr1shr/voro/archive/refs/heads/master.zip";
-        #         sha256 = "sha256-UBHCMmz0o7tQQWAlQnuX4qD1ycenxPgsvyXyBJtz9Wg";
-        #     };
-        #     buildInputs = [ 
-        #         pkgs.unzip 
-        #         pkgs.gcc14
-        #     ];
-        #     configurePhase = ''
-        #         sed -i '14s#.*#CFLAGS+=-Wall -ansi -pedantic -O3 -fPIC#' config.mk 
-        #     '';
-        #     buildPhase = ''
-        #         make
-        #     '';
-        #     installPhase = ''
-        #         make install PREFIX=$out
-        #     '';
-        #     meta = {
-        #         description = "A three-dimensional Voronoi cell library in C++";
-        #         homepage = "https://math.lbl.gov/voro++/";
-        #     };
-        # };
+            # Create an attribute set for each system containing our common packages
+            perSystem = forAllSystems (system:
+                let
+                    pkgs = import nixpkgs { inherit system; };
+                    python = pkgs.python313;
 
-        # Install pyexshalos
-        pyexshalos =  pkgs.python313Packages.buildPythonPackage {
-            pname = "pyexshalos";
-            version = "0.1.0";
-            format = "pyproject";
+                    # Define the package derivation for ExSHHalos
+                    pyexshalos = python.pkgs.buildPythonPackage {
+                        pname = "pyexshalos";
+                        version = "1.0.0";
+                        format = "pyproject";
+                        src = ./../.;
 
-            src = pkgs.fetchFromGitHub{
-                owner = "Voivodic";
-                repo = "ExSHalos";
-                rev = "main";
-                sha256 = "sha256-GKIoIS92ZUCFzhq28S3+3dW8MbtyvMWfoFToI3wkwLQ=";
-            };
+                        nativeBuildInputs = [ pkgs.gcc python.pkgs.setuptools ];
+                        buildInputs = [ pkgs.fftw pkgs.fftwFloat pkgs.gsl ];
+                        propagatedBuildInputs = [ python.pkgs.numpy python.pkgs.scipy ];
 
-            nativeBuildInputs = [
-                pkgs.gcc
-            ];
+                        pythonImportsCheck = [ "pyexshalos" ];
 
-            buildInputs = [ 
-                pkgs.fftw 
-                pkgs.fftwFloat 
-                pkgs.gsl 
-                # voroPP 
-                pkgs.python313Packages.setuptools
-            ]; 
+                        meta = {
+                            description = "Python interface to ExSHalos";
+                            homepage = "https://github.com/Voivodic/ExSHalos";
+                        };
+                    };
 
-            propagatedBuildInputs = [ 
-                pkgs.python313
-                pkgs.python313Packages.numpy
-                pkgs.python313Packages.scipy
-                pkgs.python313Packages.matplotlib
-            ]; 
+                    # Define the Python environment with the package ONCE.
+                    pythonWithExSHalos = python.withPackages (ps: [ pyexshalos ]);
+                in
+                    # Expose these common definitions for this system
+                    {
+                    inherit pkgs;
+                    package = pyexshalos;
+                    pythonEnv = pythonWithExSHalos;
+                }
+            );
+        in
+            {
+            # --- CLEANER OUTPUTS ---
 
-            pythonImportsCheck = [ "pyexshalos" ];
+            # Expose ExSHalos as a package for all systems
+            # You can build it with `nix build .`
+            packages = forAllSystems (system: {
+                default = perSystem.${system}.package;
+            });
 
-            meta = {
-                description = "Python interface to ExSHalos";
-                homepage = "https://github.com/Voivodic/ExSHalos";
-            };
+            # Create the dev shell using the centralized definitions.
+            # Enter with `nix develop`
+            devShells = forAllSystems (system: {
+                default = perSystem.${system}.pkgs.mkShell {
+                    buildInputs = [
+                        # Use the pre-built Python environment
+                        perSystem.${system}.pythonEnv
+                    ];
+                    shellHook = ''
+                    '';
+                };
+            });
+
+            # Create the app using the centralized definitions.
+            # Run with `nix run . -- your_script.py`
+            apps = forAllSystems (system: {
+                default = {
+                    type = "app";
+                    program = "${perSystem.${system}.pythonEnv}/bin/python";
+                };
+            });
         };
-    in
-    {
-        # Instructions for the creation of the shell
-        devShells.${system}.default = pkgs.mkShell{
-            buildInputs = [
-                pkgs.python313
-                pyexshalos
-            ];
-
-            shellHook = ''
-            '';
-        };
-    };
 }

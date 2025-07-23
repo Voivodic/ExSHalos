@@ -1,27 +1,40 @@
-# Start from a ubuntu image with cuda
+# Start from a ubuntu image
 FROM docker.io/library/ubuntu:24.04 
 
-# Update the image
-RUN apt update
-RUN apt upgrade -y
-
-# Set the time zone
-ENV TZ=Europe/Madrid
+# Remove the interation with the shell
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install some useful packages on ubuntu
-RUN apt install -y build-essential git gcc libfftw3-dev libgsl-dev 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    libfftw3-dev \
+    libgsl-dev \
+    python3 \
+    python3-venv \
+    python3-dev \
+    python3-pip && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install python and pip
-RUN apt install -y python3 python3-pip
+# Create a python virtual environment
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Install some python libraries usin pip
-RUN pip3 install numpy scipy setuptools --break-system-packages
+# Create a working directory for ExSHalos
+WORKDIR /ExSHalos
+
+# Install the python requirements
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Install ExSHalos
-WORKDIR /home/Libraries
-RUN git clone https://github.com/Voivodic/ExSHalos.git
-WORKDIR /home/Libraries/ExSHalos
-RUN pip3 install . --break-system-packages
+COPY . . 
+RUN pip3 install .
 
 # Set the working directory
-WORKDIR /home/Workspace
+WORKDIR /Workspace
+
+# Create an user for using the container 
+RUN useradd --create-home --shell /bin/bash appuser
+USER appuser

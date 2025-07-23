@@ -2,34 +2,67 @@
 Bootstrap: docker
 From: docker.io/library/ubuntu:24.04 
 
-#Install all libraries inside the container
+# Help for the container
+%help
+    This container provides a Python environment for the ExSHalos package.
+    It includes system dependencies like GSL and FFTW, and all Python
+    packages are installed inside a virtual environment located at /opt/venv.
+
+# Metadata
+%labels
+    Author Rodrigo Voivodic 
+    Version 1.0.0
+
+# Copy the contents of the current directory to the container
+%files
+    # Copy the entire build context to the container.
+    ./include/ /ExSHalos/
+    ./pyexshalos/ /ExSHalos/
+    ./pyproject.toml /ExSHalos/
+    ./requirements.txt /ExSHalos/
+    ./setup.py /ExSHalos/
+    ./src/ /ExSHalos/
+
+# Install pyexshalos inside the container
 %post
-    #Create the folder for the libraries and python env
-    mkdir -p /home/Libraries
+    # Set environment variables for the build process itself
+    export LC_ALL=C.UTF-8
+    export DEBIAN_FRONTEND=noninteractive
 
-    #Update the system
-    apt update
-    apt upgrade -y
+    # Update and install system dependencies in a single step
+    apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        gcc \
+        libfftw3-dev \
+        libgsl-dev \
+        python3 \
+        python3-pip \
+        python3-venv \
+        python3-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-    #Set the timezone
-    export TZ=Europe/Madrid
+    # Create the Python virtual environment
+    python3 -m venv /opt/venv
+    . /opt/venv/bin/activate
 
-    #Install some useful programs
-    apt install -y build-essential git libgsl-dev libfftw3-dev
+    # Go to the ExSHalos directory
+    cd /ExSHalos
 
-    # Install python and pip
-    apt install -y python3 python3-pip 
-    
-    # Install python libraries
-    pip3 install --upgrade numpy scipy setuptools --break-system-packages
+    # Install Python dependencies into the virtual environment
+    pip install --no-cache-dir -r requirements.txt
 
-    #Install pyExSHalos
-    cd /home/Libraries
-    git clone https://github.com/Voivodic/ExSHalos.git
-    cd /home/Libraries/ExSHalos
-    pip3 install . --break-system-packages
+    # Install pyexshalos 
+    pip install .
 
-#Set the path to the libraries
+# Set the environment variables
 %environment
-    export HOME=/home
-    cd $HOME
+    export LC_ALL=C.UTF-8
+    export DEBIAN_FRONTEND=noninteractive
+    export PATH="/opt/venv/bin:$PATH"
+
+# Set this to use the container as an executable
+%runscript
+    # This script is executed when you run the container image
+    # For example: ./my_app.sif --version
+    # Here, we pass all command-line arguments ("$@") to the python interpreter
+    exec python "$@"
