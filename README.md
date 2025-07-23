@@ -10,7 +10,33 @@ This is a python package that implements [ExSHalos](https://arxiv.org/abs/1906.0
 
 This library follows the functional programming paradigm! There are no classes, random operators nor custom types.
 
-## Installation
+---
+
+## Local installation (not recommended)
+
+To install [pyExSHalos](https://github.com/Voivodic/ExSHalos) a few libraries are required:
+
+### C requirements:
+- [FFTW3](https://www.fftw.org/) (required for installation)
+- [GSL/CBLAS](https://www.gnu.org/software/gsl/) (required for installation)
+- [OpenMP](https://www.openmp.org/) (required for installation)
+
+### Python requirements:
+- [Numpy](https://numpy.org/) (required for installation and running)
+- [setuptools](https://setuptools.pypa.io/en/latest/) (required for installation)
+- [pip](https://pypi.org/project/pip/) (required for building)
+- [scipy](https://scipy.org/) (required for running)
+
+After all libraries were installed, you just need to
+```bash
+git clone https://github.com/Voivodic/ExSHalos.git
+cd ExSHalos
+pip install .
+```
+
+---
+
+## Containarized installation (recommended)
 
 This guide provides three methods for installing `ExSHalos` in an isolated, reproducible environment. This is the strongly recommended approach as it handles all system and Python dependencies for you.
 
@@ -21,9 +47,7 @@ You must have `git` and one of the following tools installed on your system:
 *   [Apptainer](https://apptainer.org/docs/user/main/installation.html)
 *   [Nix](https://nixos.org/download.html)
 
----
-
-## Getting Started: Initial Setup
+### Getting Started: Initial Setup
 
 First, clone the repository and navigate into the project directory. All commands in the sections below assume you are running them from this `ExSHalos` directory.
 
@@ -31,10 +55,6 @@ First, clone the repository and navigate into the project directory. All command
 git clone https://github.com/Voivodic/ExSHalos.git
 cd ExSHalos
 ```
-
----
-
-## Installation Options
 
 After completing the initial setup, choose **one** of the following methods to create your environment.
 
@@ -122,6 +142,8 @@ nix run install/. -- your_script.py
 
 The `pyexshalos` package can also be used as a dependency in other Nix flakes. See the [Voivodic/nix-derivations](https://github.com/Voivodic/nix-derivations) repository for more information.
 
+---
+
 ## Quick start
 
 Using the python interface for ExSHalos is as simple as:
@@ -152,9 +174,13 @@ Using the python interface for ExSHalos is as simple as:
     pl.savefig("Ph_example.pdf")
 ```
 
+---
+
 ## Documentation
 
 More information about the installation, the API, and some tutorials can be found at the [documentation](https://voivodic.github.io/ExSHalos/).
+
+---
 
 ## TODO
 
