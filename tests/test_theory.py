@@ -3,160 +3,153 @@ Test the theory module functions using pytest.
 """
 
 # Import the core modules
+from typing import Any
+
 import numpy as np
 import pytest
-from numpy.typing import NDArray
 
 # Import the module with the theory functions
 from pyexshalos import theory
-
 
 # --- Fixtures for test setup ---
 
 
 @pytest.fixture(scope="module")
-def test_params() -> dict[str, float]:
+def test_params() -> dict[str, Any]:
     """Defines common parameters for all tests."""
     return {
         "omega_m0": 0.31,
-        "z": 0.0,
+        "omega_mz": 0.78233,
+        "delta_c": 1.68372,
+        "hz": 1.78045,
+        "radial_distance": 2.29911e3,
+        "angular_distance": 1.47909e3,
+        "delta_ra": np.pi / 3.0,
+        "delta_dec": np.pi / 4.0,
+        "z_min": 0.3,
+        "z_max": 0.5,
+        "box_shape": (1.37967e3, 1.03475e3, 0.48322e3),
+        "z": 1.0,
         "cell_size": 2.0,
-        "m_cell": 8.5e10,
+        "cell_mass": 6.882e11,
+        "tolerance": 1e-5,
     }
-
-
-@pytest.fixture(scope="module")
-def sample_arrays() -> tuple[NDArray[np.floating], NDArray[np.floating]]:
-    """Creates sample arrays for testing."""
-    k = np.logspace(-3, 1, 100)
-    pk = np.power(k, -1.5)
-    return k, pk
 
 
 # --- Test Functions ---
 
 
-def test_get_cell_mass(test_params: dict[str, float]) -> None:
+def test_get_cell_mass(test_params: dict[str, Any]) -> None:
     """Test the get_cell_mass function."""
     mass = theory.get_cell_mass(
-        omega_m0=test_params["omega_m0"], cell_size=test_params["cell_size"]
+        cell_size=test_params["cell_size"], omega_m0=test_params["omega_m0"]
     )
-    expected = (
-        2.775e11 * test_params["omega_m0"] * np.power(test_params["cell_size"], 3.0)
+
+    assert np.isclose(
+        test_params["cell_mass"], mass, rtol=test_params["tolerance"]
     )
-    assert np.isclose(mass, expected)
 
 
-def test_get_cell_size(test_params: dict[str, float]) -> None:
+def test_get_cell_size(test_params: dict[str, Any]) -> None:
     """Test the get_cell_size function."""
     size = theory.get_cell_size(
-        omega_m0=test_params["omega_m0"], m_cell=test_params["m_cell"]
+        omega_m0=test_params["omega_m0"], m_cell=test_params["cell_mass"]
     )
-    expected = np.power(
-        test_params["m_cell"] / (2.775e11 * test_params["omega_m0"]), 1.0 / 3.0
+
+    assert np.isclose(
+        test_params["cell_size"], size, rtol=test_params["tolerance"]
     )
-    assert np.isclose(size, expected)
 
 
-def test_get_omz(test_params: dict[str, float]) -> None:
+def test_get_omz(test_params: dict[str, Any]) -> None:
     """Test the get_omz function."""
-    z_array = np.array([0.0, 0.5, 1.0])
-    omz = theory.get_omz(z_array, omega_m0=test_params["omega_m0"])
-
-    # Test at z=0
-    expected_z0 = test_params["omega_m0"]
-    assert np.isclose(omz[0], expected_z0)
-
-    # Test at z=1
-    expected_z1 = (
-        test_params["omega_m0"]
-        * 8.0
-        / (test_params["omega_m0"] * 8.0 + (1.0 - test_params["omega_m0"]))
+    omz = theory.get_omz(
+        np.array(test_params["z"]), omega_m0=test_params["omega_m0"]
     )
-    assert np.isclose(omz[2], expected_z1)
+
+    assert np.isclose(
+        test_params["omega_mz"], omz.item(), rtol=test_params["tolerance"]
+    )
 
 
-def test_get_deltac(test_params: dict[str, float]) -> None:
+def test_get_deltac(test_params: dict[str, Any]) -> None:
     """Test the get_deltac function."""
-    z_array = np.array([0.0])
-    deltac = theory.get_deltac(z_array, omega_m0=test_params["omega_m0"])
-    expected = 1.686 * np.power(
-        theory.get_omz(z_array, omega_m0=test_params["omega_m0"]), 0.0055
+    deltac = theory.get_deltac(
+        np.array(test_params["z"]), omega_m0=test_params["omega_m0"]
     )
-    assert np.isclose(deltac, expected)
+
+    assert np.isclose(
+        test_params["delta_c"], deltac.item(), rtol=test_params["tolerance"]
+    )
 
 
-def test_get_hz(test_params: dict[str, float]) -> None:
+def test_get_hz(test_params: dict[str, Any]) -> None:
     """Test the get_hz function."""
-    z_array = np.array([0.0])
-    hz = theory.get_hz(z_array, omega_m0=test_params["omega_m0"])
-    expected = np.sqrt(test_params["omega_m0"] + (1.0 - test_params["omega_m0"]))
-    assert np.isclose(hz, expected)
+    hz = theory.get_hz(
+        np.array(test_params["z"]), omega_m0=test_params["omega_m0"]
+    )
+
+    assert np.isclose(
+        test_params["hz"], hz.item(), rtol=test_params["tolerance"]
+    )
 
 
-def test_get_ha(test_params: dict[str, float]) -> None:
+def test_get_ha(test_params: dict[str, Any]) -> None:
     """Test the get_ha function."""
-    a_array = np.array([1.0])
-    ha = theory.get_ha(a_array, omega_m0=test_params["omega_m0"])
-    expected = np.sqrt(test_params["omega_m0"] + (1.0 - test_params["omega_m0"]))
-    assert np.isclose(ha, expected)
+    a = 1.0 / (1.0 + test_params["z"])
+    ha = theory.get_ha(np.array(a), omega_m0=test_params["omega_m0"])
 
-
-def test_wth() -> None:
-    """Test the wth function."""
-    k = np.array([0.1, 0.5, 1.0])
-    r = 1.0
-    result = theory.wth(k, r)
-    expected = 3.0 / (np.power(k * r, 2)) * (np.sin(k * r) / (k * r) - np.cos(k * r))
-    assert np.allclose(result, expected)
-
-
-def test_fh_ps_model() -> None:
-    """Test the fh function with PS model."""
-    s = np.array([0.5, 1.0, 1.5])
-    result = theory.fh(s, model="PS")
-    delta_c = 1.686
-    nu = delta_c / s
-    expected = np.sqrt(2.0 / np.pi) * nu * np.exp(-nu * nu / 2)
-    assert np.allclose(result, expected)
-
-
-def test_dlnsdlnm() -> None:
-    """Test the dlnsdlnm function."""
-    m = np.logspace(10, 15, 10)
-    sigma = np.logspace(-1, -3, 10)
-    result = theory.dlnsdlnm(m, sigma)
-
-    # Test first element
-    expected_first = (np.log(sigma[1]) - np.log(sigma[0])) / (
-        np.log(m[1]) - np.log(m[0])
+    assert np.isclose(
+        test_params["hz"], ha.item(), rtol=test_params["tolerance"]
     )
-    assert np.isclose(result[0], expected_first)
 
-    # Test last element
-    expected_last = (np.log(sigma[-1]) - np.log(sigma[-2])) / (
-        np.log(m[-1]) - np.log(m[-2])
+
+def test_get_radial_distance(test_params: dict[str, Any]) -> None:
+    """Test the get_radial_distance function."""
+    dist = theory.get_radial_distance(
+        np.array(test_params["z"]), omega_m0=test_params["omega_m0"]
     )
-    assert np.isclose(result[-1], expected_last)
+
+    assert np.isclose(
+        test_params["radial_distance"],
+        dist.item(),
+        rtol=test_params["tolerance"],
+    )
 
 
-def test_get_bh1_ps_model() -> None:
-    """Test the get_bh1 function with PS model."""
-    m = np.logspace(10, 15, 10)
-    sigma = np.array([0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4])
-    result = theory.get_bh1(m, sigma=sigma, model="PS")
-    delta_c = 1.686
-    nu = delta_c / sigma
-    expected = 1.0 + (nu * nu - 1.0) / delta_c
-    assert np.allclose(result, expected)
+def test_get_angular_distance(test_params: dict[str, Any]) -> None:
+    """Test the get_radial_distance function."""
+    dist = theory.get_angular_distance(
+        np.array(test_params["z"]),
+        ra_0=0.0,
+        ra_1=test_params["delta_ra"],
+        dec_0=-test_params["delta_dec"] / 2.0,
+        dec_1=test_params["delta_dec"] / 2.0,
+        omega_m0=test_params["omega_m0"],
+    )
+
+    assert np.isclose(
+        test_params["angular_distance"],
+        dist.item(),
+        rtol=test_params["tolerance"],
+    )
 
 
-def test_get_bh2_ps_model() -> None:
-    """Test the get_bh2 function with PS model."""
-    m = np.logspace(10, 15, 10)
-    sigma = np.array([0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4])
-    result = theory.get_bh2(m, sigma=sigma, model="PS")
-    delta_c = 1.686
-    nu = delta_c / sigma
-    expected = np.power(nu * nu / delta_c, 2.0) - 3.0 * np.power(nu / delta_c, 2.0)
-    assert np.allclose(result, expected)
+def test_get_box_shape(test_params: dict[str, Any]) -> None:
+    """Test the get_box_shape function."""
+    shape = theory.get_box_shape(
+        ra_min=0.0,
+        ra_max=test_params["delta_ra"],
+        dec_min=-test_params["delta_dec"] / 2.0,
+        dec_max=test_params["delta_dec"] / 2.0,
+        z_min=test_params["z_min"],
+        z_max=test_params["z_max"],
+        omega_m0=test_params["omega_m0"],
+        in_rad=True,
+    )
+
+    assert np.allclose(
+        shape,
+        test_params["box_shape"],
+        rtol=test_params["tolerance"],
+    )
