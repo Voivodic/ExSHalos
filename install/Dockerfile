@@ -5,8 +5,8 @@ FROM docker.io/library/ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install some useful packages on ubuntu
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt update && \
+    apt install -y --no-install-recommends \
     build-essential \
     gcc \
     libfftw3-dev \

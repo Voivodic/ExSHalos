@@ -62,10 +62,9 @@
                 default = perSystem.${system}.pkgs.mkShell {
                     buildInputs = [
                         # Use the pre-built Python environment
+                        perSystem.${system}.pkgs.python313.pkgs.numpy
                         perSystem.${system}.pythonEnv
                     ];
-                    shellHook = ''
-                    '';
                 };
             });
 

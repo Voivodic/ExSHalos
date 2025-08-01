@@ -1,7 +1,7 @@
 Installation
 ============
 
-ExSHalos is wirtten in C/C++ and need some external libraries to work.
+ExSHalos is written in C/C++ and need some external libraries to work.
 
 Even with the dependence list being small and composed of standard libraries (likely present in clusters), the installation instructions, for each library, is given below.
 
