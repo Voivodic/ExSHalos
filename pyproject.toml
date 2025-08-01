@@ -16,3 +16,14 @@ dependencies = [
 
 [tool.setuptools.packages]
 find = {}
+
+[tool.pyright]
+typeCheckingMode = "strict"
+# reportUnknownMemberType = false
+reportMissingTypeStubs = false
+useLibraryCodeForTypes = true
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+extend-select = ["W", "N", "B", "UP", "SIM", "C4"]
+ignore = ["F722", "F821"]
