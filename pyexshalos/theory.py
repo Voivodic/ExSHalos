@@ -1,304 +1,541 @@
 """
 This module compute some theoretical quantities.
 """
-from typing import Dict, Optional, Tuple, Union, List
 
+# Import for annotations
+from typing import Any, Optional, cast
+
+# Import numpy
 import numpy as np
+from numpy.typing import NDArray
 
 
 # Get the mass of each cell given its size
-def Get_Mcell(Om0: float = 0.31, Lc: float = 2.0) -> float:
+def get_cell_mass(omega_m0: float = 0.31, cell_size: float = 2.0) -> float:
     """
     Compute the mass of a cell in the density grid.
 
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
-    :param Lc: Size of each cell in Mpc/h. Fiducial value: 2.0
-    :type Lc: float
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
+    :param cell_size: Size of each cell in Mpc/h. Fiducial value: 2.0
+    :type cell_size: float
 
     :return: Mass of the cell in units of solar masses per h.
     :rtype: float
     """
-    return 2.775e+11*Om0*np.power(Lc, 3.0)
+    return 2.775e11 * omega_m0 * np.power(cell_size, 3.0)
+
 
 # Get the size of each cell given its mass
-def Get_Lc(Om0: float = 0.31, Mcell: float = 8.5e+10) -> float:
+def get_cell_size(omega_m0: float = 0.31, m_cell: float = 8.5e10) -> float:
     """
     Get the size of each cell given its mass.
 
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
-    :param Mcell: Mass of the cell in units of solar masses per h. Fiducial value: 8.5e+10
-    :type Mcell: float
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
+    :param m_cell: Mass of the cell in units of solar masses per h.
+                   Fiducial value: 8.5e+10
+    :type m_cell: float
 
     :return: Size of the cell in Mpc/h.
     :rtype: float
     """
-    return np.power(Mcell / (2.775e+11 * Om0), 1.0 / 3.0)
+    return np.power(m_cell / (2.775e11 * omega_m0), 1.0 / 3.0)
+
 
 # Get Om at any redshift
-def Get_Omz(z: float = 0.0, Om0: float = 0.31) -> float:
+def get_omz(
+    z: NDArray[np.floating], omega_m0: float = 0.31
+) -> NDArray[np.floating]:
     """
     Return the value of the matter overdensity at a given redshift.
 
-    :param z: Redshift. Fiducial value: 0.0
-    :type z: float
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :param z: Redshift.
+    :type z: NDArray[np.floating]
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
 
     :return: Matter overdensity at redshift z.
-    :rtype: float
+    :rtype: NDArray[np.floating]
     """
-    return Om0 * np.power(1.0 + z, 3.0) / (Om0 * np.power(1.0 + z, 3.0) + (1.0 - Om0))
+    return (
+        omega_m0
+        * np.power(1.0 + z, 3.0)
+        / (omega_m0 * np.power(1.0 + z, 3.0) + (1.0 - omega_m0))
+    )
+
 
 # Get delta_c (critical matter overdensity for halo formation) at any redshift
-def Get_deltac(z: float = 0.0, Om0: float = 0.31) -> float:
+def get_deltac(
+    z: NDArray[np.floating], omega_m0: float = 0.31
+) -> NDArray[np.floating]:
     """
-    Return the value of delta_c (matter density contrast for halo formation) following a fit.
+    Return the value of delta_c (matter density contrast for halo
+    formation) following a fit.
 
-    :param z: Redshift. Fiducial value: 0.0
-    :type z: float
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :param z: Redshift.
+    :type z: NDArray[np.floating]
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
 
     :return: Value of delta_c at redshift z.
-    :rtype: float
+    :rtype: NDArray[np.floating]
     """
-    return 1.686 * np.power(Get_Omz(z, Om0), 0.0055)
+    return 1.686 * np.power(get_omz(z, omega_m0), 0.0055)
+
 
 # Get H(z) (Hubble constant at z)
-def Get_Hz(z: float = 0.0, Om0: float = 0.31) -> float:
+def get_hz(
+    z: NDArray[np.floating], omega_m0: float = 0.31
+) -> NDArray[np.floating]:
     """
     Return the Hubble function, in units of 100*h, at a given redshift.
 
-    :param z: Redshift. Fiducial value: 0.0
-    :type z: float
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :param z: Redshift.
+    :type z: NDArray[np.floating]
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
 
     :return: Hubble function in units of 100*h at redshift z.
-    :rtype: float
+    :rtype: NDArray[np.floating]
     """
-    return np.sqrt(Om0 * np.power(1.0 + z, 3.0) + (1.0 - Om0))
+    return np.sqrt(omega_m0 * np.power(1.0 + z, 3.0) + (1.0 - omega_m0))
+
 
 # Get H(a) (Hubble constant at a)
-def Get_Ha(a: float = 1.0, Om0: float = 0.31) -> float:
+def get_ha(
+    a: NDArray[np.floating], omega_m0: float = 0.31
+) -> NDArray[np.floating]:
     """
     Return the Hubble function, in units of 100*h, at a given scale factor.
 
-    :param a: Scale factor. Fiducial value: 1.0
-    :type a: float
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :param a: Scale factor.
+    :type a: NDArray[np.floating]
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
 
     :return: Hubble function in units of 100*h at scale factor a.
-    :rtype: float
+    :rtype: NDArray[np.floating]
     """
-    return np.sqrt(Om0 * np.power(a, -3.0) + (1.0 - Om0))
+    return np.sqrt(omega_m0 * np.power(a, -3.0) + (1.0 - omega_m0))
+
+
+# Compute the comoving radial distance at a given redshift
+def get_radial_distance(
+    z: NDArray[np.floating], omega_m0: float = 0.31
+) -> NDArray[np.floating]:
+    """
+    Return the comoving radial distance, in units of Mpc/h.
+
+    :param z: Redshift.
+    :type z: numpy.ndarray
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
+
+    :return: Distance as a function of redshift.
+    :rtype: numpy.ndarray
+    """
+    # Import cumulative_trapezoid from scipy.integrate
+    from scipy.integrate import (
+        quad,  # pyright: ignore[reportUnknownVariableType]
+    )
+
+    # Compute the integrand
+    def _integrand(s: NDArray[np.floating]) -> NDArray[np.floating]:
+        return 1.0 / (s**2 * get_ha(s, omega_m0))
+
+    # Compute the integral for all z's
+    a = 1.0 / (1.0 + z)
+    if len(z.shape) == 0:
+        resp = cast(NDArray[np.floating], quad(_integrand, 1.0, a)[0])
+    else:
+        resp = np.zeros(len(z))
+        for i in range(len(z)):
+            resp[i] = quad(_integrand, 1.0, a[i])[0]
+
+    # Compute the integral
+    return -2997.92 * np.array(resp)
+
+
+# Compute the angular diameter distance at a given redshift
+def get_angular_distance(
+    z: NDArray[np.floating],
+    ra_0: float,
+    ra_1: float,
+    dec_0: float,
+    dec_1: float,
+    omega_m0: float = 0.31,
+) -> NDArray[np.floating]:
+    """
+    Return the comoving angular distance, in units of Mpc/h.
+
+    :param z: Redshift.
+    :type z: numpy.ndarray
+    :param ra_0: Right ascension of the point 0.
+    :type ra_0: float
+    :param ra_1: Right ascension of the point 1.
+    :type ra_1: float
+    :param dec_0: Declination of the point 0.
+    :type dec_0: float
+    :param dec_1: Declination of the point 1.
+    :type dec_1: float
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
+
+    :return: Angular distance in units of Mpc/h.
+    :rtype: numpy.ndarray
+    """
+    # Compute the angular diameter distance
+    r = get_radial_distance(z, omega_m0)
+    da = r / (1.0 + z)
+
+    # Compute the angular distance between the objects
+    theta = np.arccos(
+        np.sin(dec_0) * np.sin(dec_1)
+        + np.cos(dec_0) * np.cos(dec_1) * np.cos(ra_0 - ra_1)
+    )
+
+    # Compute the angular diameter distance
+    da = r / (1.0 + z) * theta
+
+    return da
+
+
+# Get the shape of a box needed to enclose a volume of the sky
+def get_box_shape(
+    ra_min: float,
+    ra_max: float,
+    dec_min: float,
+    dec_max: float,
+    z_min: float,
+    z_max: float,
+    omega_m0: float = 0.31,
+    in_rad: bool = True,
+) -> tuple[float, float, float]:
+    """
+    Compute the shape of a box needed to enclose a volume of the sky.
+
+    :param ra_min: Minimum right ascension.
+    :type ra_min: float
+    :param ra_max: Maximum right ascension.
+    :type ra_max: float
+    :param dec_min: Minimum declination.
+    :type dec_min: float
+    :param dec_max: Maximum declination.
+    :type dec_max: float
+    :param z_min: Minimum redshift.
+    :type z_min: float
+    :param z_max: Maximum redshift.
+    :type z_max: float
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
+
+    :return: Tuple containing the shape of the box in units of Mpc/h.
+    :rtype: tuple[float, float, float]
+    """
+    # Convert to radians
+    if not in_rad:
+        ra_min = ra_min * np.pi / 180.0
+        ra_max = ra_max * np.pi / 180.0
+        dec_min = dec_min * np.pi / 180.0
+        dec_max = dec_max * np.pi / 180.0
+
+    # Compute the radial distances
+    dz_min: float = get_radial_distance(np.array(z_min), omega_m0).item()
+    dz_max: float = get_radial_distance(np.array(z_max), omega_m0).item()
+
+    # Compute the size of the box along each dimension
+    lz: float = np.fabs(dz_max - dz_min).item()
+    ly: float = (np.max([dz_max, dz_min]) * np.fabs(dec_max - dec_min)).item()
+    dec_max_width: float = 0.0
+    if (dec_min < 0.0 and dec_max < 0.0) or (dec_min > 0.0 and dec_max > 0.0):
+        dec_max_width = np.min([np.fabs(dec_max), np.fabs(dec_min)])
+    lx: float = (
+        np.max([dz_max, dz_min])
+        * np.fabs(ra_max - ra_min)
+        * np.cos(dec_max_width)
+    ).item()
+
+    return (lx, ly, lz)
+
 
 # Get dH(a) (derivative of H(a) with respect to a)
-def Get_dHa(a: float = 1.0, Om0: float = 0.31) -> float:
+def get_dha(
+    a: NDArray[np.floating], omega_m0: float = 0.31
+) -> NDArray[np.floating]:
     """
-    Return the derivative of the Hubble's function, with respect to a in units of 100*h, at a given scale factor.
+    Return the derivative of the Hubble's function, with respect to a in
+    units of 100*h, at a given scale factor.
 
     :param a: Scale factor. Fiducial value: 1.0
-    :type a: float
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :type a: NDArray[np.floating]
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
 
-    :return: Derivative of the Hubble's function in units of 100*h at scale factor a.
-    :rtype: float
+    :return: Derivative of the Hubble's function in units of 100*h at
+             scale factor a.
+    :rtype: NDArray[np.floating]
     """
-    return -1.5 * Om0 * np.power(a, -4.0) / Get_Ha(a, Om0)
+    return -1.5 * omega_m0 * np.power(a, -4.0) / get_ha(a, omega_m0)
+
 
 # Get the growth rate at z
-def Get_fz(z: float = 0.0, Om0: float = 0.31) -> float:
+def get_fz(
+    z: NDArray[np.floating], omega_m0: float = 0.31
+) -> NDArray[np.floating]:
     """
     Return the growth rate at a given redshift.
 
     :param z: Redshift. Fiducial value: 0.0
     :type z: float
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
 
     :return: Growth rate at redshift z.
     :rtype: float
     """
-    return np.power(Get_Omz(z, Om0), 0.5454)
+    return np.power(get_omz(z, omega_m0), 0.5454)
 
-# Define the system of differential equations used to compute the growth function
-def Growth_eq(y: Tuple[float, float], a: float, Om0: float = 0.31) -> np.ndarray:
+
+# Define the system of differential equations used to compute the growth
+# function
+def growth_eq(
+    y: tuple[NDArray[np.floating], NDArray[np.floating]],
+    a: NDArray[np.floating],
+    omega_m0: float = 0.31,
+) -> NDArray[np.floating]:
     """
-    Define the system of differential equations used to compute the growth function.
+    Define the system of differential equations used to compute the growth
+    function.
 
-    :param y: Tuple containing the density contrast (d) and its derivative (v).
+    :param y: Tuple containing the density contrast (d) and its
+              derivative (v).
     :type y: tuple of float
     :param a: Scale factor. Fiducial value.
     :type a: float
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
 
-    :return: Array containing the derivatives of density contrast and its velocity.
+    :return: Array containing the derivatives of density contrast and
+        its velocity.
     :rtype: numpy.ndarray
     """
     d, v = y
     dydt = np.array([
         v,
-        -(3.0/a + Get_dHa(a, Om0)/Get_Ha(a, Om0)) * v + 3.0/2.0 * Om0 / (np.power(Get_Ha(a, Om0), 2.0) * np.power(a, 5.0)) * d
+        -(3.0 / a + get_dha(a, omega_m0) / get_ha(a, omega_m0)) * v
+        + 3.0
+        / 2.0
+        * omega_m0
+        / (np.power(get_ha(a, omega_m0), 2.0) * np.power(a, 5.0))
+        * d,
     ])
     return dydt
 
 
 # Return the growth function
-def Get_Dz(Om0: float = 0.31, zmax: float = 1000, zmin: float = -0.5, nzs: int = 1000) -> Dict[str, np.ndarray]:
+def get_dz(
+    omega_m0: float = 0.31,
+    z_max: float = 1000,
+    z_min: float = -0.5,
+    n_zs: int = 1000,
+) -> dict[str, NDArray[np.floating]]:
     """
     Compute the growth function over a range of redshifts.
 
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
-    :param zmax: Maximum redshift to consider. Fiducial value: 1000
-    :type zmax: float
-    :param zmin: Minimum redshift to consider. Fiducial value: -0.5
-    :type zmin: float
-    :param nzs: Number of redshift steps. Fiducial value: 1000
-    :type nzs: int
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
+    :param z_max: Maximum redshift to consider. Fiducial value: 1000
+    :type z_max: float
+    :param z_min: Minimum redshift to consider. Fiducial value: -0.5
+    :type z_min: float
+    :param n_zs: Number of redshift steps. Fiducial value: 1000
+    :type n_zs: int
 
-    :return: Dictionary with the keys
-
-             - "z": Ndarray with redshifts
-             = "a": Ndarray with scale factors
-             - "Dz" Ndarray with growth factors
-             - "dDz": Ndarray with derivatives of the growth factor
+    :return: dictionary with the keys
+        - "z": Ndarray with redshifts
+        - "a": Ndarray with scale factors
+        - "dz": Ndarray with growth factors
+        - "d_dz": Ndarray with derivatives of the growth factor
 
     :rtype: dict
     """
-    from scipy.integrate import odeint
+    from scipy.integrate import (
+        odeint,  # pyright: ignore[reportUnknownVariableType]
+    )
 
-    resp = {}
+    resp: dict[str, NDArray[np.floating]] = {}
 
     # Set the initial conditions
-    a = np.logspace(np.log10(1.0 / (zmax + 1.0)), np.log10(1.0 / (zmin + 1.0)), nzs)
-    resp['z'] = 1.0 / a - 1.0
-    resp['a'] = a
+    a = cast(
+        NDArray[np.floating],
+        np.logspace(
+            np.log10(1.0 / (z_max + 1.0)), np.log10(1.0 / (z_min + 1.0)), n_zs
+        ),
+    )
+    resp["z"] = 1.0 / a - 1.0
+    resp["a"] = a
     d0 = a[0]
     dd0 = 1.0
     y0 = [d0, dd0]
 
     # Solve the Growth function equation
-    sol = odeint(Growth_eq, y0, a, args=(Om0,))
-    resp['Dz'] = sol[:, 0]
-    resp['dDz'] = sol[:, 1]
+    sol = cast(
+        NDArray[np.floating], odeint(growth_eq, y0, a, args=(omega_m0,))
+    )
+    resp["dz"] = sol[:, 0]
+    resp["d_dz"] = sol[:, 1]
 
     return resp
 
+
 # Window (top-hat) function in Fourier space
-def Wth(k: np.ndarray, R: float) -> np.ndarray:
+def wth(k: NDArray[np.floating], r: float) -> NDArray[np.floating]:
     """
     Compute the top-hat window function in Fourier space.
 
     :param k: Wavenumber.
     :type k: numpy.ndarray
-    :param R: Smoothing radius.
-    :type R: float
+    :param r: Smoothing radius.
+    :type r: float
 
     :return: Window function value.
     :rtype: np.ndarray
     """
-    resp = 3.0 / (np.power(k * R, 2)) * (np.sin(k * R) / (k * R) - np.cos(k * R))
+    resp = (
+        3.0 / (np.power(k * r, 2)) * (np.sin(k * r) / (k * r) - np.cos(k * r))
+    )
     return resp
 
+
 # Compute the variance of the linear density field
-def Compute_sigma(
-    k: np.ndarray,
-    P: np.ndarray,
-    R: Optional[np.ndarray] = None,
-    M: Optional[np.ndarray] = None,
-    Om0: float = 0.31,
-    z: float = 0.0
-) -> np.ndarray:
+def compute_sigma(
+    k: NDArray[np.floating],
+    pk: NDArray[np.floating],
+    r: Optional[NDArray[np.floating]] = None,
+    m: Optional[NDArray[np.floating]] = None,
+    omega_m0: float = 0.31,
+    z: float = 0.0,
+) -> NDArray[np.floating]:
     """
     Compute the variance of the density field.
 
     :param k: Wavenumbers of the power spectrum.
     :type k: numpy.ndarray
-    :param P: Power spectrum.
-    :type P: numpy.ndarray
-    :param R: Smoothing radius (used to compute the mass). Fiducial value: None
-    :type R: Optional[numpy.ndarray]
-    :param M: Mass. Fiducial value: None
-    :type M: Optional[numpy.ndarray]
-    :param Om0: Omega matter at z=0 (used to compute the mass). Fiducial value: 0.31
-    :type Om0: float
+    :param pk: Power spectrum.
+    :type pk: numpy.ndarray
+    :param r: Smoothing radius (used to compute the mass). Fiducial value: None
+    :type r: Optional[numpy.ndarray]
+    :param m: Mass. Fiducial value: None
+    :type m: Optional[numpy.ndarray]
+    :param omega_m0: Omega matter at z=0 (used to compute the mass).
+                     Fiducial value: 0.31
+    :type omega_m0: float
     :param z: Redshift. Fiducial value: 0.0
     :type z: float
 
     :return: Variance of the density field on the given scales.
     :rtype: numpy.ndarray
     """
-    from scipy.integrate import simpson
+    from scipy.integrate import (
+        simpson,  # pyright: ignore[reportUnknownVariableType]
+    )
 
-    # Compute R(M) if R is not provided
-    if R is None:
-        if M is None:
-            raise ValueError("You have to provide either the mass array (M) or the radius array (R)!")
+    # Compute R(M) if r_smooth is not provided
+    if r is None:
+        if m is None:
+            raise ValueError(
+                "You have to provide either the mass array (m) or "
+                "the radius array (r_smooth)!"
+            )
         else:
-            R = np.power(3.0 * M / (4.0 * np.pi * 2.775e+11 * Om0 * np.power(1 + z, 3.0)), 1.0 / 3.0)
+            r = np.power(
+                3.0
+                * m
+                / (4.0 * np.pi * 2.775e11 * omega_m0 * np.power(1 + z, 3.0)),
+                1.0 / 3.0,
+            )
+    r = cast(NDArray[np.floating], r)
 
     # Evaluate sigma
-    Nr = len(R)
-    sigma = np.zeros(Nr)
-    for j in range(Nr):
-        kt = k[k <= 2.0 * np.pi / R[j]]
-        Pt = P[k <= 2.0 * np.pi / R[j]]
-        
-        sigma[j] = np.sqrt(simpson(Pt * kt * kt * np.power(Wth(kt, R[j]), 2.0), x = kt) / (2.0 * np.pi * np.pi))
+    # At this point, r_smooth is guaranteed to be an NDArray[np.floating]
+    # due to the check above
+    n_r = len(r)
+    sigma = np.zeros(n_r)
+    for j in range(n_r):
+        kt = k[k <= 2.0 * np.pi / r[j]]
+        p_t = pk[k <= 2.0 * np.pi / r[j]]
+
+        sigma[j] = np.sqrt(
+            cast(
+                NDArray[np.floating],
+                simpson(p_t * kt * kt * np.power(wth(kt, r[j]), 2.0), x=kt)
+                / (2.0 * np.pi * np.pi),
+            )
+        )
 
     return sigma
 
-# Compute the derivative of sigma with respect to M
-def dlnsdlnm(M: np.ndarray, sigma: np.ndarray) -> np.ndarray:
-    """
-    Compute the derivative of the logarithm of sigma with respect to the logarithm of mass using finite differences.
 
-    :param M: Mass array.
-    :type M: numpy.ndarray
+# Compute the derivative of sigma with respect to M
+def dlnsdlnm(
+    m: NDArray[np.floating], sigma: NDArray[np.floating]
+) -> NDArray[np.floating]:
+    """
+    Compute the variance of the logarithm of sigma with respect to the
+    logarithm of mass using finite differences.
+
+    :param m: Mass array.
+    :type m: numpy.ndarray
     :param sigma: Variance array.
     :type sigma: numpy.ndarray
 
-    :return: Array containing the derivatives of ln(sigma) with respect to ln(M).
+    :return: Array containing the derivatives of ln(sigma)
+             with respect to ln(m).
     :rtype: numpy.ndarray
     """
-    resp = np.zeros(len(M))
+    result: NDArray[np.floating] = np.zeros(len(m))
 
-    resp[0] = (np.log(sigma[1]) - np.log(sigma[0])) / (np.log(M[1]) - np.log(M[0]))
-    resp[1:-1] = (np.log(sigma[2:]) - np.log(sigma[:-2])) / (np.log(M[2:]) - np.log(M[:-2]))
-    resp[-1] = (np.log(sigma[-1]) - np.log(sigma[-2])) / (np.log(M[-1]) - np.log(M[-2]))
+    result[0] = (np.log(sigma[1]) - np.log(sigma[0])) / (
+        np.log(m[1]) - np.log(m[0])
+    )
+    result[1:-1] = (np.log(sigma[2:]) - np.log(sigma[:-2])) / (
+        np.log(m[2:]) - np.log(m[:-2])
+    )
+    result[-1] = (np.log(sigma[-1]) - np.log(sigma[-2])) / (
+        np.log(m[-1]) - np.log(m[-2])
+    )
 
-    return resp
+    return result
+
 
 # Multiplicity function
 def fh(
-    s: np.ndarray,
-    model: Union[int, str] = "PS",
-    theta: Optional[Union[float, np.ndarray]] = None,
+    s: NDArray[np.floating],
+    model: int | str = "PS",
+    theta: Optional[float | NDArray[np.floating]] = None,
     delta_c: Optional[float] = None,
-    Om0: float = 0.31,
-    z: float = 0.0
-) -> np.ndarray:
+    omega_m0: float = 0.31,
+    z: float = 0.0,
+) -> NDArray[np.floating]:
     """
     Compute the halo mass function (HMF) based on different models.
 
     :param s: Variance of the density field.
     :type s: numpy.ndarray
-    :param model: HMF model to use (0: Press-Schechter, 1: Sheth-Tormen, 2: Tinker, 3: Linear Diffusive Barrier).
-                  Can also be a string identifier ("PS", "ST", "Tinker", "2LDB"). Fiducial value: "PS"
+    :param model: HMF model to use (0: Press-Schechter, 1: Sheth-Tormen,
+                  2: Tinker, 3: Linear Diffusive Barrier).
+                  Can also be a string ("PS", "ST", "Tinker", "2LDB").
+                  Fiducial value: "PS"
     :type model: Union[int, str]
-    :param theta: Model parameters. For Sheth-Tormen: [a, b, p], for Tinker: Delta, for Linear Diffusive Barrier: [b, D, dv, J_max].
+    :param theta: Model parameters.
+                  For Sheth-Tormen: [a, b, p], for Tinker: Delta,
+                  for Linear Diffusive Barrier: [b, D, dv, J_max].
     :type theta: Optional[Union[float, np.ndarray]]
-    :param delta_c: Critical density for collapse. Fiducial value: None 
+    :param delta_c: Critical density for collapse. Fiducial value: None
     :type delta_c: Optional[float]
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
     :param z: Redshift. Fiducial value: 0.0
     :type z: float
 
@@ -309,145 +546,287 @@ def fh(
 
     # Compute critical density if it was not given
     if delta_c is None:
-        delta_c = Get_deltac(z=z, Om0=Om0)
-    nu = delta_c / s
-    resp = np.zeros(len(s))
+        delta_c = get_deltac(z=np.array(z), omega_m0=omega_m0).item()
+    nu: NDArray[np.floating] = delta_c / s
+    result: NDArray[np.floating] = np.zeros(len(s))
 
     # Press-Schechter
     if model == 0 or model in ["ps", "PS", "1SB"]:
-        resp = np.sqrt(2.0 / np.pi) * nu * np.exp(-nu * nu / 2)
+        result = np.sqrt(2.0 / np.pi) * nu * np.exp(-nu * nu / 2)
 
     # Sheth-Tormen
     elif model == 1 or model in ["ST", "st", "elliptical"]:
+        a_st_param: float
+        b_st_param: float
+        p_st_param: float
         if theta is not None:
-            a, b, p = theta
+            # Expecting theta to be a 1D NDArray of 3 floating-point parameters
+            if isinstance(theta, np.ndarray):
+                if not theta.shape == (3,):
+                    raise ValueError(
+                        "Theta for Sheth-Tormen model must be a 1D numpy array"
+                        "of 3 parameters [a, b, p]."
+                    )
+                a_st_param, b_st_param, p_st_param = (
+                    float(theta[0]),
+                    float(theta[1]),
+                    float(theta[2]),
+                )
+            else:
+                raise ValueError(
+                    "Theta for Sheth-Tormen model must be a 1D numpy array "
+                    "of 3 parameters [a, b, p]."
+                )
         else:
-            a, b, p = np.array([0.7, 0.4, 0.6])
+            a_st_param, b_st_param, p_st_param = 0.7, 0.4, 0.6
 
-        B = np.sqrt(a) * delta_c * (1.0 + b * np.power(a * nu * nu, -p))
-        A = 0.0
+        b_st_val: NDArray[np.floating] = (
+            np.sqrt(a_st_param)
+            * delta_c
+            * (1.0 + b_st_param * np.power(a_st_param * nu * nu, -p_st_param))
+        )
+        coeff_a: float = 0.0
         for i in range(6):
-            A += np.power(-1, i) * binom(p, i)
+            coeff_a += np.power(-1, i) * binom(p_st_param, i)
 
-        resp = np.sqrt(2.0 * a / np.pi) * nu * np.exp(-B * B / (2.0 * s * s)) * (1.0 + b * A * np.power(a * nu * nu, -p))
+        result = (
+            np.sqrt(2.0 * a_st_param / np.pi)
+            * nu
+            * np.exp(-b_st_val * b_st_val / (2.0 * s * s))
+            * (
+                1.0
+                + b_st_param
+                * coeff_a
+                * np.power(a_st_param * nu * nu, -p_st_param)
+            )
+        )
 
     # Tinker
     elif model == 2 or model in ["Tinker", "tinker", "TINKER"]:
+        delta_val: float
         if theta is not None:
-            Delta = theta
+            # Expecting theta to be a single scalar float or a 1-element array
+            if isinstance(theta, np.ndarray):
+                if theta.size != 1:
+                    raise ValueError(
+                        "Theta for Tinker model must be a single scalar "
+                        "or an array of 1 element."
+                    )
+                delta_val = float(theta.item())
+            else:  # theta is float
+                delta_val = float(theta)
         else:
-            Delta = 300
+            delta_val = 300.0
 
-        if Delta == 200:
-            B, d, e, f, g = 0.482, 1.97, 1.0, 0.51, 1.228
-        elif Delta == 300:
-            B, d, e, f, g = 0.466, 2.06, 0.99, 0.48, 1.310
-        elif Delta == 400:
-            B, d, e, f, g = 0.494, 2.30, 0.93, 0.48, 1.403
+        # Initialize Tinker model parameters
+        b_tinker: float
+        d_tinker: float
+        e_tinker: float
+        f_tinker: float
+        g_tinker: float
 
-        resp = B * (np.power(s / e, -d) + np.power(s, -f)) * np.exp(-g / (s * s))
+        if delta_val == 200:
+            b_tinker, d_tinker, e_tinker, f_tinker, g_tinker = (
+                0.482,
+                1.97,
+                1.0,
+                0.51,
+                1.228,
+            )
+        elif delta_val == 300:
+            b_tinker, d_tinker, e_tinker, f_tinker, g_tinker = (
+                0.466,
+                2.06,
+                0.99,
+                0.48,
+                1.310,
+            )
+        elif delta_val == 400:
+            b_tinker, d_tinker, e_tinker, f_tinker, g_tinker = (
+                0.494,
+                2.30,
+                0.93,
+                0.48,
+                1.403,
+            )
+        else:
+            b_tinker, d_tinker, e_tinker, f_tinker, g_tinker = (
+                0.466,
+                2.06,
+                0.99,
+                0.48,
+                1.310,
+            )
+
+        result = (
+            b_tinker
+            * (np.power(s / e_tinker, -d_tinker) + np.power(s, -f_tinker))
+            * np.exp(-g_tinker / (s * s))
+        )
 
     # Linear Diffusive Barrier
     elif model == 3 or model in ["2LDB"]:
+        b_ldb: float
+        d_ldb: float
+        dv_ldb: float
+        j_max_ldb: int
         if theta is not None:
-            b, D, dv, J_max = theta
+            # Expecting theta to be a 1D NDArray of 4 floating-point parameters
+            if isinstance(theta, np.ndarray):
+                if not theta.shape == (4,):
+                    raise ValueError(
+                        "Theta for Linear Diffusive Barrier model must be a 1D"
+                        "numpy array of 4 parameters [b, D, dv, J_max]."
+                    )
+                b_ldb, d_ldb, dv_ldb, j_max_ldb = (
+                    float(theta[0]),
+                    float(theta[1]),
+                    float(theta[2]),
+                    int(theta[3]),
+                )
+            else:
+                raise ValueError(
+                    "Theta for Linear Diffusive Barrier model must be a 1D "
+                    "numpy array of 4 parameters [b, D, dv, J_max]."
+                )
         else:
-            b, D, dv, J_max = np.array([0.0, 0.0, 2.71, 20])
+            b_ldb, d_ldb, dv_ldb, j_max_ldb = 0.0, 0.0, 2.71, 20
 
-        resp = np.zeros(len(s))
-        dt = delta_c + dv
+        result = np.zeros(len(s))
+        dt: float = delta_c + dv_ldb
 
-        for n in range(1, J_max + 1):
-            resp += 2.0 * (1.0 + D) * np.exp(-b * b * s * s / (2.0 * (1.0 + D))) * np.exp(-b * delta_c / (1.0 + D)) * (n * np.pi / (dt * dt)) * s * s * np.sin(n * np.pi * delta_c / dt) * np.exp(-n * n * np.pi * np.pi * s * s * (1.0 + D) / (2.0 * dt * dt))
+        for n in range(1, j_max_ldb + 1):
+            result += (
+                2.0
+                * (1.0 + d_ldb)
+                * np.exp(-b_ldb * b_ldb * s * s / (2.0 * (1.0 + d_ldb)))
+                * np.exp(-b_ldb * delta_c / (1.0 + d_ldb))
+                * (n * np.pi / (dt * dt))
+                * s
+                * s
+                * np.sin(n * np.pi * delta_c / dt)
+                * np.exp(
+                    -n
+                    * n
+                    * np.pi
+                    * np.pi
+                    * s
+                    * s
+                    * (1.0 + d_ldb)
+                    / (2.0 * dt * dt)
+                )
+            )
 
-    return resp
+    return result
+
 
 # Compute the halo mass function
-def Get_dndlnm(
-    M: np.ndarray,
-    sigma: Optional[np.ndarray] = None,
-    model: Union[int, str] = "PS",
-    theta: Optional[Union[float, np.ndarray]] = None,
+def get_dndlnm(
+    m: NDArray[np.floating],
+    sigma: Optional[NDArray[np.floating]] = None,
+    model: int | str = "PS",
+    theta: Optional[float | NDArray[np.floating]] = None,
     delta_c: Optional[float] = None,
-    Om0: float = 0.31,
+    omega_m0: float = 0.31,
     z: float = 0.0,
-    k: Optional[np.ndarray] = None,
-    P: Optional[np.ndarray] = None
-) -> np.ndarray:
+    k: Optional[NDArray[np.floating]] = None,
+    pk: Optional[NDArray[np.floating]] = None,
+) -> NDArray[np.floating]:
     """
-    Compute the logarithmic derivative of the halo mass function with respect to mass.
+    Compute the logarithmic derivative of the halo mass function
+    with respect to mass.
 
-    :param M: Mass array.
-    :type M: numpy.ndarray
+    :param m: Mass array.
+    :type m: numpy.ndarray
     :param sigma: Variance of the density field. Fiducial value: None
     :type sigma: Optional[numpy.ndarray]
-    :param model: HMF model to use (0: Press-Schechter, 1: Sheth-Tormen, 2: Tinker, 3: Linear Diffusive Barrier).
-                  Can also be a string identifier ("PS", "ST", "Tinker", "2LDB"). Fiducial value: "PS"
+    :param model: HMF model to use (0: Press-Schechter, 1: Sheth-Tormen,
+                  2: Tinker, 3: Linear Diffusive Barrier).
+                  Can also be a string identifier ("PS", "ST", "Tinker",
+                  "2LDB"). Fiducial value: "PS"
     :type model: Union[int, str]
-    :param theta: Model parameters. For Sheth-Tormen: [a, b, p], for Tinker: Delta, for Linear Diffusive Barrier: [b, D, dv, J_max].
+    :param theta: Model parameters. For Sheth-Tormen: [a, b, p],
+                  for Tinker: Delta,
+                  for Linear Diffusive Barrier: [b, D, dv, J_max].
     :type theta: Optional[Union[float, np.ndarray]]
     :param delta_c: Critical density for collapse. Fiducial value: None
     :type delta_c: Optional[float]
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
     :param z: Redshift. Fiducial value: 0.0
     :type z: float
-    :param k: Wavenumbers of the power spectrum (required if sigma is None). Fiducial value: None
+    :param k: Wavenumbers of the power spectrum (only if sigma is None).
+              Fiducial value: None
     :type k: Optional[numpy.ndarray]
-    :param P: Power spectrum (required if sigma is None). Fiducial value: None
-    :type P: Optional[numpy.ndarray]
+    :param pk: Power spectrum (required if sigma is None).
+               Fiducial value: None
+    :type pk: Optional[numpy.ndarray]
 
     :return: Halo mass function.
     :rtype: numpy.ndarray
     """
-    rhoc = 2.775e+11
-    rhom = Om0 * rhoc * np.power(1 + z, 3)
+    rho_c = 2.775e11
+    rho_m = omega_m0 * rho_c * np.power(1 + z, 3)
 
     # Compute sigma if it was not given
     if sigma is None:
-        if k is None or P is None:
-            raise ValueError("sigma or (k, P) must be provided!")
-        sigma = Compute_sigma(k, P, M=M, Om0=Om0, z=z)
+        if k is None or pk is None:
+            raise ValueError("sigma or (k, p) must be provided!")
+        sigma = compute_sigma(k, pk, m=m, omega_m0=omega_m0, z=z)
 
-    return -fh(sigma, model, theta, delta_c, Om0, z) * rhom / M * dlnsdlnm(M, sigma)
+    return (
+        -fh(sigma, model, theta, delta_c, omega_m0, z)
+        * rho_m
+        / m
+        * dlnsdlnm(m, sigma)
+    )
+
 
 # Halo bias of first order
-def Get_bh1(
-    M: np.ndarray,
-    s: Optional[np.ndarray] = None,
-    model: Union[int, str] = "PS",
-    theta: Optional[Union[float, np.ndarray]] = None,
+def get_bh1(
+    m: NDArray[np.floating],
+    sigma: Optional[NDArray[np.floating]] = None,
+    model: int | str = "PS",
+    theta: Optional[float | NDArray[np.floating]] = None,
     delta_c: Optional[float] = None,
-    Om0: float = 0.31,
+    omega_m0: float = 0.31,
     z: float = 0.0,
-    k: Optional[np.ndarray] = None,
-    P: Optional[np.ndarray] = None,
-    Lagrangian: bool = False
-) -> np.ndarray:
+    k: Optional[NDArray[np.floating]] = None,
+    pk: Optional[NDArray[np.floating]] = None,
+    lagrangian: bool = False,
+) -> NDArray[np.floating]:
     """
     Compute the first-order halo bias (b1).
 
-    :param M: Mass array.
-    :type M: numpy.ndarray
-    :param s: Variance of the linear density field. Fiducial value: None 
-    :type s: Optional[numpy.ndarray]
-    :param model: HMF model to use (0: Press-Schechter, 1: Sheth-Tormen, 2: Tinker, 3: Linear Diffusive Barrier).
-                  Can also be a string identifier ("PS", "ST", "Tinker", "2LDB"). Fiducial value: None
+    :param m: Mass array.
+    :type m: numpy.ndarray
+    :param sigma: Variance of the linear density field.
+                  Fiducial value: None
+    :type sigma: Optional[numpy.ndarray]
+    :param model: HMF model to use (0: Press-Schechter, 1: Sheth-
+                  Tormen, 2: Tinker, 3: Linear Diffusive Barrier).
+                  Can also be a string identifier ("PS", "ST", "Tinker",
+                  "2LDB"). Fiducial value: None
     :type model: Union[int, str]
-    :param theta: Model parameters. For Sheth-Tormen: [a, b, p], for Tinker: Delta, for Linear Diffusive Barrier: [b, D, dv, J_max].
+    :param theta: Model parameters. For Sheth-Tormen: [a, b, p],
+                  for Tinker: Delta,
+                  for Linear Diffusive Barrier: [b, D, dv, J_max].
     :type theta: Optional[Union[float, np.ndarray]]
-    :param delta_c: Critical density for collapse. Fiducial value: None
+    :param delta_c: Critical density for collapse.
+                    Fiducial value: None
     :type delta_c: Optional[float]
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
     :param z: Redshift. Fiducial value: 0.0
     :type z: float
-    :param k: Wavenumbers of the power spectrum (required if s is None). Fiducial value: None
+    :param k: Wavenumbers of the power spectrum
+              (required if sigma is None). Fiducial value: None
     :type k: Optional[numpy.ndarray]
-    :param P: Power spectrum (required if s is none). Fiducial value: None
-    :type P: Optional[numpy.ndarray]
-    :param Lagrangian: Whether to compute the Lagrangian bias.
-    :type Lagrangian: bool
+    :param pk: Power spectrum (required if sigma is none).
+               Fiducial value: None
+    :type pk: Optional[numpy.ndarray]
+    :param lagrangian: Whether to compute the Lagrangian bias.
+    :type lagrangian: bool
 
     :return: First-order halo bias (b1).
     :rtype: numpy.ndarray
@@ -455,213 +834,428 @@ def Get_bh1(
     from scipy.special import binom
 
     # Compute sigma if it was not given
-    if s is None:
-        if k is None or P is None:
-            raise ValueError("s or (k, P) must be provided!")
-        s = Compute_sigma(k, P, M=M, Om0=Om0, z=z)
+    if sigma is None:
+        if k is None or pk is None:
+            raise ValueError("sigma or (k, p) must be provided!")
+        sigma = compute_sigma(k, pk, m=m, omega_m0=omega_m0, z=z)
 
     # Compute delta_c if it was not given
     if delta_c is None:
-        delta_c = Get_deltac(Get_Omz(Om0=Om0, z=z))
-    nu = delta_c / s
-    resp = np.zeros(len(s))
+        delta_c = get_deltac(get_omz(omega_m0=omega_m0, z=np.array(z))).item()
+    nu: NDArray[np.floating] = delta_c / sigma
+    result: NDArray[np.floating] = np.zeros(len(sigma))
 
     # Press-Schechter
     if model == 0 or model in ["ps", "PS", "1SB"]:
-        resp = 1.0 + (nu * nu - 1.0) / delta_c
+        result = 1.0 + (nu * nu - 1.0) / delta_c
 
     # Sheth-Tormen
     elif model == 1 or model in ["ST", "st", "elliptical"]:
+        a_st_param: float
+        b_st_param: float
+        p_st_param: float
         if theta is not None:
-            a, b, p = theta
+            # Expecting theta to be a 1D NDArray of 3 floating-point
+            # parameters
+            if isinstance(theta, np.ndarray):
+                if not theta.shape == (3,):
+                    raise ValueError(
+                        "Theta for Sheth-Tormen model must be a 1D numpy"
+                        " array of 3 parameters [a, b, p]."
+                    )
+                a_st_param, b_st_param, p_st_param = (
+                    float(theta[0]),
+                    float(theta[1]),
+                    float(theta[2]),
+                )
+            else:
+                raise ValueError(
+                    "Theta for Sheth-Tormen model must be a 1D numpy"
+                    " array of 3 parameters [a, b, p]."
+                )
         else:
-            a, b, p = np.array([0.7, 0.4, 0.6])
+            a_st_param, b_st_param, p_st_param = 0.7, 0.4, 0.6
 
-        A = 0.0
+        coeff_a: float = 0.0
         for i in range(6):
-            A += np.power(-1, i) * binom(p, i)
+            coeff_a += np.power(-1, i) * binom(p_st_param, i)
 
-        resp = 1.0 + np.sqrt(a) * nu * nu / delta_c * (1.0 + b * np.power(a * nu * nu, -p)) - 1.0 / (np.sqrt(a) * delta_c * (1.0 + A * np.power(a * nu * nu, -p)))
+        result = (
+            1.0
+            + np.sqrt(a_st_param)
+            * nu
+            * nu
+            / delta_c
+            * (1.0 + b_st_param * np.power(a_st_param * nu * nu, -p_st_param))
+            - 1.0
+            / (
+                np.sqrt(a_st_param)
+                * delta_c
+                * (1.0 + coeff_a * np.power(a_st_param * nu * nu, -p_st_param))
+            )
+        )
 
     # Tinker
-    elif model == 2 or model in ["Tinker", "tinker", "TINKER"]:
+    elif model == 2 or model in [
+        "Tinker",
+        "tinker",
+        "TINKER",
+    ]:
+        delta_tinker_val: float
         if theta is not None:
-            Del = theta
+            # Expecting theta to be a single scalar float or a 1-element
+            # numpy array
+            if isinstance(theta, np.ndarray):
+                if theta.size != 1:
+                    raise ValueError(
+                        "Theta for Tinker model must be a single scalar"
+                        " or an array of 1 element."
+                    )
+                delta_tinker_val = float(theta.item())
+            else:  # theta is float
+                delta_tinker_val = float(theta)
         else:
-            Del = 300
+            delta_tinker_val = 300.0
 
-        y = np.log10(Del)
-        A = 1.0 + 0.24 * y * np.exp(-(4.0 / y) ** 4)
-        a = 0.44 * y - 0.88
-        B = 0.183
-        b = 1.5
-        C = 0.019 + 0.107 * y + 0.19 * np.exp(-(4.0 / y) ** 4)
-        c = 2.4
+        y: float = np.log10(delta_tinker_val)
+        a_tinker_param: float = 1.0 + 0.24 * y * np.exp(-((4.0 / y) ** 4))
+        b_tinker_param: float = 0.44 * y - 0.88
+        c_tinker_param: float = 0.183
+        d_tinker_param: float = 1.5
+        e_tinker_param: float = (
+            0.019 + 0.107 * y + 0.19 * np.exp(-((4.0 / y) ** 4))
+        )
+        f_tinker_param: float = 2.4
 
-        resp = 1.0 - A * np.power(nu, a) / (np.power(nu, a) + np.power(delta_c, a)) + B * np.power(nu, b) + C * np.power(nu, c)
+        result = (
+            1.0
+            - a_tinker_param
+            * np.power(nu, b_tinker_param)
+            / (
+                np.power(nu, b_tinker_param)
+                + np.power(delta_c, b_tinker_param)
+            )
+            + c_tinker_param * np.power(nu, d_tinker_param)
+            + e_tinker_param * np.power(nu, f_tinker_param)
+        )
 
     # Linear Diffusive Barrier
     elif model == 3 or model in ["2LDB"]:
+        b_ldb: float
+        d_ldb: float
+        dv_ldb: float
+        j_max_ldb: int
         if theta is not None:
-            b, D, dv, J_max = theta
+            # Expecting theta to be a 1D NDArray of 4 floating-point
+            # parameters
+            if isinstance(theta, np.ndarray):
+                if not theta.shape == (4,):
+                    raise ValueError(
+                        "Theta for Linear Diffusive Barrier model must be"
+                        " a 1D numpy array of 4 parameters [b, D, dv,"
+                        " J_max]."
+                    )
+                b_ldb, d_ldb, dv_ldb, j_max_ldb = (
+                    float(theta[0]),
+                    float(theta[1]),
+                    float(theta[2]),
+                    int(theta[3]),
+                )
+            else:
+                raise ValueError(
+                    "Theta for Linear Diffusive Barrier model must be"
+                    " a 1D numpy array of 4 parameters [b, D, dv,"
+                    " J_max]."
+                )
         else:
-            b, D, dv, J_max = np.array([0.0, 0.0, 2.71, 20])
-
-        resp = np.zeros(len(s))
-        tmp = np.zeros(len(s))
-        dt = delta_c + dv
+            b_ldb, d_ldb, dv_ldb = 0.0, 0.0, 2.71
+            j_max_ldb = 20
+        result = np.zeros(len(sigma))
+        temp = np.zeros(len(sigma))
+        dt: float = delta_c + dv_ldb
 
         # Halos
-        for n in range(1, int(J_max) + 1):
-            resp -= (n * np.pi / (dt * dt)) * np.sin(n * np.pi * delta_c / dt) * np.exp(-n * n * np.pi * np.pi * s * s * (1.0 + D) / (2.0 * dt * dt)) * (np.power(np.tan(n * np.pi * delta_c / dt), -1.0) * (n * np.pi / dt) - b / (1.0 + D))
+        for n in range(1, int(j_max_ldb) + 1):
+            result -= (
+                (n * np.pi / (dt * dt))
+                * np.sin(n * np.pi * delta_c / dt)
+                * np.exp(
+                    -n
+                    * n
+                    * np.pi
+                    * np.pi
+                    * sigma
+                    * sigma
+                    * (1.0 + d_ldb)
+                    / (2.0 * dt * dt)
+                )
+                * (
+                    np.power(np.tan(n * np.pi * delta_c / dt), -1.0)
+                    * (n * np.pi / dt)
+                    - b_ldb / (1.0 + d_ldb)
+                )
+            )
 
-        for n in range(1, int(J_max) + 1):
-            tmp += (n * np.pi / (dt * dt)) * np.sin(n * np.pi * delta_c / dt) * np.exp(-n * n * np.pi * np.pi * s * s * (1.0 + D) / (2.0 * dt * dt))
+        for n in range(1, int(j_max_ldb) + 1):
+            temp += (
+                (n * np.pi / (dt * dt))
+                * np.sin(n * np.pi * delta_c / dt)
+                * np.exp(
+                    -n
+                    * n
+                    * np.pi
+                    * np.pi
+                    * sigma
+                    * sigma
+                    * (1.0 + d_ldb)
+                    / (2.0 * dt * dt)
+                )
+            )
 
-        resp = np.ones(len(s)) + resp / tmp
+        result = np.ones(len(sigma)) + result / temp
 
     # Convert to Lagrangian bias if needed
-    if Lagrangian:
-        resp -= 1.0
+    if lagrangian:
+        result -= 1.0
 
-    return resp
+    return result
+
 
 # Halo bias of second order
-def Get_bh2(
-    M: np.ndarray,
-    s: Optional[np.ndarray] = None,
-    model: Union[int, str] = "PS",
-    theta: Optional[Union[float, np.ndarray]] = None,
+def get_bh2(
+    m: NDArray[np.floating],
+    sigma: Optional[NDArray[np.floating]] = None,
+    model: int | str = "PS",
+    theta: Optional[float | NDArray[np.floating]] = None,
     delta_c: Optional[float] = None,
-    Om0: float = 0.31,
+    omega_m0: float = 0.31,
     z: float = 0.0,
-    k: Optional[np.ndarray] = None,
-    P: Optional[np.ndarray] = None,
-    Lagrangian: bool = False,
-    b1: Optional[np.ndarray] = None
-) -> np.ndarray:
+    k: Optional[NDArray[np.floating]] = None,
+    pk: Optional[NDArray[np.floating]] = None,
+    lagrangian: bool = False,
+    b_1: Optional[NDArray[np.floating]] = None,
+) -> NDArray[np.floating]:
     """
     Compute the second-order halo bias (b2).
 
-    :param M: Mass array.
-    :type M: numpy.ndarray
-    :param s: Variance of the density field. Fiducial value: None
-    :type s: Optional[numpy.ndarray]
-    :param model: HMF model to use (0: Press-Schechter, 1: Sheth-Tormen, 2: Matteo, 3: Lazeyras).
-                  Can also be a string identifier ("PS", "ST", "Matteo", "Lazeyras"). Fiducial value: "PS"
+    :param m: Mass array.
+    :type m: numpy.ndarray
+    :param sigma: Variance of the density field.
+                  Fiducial value: None
+    :type sigma: Optional[numpy.ndarray]
+    :param model: HMF model to use (0: Press-Schechter, 1: Sheth-
+                  Tormen, 2: Matteo, 3: Lazeyras). Can also be a string
+                  identifier ("PS", "ST", "Matteo", "Lazeyras").
+                  Fiducial value: "PS"
     :type model: Union[int, str]
-    :param theta: Model parameters. For Sheth-Tormen: [a, b, p], for Matteo: b1, for Lazeyras: b1.
+    :param theta: Model parameters. For Sheth-Tormen: [a, b, p],
+                  for Matteo: b1, for Lazeyras: b1.
     :type theta: Optional[Union[float, np.ndarray]]
-    :param delta_c: Critical density for collapse. Fiducial value: None
+    :param delta_c: Critical density for collapse.
+                    Fiducial value: None
     :type delta_c: Optional[float]
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
     :param z: Redshift. Fiducial value: 0.0
     :type z: float
-    :param k: Wavenumbers of the power spectrum (required if s is None). Fiducial value: None
+    :param k: Wavenumbers of the power spectrum
+              (required if sigma is None). Fiducial value: None
     :type k: Optional[numpy.ndarray]
-    :param P: Power spectrum (required if s is None). Fiducial value: None
-    :type P: Optional[numpy.ndarray]
-    :param Lagrangian: Whether to compute the Lagrangian bias.
-    :type Lagrangian: bool
-    :param b1: First-order halo bias (used in Matteo's and Lazeyras's models). Fiducial value: None
-    :type b1: Optional[numpy.ndarray]
+    :param pk: Power spectrum (required if sigma is None).
+               Fiducial value: None
+    :type pk: Optional[numpy.ndarray]
+    :param lagrangian: Whether to compute the Lagrangian bias.
+    :type lagrangian: bool
+    :param b_1: First-order halo bias (used in Matteo's and
+                Lazeyras's models). Fiducial value: None
+    :type b_1: Optional[numpy.ndarray]
 
-    :return: Array containing the second-order halo bias values (b2).
+    :return: Array containing the second-order halo bias values
+        (b2).
     :rtype: numpy.ndarray
     """
     from scipy.special import binom
 
     # Compute the variance of the linear density field if it was not given
-    if s is None:
-        s = Compute_sigma(k, P, M=M, Om0=Om0, z=z)
+    if sigma is None:
+        if k is None or pk is None:
+            raise ValueError("sigma or (k, pk) must be provided!")
+        sigma = compute_sigma(k, pk, m=m, omega_m0=omega_m0, z=z)
 
     # Compute the critical density if it was not given
     if delta_c is None:
-        delta_c = Get_deltac(Get_Omz(Om0=Om0, z=z))
-    nu = delta_c / s
-    S = s ** 2
-    resp = np.zeros(len(s))
+        delta_c = get_deltac(z=np.array(z), omega_m0=omega_m0).item()
+    nu: NDArray[np.floating] = delta_c / sigma
+    sigma_squared: NDArray[np.floating] = sigma**2
+    resp: NDArray[np.floating] = np.zeros(len(sigma))
 
     # Press-Schechter
     if model == 0 or model in ["ps", "PS", "1SB"]:
-        resp = np.power(nu * nu / delta_c, 2.0) - 3.0 * np.power(nu / delta_c, 2.0)
+        resp = np.power(nu * nu / delta_c, 2.0) - 3.0 * np.power(
+            nu / delta_c, 2.0
+        )
 
     # Sheth-Tormen
     elif model == 1 or model in ["ST", "st", "elliptical"]:
+        a_st_param: float
+        b_st_param: float
+        p_st_param: float
         if theta is not None:
-            a, b, p = theta
+            if isinstance(theta, np.ndarray):
+                if not theta.shape == (3,):
+                    raise ValueError(
+                        "Theta for Sheth-Tormen model must be a 1D numpy "
+                        "array of 3 parameters [a, b, p]."
+                    )
+                a_st_param, b_st_param, p_st_param = (
+                    float(theta[0]),
+                    float(theta[1]),
+                    float(theta[2]),
+                )
+            else:
+                raise ValueError(
+                    "Theta for Sheth-Tormen model must be a 1D numpy "
+                    "array of 3 parameters [a, b, p]."
+                )
         else:
-            a, b, p = np.array([0.7, 0.4, 0.6])
+            a_st_param, b_st_param, p_st_param = 0.7, 0.4, 0.6
 
-        A = 0.0
+        coeff_a: float = 0.0
         for i in range(6):
-            A += np.power(-1, i) * binom(p, i)
+            coeff_a += np.power(-1, i) * binom(p_st_param, i)
 
-        B = np.sqrt(a) * delta_c * (1.0 + b * np.power(a * nu * nu, -p))
-        BP = np.sqrt(a) * delta_c * (1.0 + A * np.power(a * nu * nu, -p))
+        b_st_val: NDArray[np.floating] = (
+            np.sqrt(a_st_param)
+            * delta_c
+            * (1.0 + b_st_param * np.power(a_st_param * nu * nu, -p_st_param))
+        )
+        bp_st_val: NDArray[np.floating] = (
+            np.sqrt(a_st_param)
+            * delta_c
+            * (1.0 + coeff_a * np.power(a_st_param * nu * nu, -p_st_param))
+        )
 
-        resp = np.power(B / S, 2.0) - 1.0 / S - 2.0 * B / (S * BP)
+        resp = (
+            np.power(b_st_val / sigma_squared, 2.0)
+            - 1.0 / sigma_squared
+            - 2.0 * b_st_val / (sigma_squared * bp_st_val)
+        )
 
     # Matteo
     elif model == 2 or model in ["matteo", "Matteo"]:
-        if b1 is None:
-            b1 = bh1(M, s=s, model=2, theta=330, delta_c=delta_c, Om0=Om0, z=z, k=k, P=P, Lagrangian=True)
-        resp = -0.09143 * b1 ** 3 + 0.7093 * b1 ** 2 - 0.2607 * b1 - 0.3469
+        if b_1 is None:
+            b_1 = get_bh1(
+                m,
+                sigma=sigma,
+                model=2,  # Using Tinker model from get_bh1 for these recipes
+                theta=330.0,  # Tinker's Delta parameter
+                delta_c=delta_c,
+                omega_m0=omega_m0,
+                z=z,
+                k=k,
+                pk=pk,
+                lagrangian=True,
+            )
+        resp = -0.09143 * b_1**3 + 0.7093 * b_1**2 - 0.2607 * b_1 - 0.3469
 
     # Lazeyras
     elif model == 3 or model in ["Lazeyras", "lazeyras"]:
-        if b1 is None:
-            b1 = bh1(M, s=s, model=2, theta=330, delta_c=delta_c, Om0=Om0, z=z, k=k, P=P, Lagrangian=True)
-        resp = 0.412 - 2.143 * b1 + 0.929 * b1 ** 2 + 0.008 * b1 ** 3
+        if b_1 is None:
+            b_1 = get_bh1(
+                m,
+                sigma=sigma,
+                model=2,  # Using Tinker model
+                theta=330.0,  # Tinker's Delta parameter
+                delta_c=delta_c,
+                omega_m0=omega_m0,
+                z=z,
+                k=k,
+                pk=pk,
+                lagrangian=True,
+            )
+        resp = 0.412 - 2.143 * b_1 + 0.929 * b_1**2 + 0.008 * b_1**3
 
-    if not Lagrangian:
-        if b1 is None:
-            b1 = bh1(M, s=s, model=model, theta=theta, delta_c=delta_c, Om0=Om0, z=z, k=k, P=P, Lagrangian=True)
-        resp = 4.0 / 21.0 * b1 + 1.0 / 2.0 * resp
+    if not lagrangian:
+        if b_1 is None:
+            b_1 = get_bh1(
+                m,
+                sigma=sigma,
+                model=model,
+                theta=theta,
+                delta_c=delta_c,
+                omega_m0=omega_m0,
+                z=z,
+                k=k,
+                pk=pk,
+                lagrangian=True,
+            )
+        resp = 4.0 / 21.0 * b_1 + 1.0 / 2.0 * resp
+
+    return resp
+    if not lagrangian:
+        if b_1 is None:
+            b_1 = get_bh1(
+                m,
+                sigma=sigma,
+                model=model,
+                theta=theta,
+                delta_c=delta_c,
+                omega_m0=omega_m0,
+                z=z,
+                k=k,
+                pk=pk,
+                lagrangian=True,
+            )
+        resp = 4.0 / 21.0 * b_1 + 1.0 / 2.0 * resp
 
     return resp
 
+
 # Halo bias of third order
-def Get_bh3(
-    M: np.ndarray,
-    s: Optional[np.ndarray] = None,
-    model: Union[int, str] = "PS",
-    theta: Optional[Union[float, np.ndarray]] = None,
+def get_bh3(
+    mass: NDArray[np.floating],
+    sigma: Optional[NDArray[np.floating]] = None,
+    model: int | str = "PS",
+    theta: Optional[float | NDArray[np.floating]] = None,
     delta_c: Optional[float] = None,
-    Om0: float = 0.31,
+    omega_m0: float = 0.31,
     z: float = 0.0,
-    k: Optional[np.ndarray] = None,
-    P: Optional[np.ndarray] = None,
-    Lagrangian: bool = False,
-    bs2: float = 0.0
-) -> np.ndarray:
+    k: Optional[NDArray[np.floating]] = None,
+    pk: Optional[NDArray[np.floating]] = None,
+    lagrangian: bool = False,
+    b_s2: float = 0.0,
+) -> NDArray[np.floating]:
     """
     Compute the third-order halo bias (b3).
 
-    :param M: Mass array.
-    :type M: numpy.ndarray
-    :param s: Variance of the density field. Fiducial value: None
-    :type s: Optional[numpy.ndarray]
-    :param model: HMF model to use (0: Press-Schechter, 1: Sheth-Tormen).
-                  Can also be a string identifier ("PS", "ST"). Fiducial value: "PS"
+    :param mass: Mass array.
+    :type mass: numpy.ndarray
+    :param sigma: Variance of the density field.
+                  Fiducial value: None
+    :type sigma: Optional[numpy.ndarray]
+    :param model: HMF model to use (0: Press-Schechter,
+                  1: Sheth-Tormen). Can also be a string identifier
+                  ("PS", "ST"). Fiducial value: "PS"
     :type model: Union[int, str]
     :param theta: Model parameters. For Sheth-Tormen: [a, b, p].
     :type theta: Optional[Union[float, np.ndarray]]
-    :param delta_c: Critical density for collapse. Fiducial value: None
+    :param delta_c: Critical density for collapse.
+                    Fiducial value: None
     :type delta_c: Optional[float]
-    :param Om0: Omega matter at z=0. Fiducial value: 0.31
-    :type Om0: float
+    :param omega_m0: Omega matter at z=0. Fiducial value: 0.31
+    :type omega_m0: float
     :param z: Redshift. Fiducial value: 0.0
     :type z: float
-    :param k: Wavenumbers of the power spectrum (required if s is None). Fiducial value: None
+    :param k: Wavenumbers of the power spectrum
+              (required if sigma is None). Fiducial value: None
     :type k: Optional[numpy.ndarray]
-    :param P: Power spectrum (required if s is None). Fiducial value: None
-    :type P: Optional[numpy.ndarray]
-    :param Lagrangian: Whether to compute the Lagrangian bias.
-    :type Lagrangian: bool
-    :param bs2: Second-order halo bias. Fiducial value: 0.0
-    :type bs2: float
+    :param pk: Power spectrum (required if sigma is None).
+               Fiducial value: None
+    :type pk: Optional[numpy.ndarray]
+    :param lagrangian: Whether to compute the Lagrangian bias.
+    :type lagrangian: bool
+    :param b_s2: Second-order halo bias. Fiducial value: 0.0
+    :type b_s2: float
 
     :return: Array containing the third-order halo bias values (b3).
     :rtype: numpy.ndarray
@@ -669,107 +1263,180 @@ def Get_bh3(
     from scipy.special import binom
 
     # Compute the variance of the linear density grid if it was not given
-    if s is None:
-        s = Compute_sigma(k, P, M=M, Om0=Om0, z=z)
+    if sigma is None:
+        if k is None or pk is None:
+            raise ValueError("sigma or (k, pk) must be provided!")
+        sigma = compute_sigma(k, pk, m=mass, omega_m0=omega_m0, z=z)
 
     # Compute the critical density if it was not given
-    if delta_c < 0.0:
-        delta_c = Get_deltac(Get_Omz(Om0=Om0, z=z))
-    nu = delta_c / s
-    S = s ** 2
-    resp = np.zeros(len(s))
+    if delta_c is None:
+        delta_c = get_deltac(z=np.array(z), omega_m0=omega_m0).item()
+    nu: NDArray[np.floating] = delta_c / sigma
+    sigma_squared: NDArray[np.floating] = sigma**2
+    resp: NDArray[np.floating] = np.zeros(len(sigma))
 
     # Press-Schechter
     if model == 0 or model in ["ps", "PS", "1SB"]:
-        resp = np.power(delta_c / S, 3.0) - 6.0 * delta_c / np.power(S, 2.0) + 3.0 / S / delta_c
+        b1_ps = (
+            1.0 + (nu * nu - 1.0) / delta_c
+        )  # This variable is assigned but not used later.
+        resp = np.power(b1_ps, 3.0) - 3.0 * b1_ps / np.power(
+            sigma_squared, 2.0
+        )
 
     # Sheth-Tormen
     elif model == 1 or model in ["ST", "st", "elliptical"]:
+        a_st_param: float
+        b_st_param: float
+        p_st_param: float
         if theta is not None:
-            a, b, p = theta
+            # Expecting theta to be a 1D NDArray of 3 floating-point parameters
+            if isinstance(theta, np.ndarray):
+                if not theta.shape == (3,):
+                    raise ValueError(
+                        "Theta for Sheth-Tormen model must be a 1D numpy "
+                        "array of 3 parameters [a, b, p]."
+                    )
+                a_st_param, b_st_param, p_st_param = (
+                    float(theta[0]),
+                    float(theta[1]),
+                    float(theta[2]),
+                )
+            else:
+                raise ValueError(
+                    "Theta for Sheth-Tormen model must be a 1D numpy "
+                    "array of 3 parameters [a, b, p]."
+                )
         else:
-            a, b, p = np.array([0.7, 0.4, 0.6])
+            a_st_param, b_st_param, p_st_param = 0.7, 0.4, 0.6
 
-        A = 0.0
+        coeff_a: float = 0.0
         for i in range(6):
-            A += np.power(-1, i) * binom(p, i)
+            coeff_a += np.power(-1, i) * binom(p_st_param, i)
 
-        B = np.sqrt(a) * delta_c * (1.0 + b * np.power(a * nu * nu, -p))
-        BP = np.sqrt(a) * delta_c * (1.0 + A * np.power(a * nu * nu, -p))
+        b1_st = (  # This variable is assigned but not used later.
+            1.0
+            + np.sqrt(a_st_param)
+            * nu
+            * nu
+            / delta_c
+            * (1.0 + b_st_param * np.power(a_st_param * nu * nu, -p_st_param))
+            - 1.0
+            / (
+                np.sqrt(a_st_param)
+                * delta_c
+                * (1.0 + coeff_a * np.power(a_st_param * nu * nu, -p_st_param))
+            )
+        )
 
-        resp = np.power(B / S, 3.0) - 3.0 * B / np.power(S, 2.0) - 3.0 * B * B / (S * S * BP) + 3.0 / (S * BP)
+        resp = (
+            np.power(b1_st / sigma_squared, 3.0)  # b_st_val is undefined
+            - 3.0
+            * b1_st
+            / np.power(sigma_squared, 2.0)  # b_st_val is undefined
+            - 3.0
+            * b1_st
+            * b1_st
+            / (
+                sigma_squared * sigma_squared * b1_st
+            )  # b_st_val, bp_st_val are undefined
+            + 3.0 / (sigma_squared * b1_st)  # bp_st_val is undefined
+        )
 
-    if not Lagrangian:
-        b2 = bh2(M, s=s, model=model, theta=theta, delta_c=delta_c, Om0=Om0, z=z, k=k, P=P, Lagrangian=True)
-        resp = -1.0 / 2.0 * b2 + 1.0 / 6.0 * resp - 2.0 / 3.0 * bs2
+    if not lagrangian:
+        b2: NDArray[np.floating] = get_bh2(
+            mass,
+            sigma=sigma,
+            model=model,
+            theta=theta,
+            delta_c=delta_c,
+            omega_m0=omega_m0,
+            z=z,
+            k=k,
+            pk=pk,
+            lagrangian=True,
+        )
+        resp = -1.0 / 2.0 * b2 + 1.0 / 6.0 * resp - 2.0 / 3.0 * b_s2
 
     return resp
 
+
 # Compute the power spectra using CLPT at first order
-def CLPT_Powers(
-    k: np.ndarray,
-    P: np.ndarray,
-    Lambda: float = 0.7,
-    kmax: float = 0.7,
-    nmin: int = 5,
-    nmax: int = 10,
-    verbose: bool = False
-) -> Dict[str, np.ndarray]:
+def clpt_powers(
+    k: NDArray[np.floating],
+    pk: NDArray[np.floating],
+    lambda_val: float = 0.7,
+    k_max: float = 0.7,
+    n_min: int = 5,
+    n_max: int = 10,
+    verbose: bool = False,
+) -> dict[str, NDArray[np.floating]]:
     """
-    Compute the power spectra of the operators using Convolution Lagrangian Perturbation Theory (CLPT).
+    Compute the power spectra of the operators using
+    Convolution Lagrangian Perturbation Theory (CLPT).
 
     :param k: Wavenumber of the power spectrum.
     :type k: numpy.ndarray
-    :param P: Linear power spectrum.
-    :type P: numpy.ndarray
-    :param Lambda: Scale to be used to smooth the power spectrum. Fiducial value: 0.7
-    :type Lambda: float
-    :param kmax: Maximum wavenumber of the outputs. Fiducial value: 0.7
-    :type kmax: float
-    :param nmin: Minimum order used in the full computation of the terms of the expansion. Fiducial value: 5
-    :type nmin: int
-    :param nmax: Maximum order used in the Limber approximation of the terms of the expansion. Fiducial value: 10
-    :type nmax: int
-    :param verbose: Whether to output information in the C code. Fiducial value: False
+    :param pk: Linear power spectrum.
+    :type pk: numpy.ndarray
+    :param lambda_val: Scale to be used to smooth the power spectrum.
+                       Fiducial value: 0.7
+    :type lambda_val: float
+    :param k_max: Maximum wavenumber of the outputs. Fiducial value: 0.7
+    :type k_max: float
+    :param n_min: Minimum order used in the full computation of the terms.
+                  Fiducial value: 5
+    :type n_min: int
+    :param n_max: Maximum order used in the Limber approximation of the terms.
+                  Fiducial value: 10
+    :type n_max: int
+    :param verbose: Whether to output information in the C code.
+                    Fiducial value: False
     :type verbose: bool
 
-    :return: Dictionary with the power spectra of the operators:
-
-             - "k": Ndarray with the wavenumbers
-             - "Plin": Ndarray with linear power spectrum used as input
-             - "P11": Ndarray with result for the 11 power spectrum
+    :return: dictionary with the power spectra of the operators:
+        - "k": Ndarray with the wavenumbers
+        - "Plin": Ndarray with linear power spectrum used as input
+        - "P11": Ndarray with result for the 11 power spectrum
 
     :rtype: dict
     """
     # Call the c function that compute the CLPT
-    from .lib.analytical import clpt_compute
-
-    x = clpt_compute(
-        k.astype("float64"),
-        P.astype("float64"),
-        np.float64(Lambda),
-        np.float64(kmax),
-        np.int32(nmin),
-        np.int32(nmax),
-        np.int32(verbose)
+    from .lib.analytical import (  # pyright: ignore[reportMissingImports]
+        clpt_compute,  # pyright: ignore[reportUnknownVariableType]
     )
-    
+
+    # The type of `clpt_compute` is unknown without access to its definition.
+    x = cast(
+        dict[str, NDArray[np.floating]],
+        clpt_compute(
+            k.astype("float64"),
+            pk.astype("float64"),
+            np.float64(lambda_val),
+            np.float64(k_max),
+            np.int32(n_min),
+            np.int32(n_max),
+            np.int32(verbose),
+        ),
+    )
+
     return x
 
+
 # Compute the generalized corraletion functions (Xi_lm)
-def Xi_lm(
-    r: np.ndarray,
-    k: np.ndarray,
-    P: np.ndarray,
-    Lambda: float = 0.7,
-    l: int = 0,
-    mk: int = 2,
-    mr: int = 0,
-    K: int = 11,
+def xi_lm(
+    r: NDArray[np.floating],
+    k: NDArray[np.floating],
+    pk: NDArray[np.floating],
+    lambda_val: float = 0.7,
+    bessel_order: int = 0,
+    m_k: int = 2,
+    m_r: int = 0,
+    num_points_gaussian_smooth: int = 11,
     alpha: float = 4.0,
-    Rmax: float = 1.0,
-    verbose: bool = False
-) -> np.ndarray:
+    r_max: float = 1.0,
+    verbose: bool = False,
+) -> NDArray[np.floating]:
     """
     Compute the generalized correlation functions (Xi_lm).
 
@@ -777,308 +1444,920 @@ def Xi_lm(
     :type r: numpy.ndarray
     :param k: Wavenumber of the power spectrum.
     :type k: numpy.ndarray
-    :param P: Linear power spectrum.
-    :type P: numpy.ndarray
-    :param Lambda: Scale to be used to smooth the power spectrum. Fiducial value: 0.7
-    :type Lambda: float
+    :param pk: Linear power spectrum.
+    :type pk: numpy.ndarray
+    :param lambda_val: Scale to be used to smooth the power spectrum.
+                       Fiducial value: 0.7
+    :type lambda_val: float
     :param l: Order of the spherical Bessel's function. Fiducial value: 0
     :type l: int
-    :param mk: Power of k in the integral. Fiducial value: 2
-    :type mk: int
-    :param mr: Power of r in the integral. Fiducial value: 0
-    :type mr: int
-    :param K: Number of points used by the Gaussian smooth. Fiducial value: 11
-    :type K: int
-    :param alpha: Value of alpha used by the Gaussian smooth. Fiducial value: 4.0
+    :param m_k: Power of k in the integral. Fiducial value: 2
+    :type m_k: int
+    :param m_r: Power of r in the integral. Fiducial value: 0
+    :type m_r: int
+    :param num_points_gaussian_smooth:
+        Number of points used by the Gaussian smooth. Fiducial value: 11
+    :type num_points_gaussian_smooth: int
+    :param alpha: Value of alpha used by the Gaussian smooth.
+                  Fiducial value: 4.0
     :type alpha: float
-    :param Rmax: Maximum radius for the smoothing. Fiducial value: 1.0
-    :type Rmax: float
-    :param verbose: Whether to output information in the C code. Fiducial value: False
+    :param r_max: Maximum radius for the smoothing. Fiducial value: 1.0
+    :type r_max: float
+    :param verbose: Whether to output information in the C code.
+                    Fiducial value: False
     :type verbose: bool
 
-    :return: The generalized correlation function :math: 'xi_{lm} = int dk k^{mk} r^{mr} P(k) j_l(kr)'.
+    :return: The generalized correlation function
+        :math: 'xi_{lm} = int dk k^{mk} r^{mr} P(k) j_l(kr)'.
     :rtype: numpy.ndarray
     """
     # Call the c function that compute the Xi_lm
-    from .lib.analytical import xilm_compute
+    from .lib.analytical import (  # pyright: ignore[reportMissingImports]
+        xilm_compute,  # pyright: ignore[reportUnknownVariableType]
+    )
 
-    x = xilm_compute(
-        r.astype("float64"),
-        k.astype("float64"),
-        P.astype("float64"),
-        np.float64(Lambda),
-        np.int32(l),
-        np.int32(mk),
-        np.int32(mr),
-        np.int32(K),
-        np.float64(alpha),
-        np.float64(Rmax),
-        np.int32(verbose)
+    x = cast(
+        NDArray[np.floating],
+        xilm_compute(
+            r.astype("float64"),
+            k.astype("float64"),
+            pk.astype("float64"),
+            np.float64(lambda_val),
+            np.int32(bessel_order),
+            np.int32(m_k),
+            np.int32(m_r),
+            np.int32(num_points_gaussian_smooth),
+            np.float64(alpha),
+            np.float64(r_max),
+            np.int32(verbose),
+        ),
     )
 
     return x
 
+
 # Compute the 1-loop matter or galaxy power spectrum using classPT
-def Pgg_EFTofLSS(
-    k: Optional[np.ndarray] = None,
-    parameters: Dict[str, float] = {},
-    b: Optional[np.ndarray] = None,
-    cs: Optional[np.ndarray] = None,
-    c: Optional[np.ndarray] = None,
-    IR_resummation: bool = True,
+def pgg_eftoflss(
+    k: Optional[NDArray[np.floating]] = None,
+    parameters: Optional[dict[str, float]] = None,
+    b: Optional[NDArray[np.floating]] = None,
+    cs: Optional[NDArray[np.floating]] = None,
+    c: Optional[NDArray[np.floating]] = None,
+    ir_resummation: bool = True,
     cb: bool = True,
-    RSD: bool = True,
-    AP: bool = False,
-    Om_fid: float = 0.31,
+    rsd: bool = True,
+    ap: bool = False,
+    om_fid: float = 0.31,
     z: float = 0.0,
-    ls: Union[List[int], int] = [0, 2, 4],
-    pk_mult: Optional[np.ndarray] = None,
+    ls: list[int] | int = 0,
+    pk_mult: Optional[dict[str, NDArray[np.floating]]] = None,
     fz: Optional[float] = None,
-    OUT_MULT: bool = False,
+    out_mult: bool = False,
     h_units: bool = True,
-    vectorized: bool = False
-) -> Dict[str, np.ndarray]:
+    vectorized: bool = False,
+) -> dict[str, NDArray[np.floating]]:
     """
     Compute the 1-loop matter or galaxy power spectrum using classPT.
 
-    :param k: Wavenumbers of the power spectrum (need to run CLASS-PT). Fiducial value: None
+    :param k: Wavenumbers of the power spectrum (need to run CLASS-PT).
+              Fiducial value: None
     :type k: Optional[numpy.ndarray]
-    :param parameters: Cosmological parameters used by CLASS. Fiducial value: {}
+    :param parameters: Cosmological parameters used by CLASS.
+                       Fiducial value: {}
     :type parameters: dict
-    :param b: Values of the bias parameters (b1, b2, bG2, bGamma3, b4). Fiducial value: None
+    :param b: Values of the bias parameters (b1, b2, bG2, bGamma3, b4).
+              Fiducial value: None
     :type b: Optional[numpy.ndarray]
-    :param cs: Values of the stochastic parameters. 1D or 2D (multitracers) array. Fiducial value: None
+    :param cs: Values of the stochastic parameters.2D for multitracers array.
+               Fiducial value: None
     :type cs: Optional[numpy.ndarray]
-    :param c: Values of the counterterms. 1D or 2D (multitracers) array. Fiducial value: None
+    :param c: Values of the counterterms. 1D or 2D (multitracers) array.
+              Fiducial value: None
     :type c: Optional[numpy.ndarray]
-    :param IR_resummation: Option to do the IR resummation of the spectrum. Fiducial value: True
-    :type IR_resummation: bool
+    :param ir_resummation: Option to do the IR resummation of the spectrum.
+                           Fiducial value: True
+    :type ir_resummation: bool
     :param cb: Option to add baryons. Fiducial value: True
     :type cb: bool
-    :param RSD: Option to give the power spectrum in redshift space. Fiducial value: True
+    :param RSD: Option to give the power spectrum in redshift space.
+                Fiducial value: True
     :type RSD: bool
-    :param AP: Option to use the Alcock-Paczynski (AP) effect. Fiducial value: False
-    :type AP: bool
-    :param Om_fid: Omega matter fiducial for the AP correction. Fiducial value: 0.31
-    :type Om_fid: float
+    :param ap: Option to use the Alcock-Paczynski (AP) effect.
+               Fiducial value: False
+    :type ap: bool
+    :param om_fid: Omega matter fiducial for the AP correction.
+                   Fiducial value: 0.31
+    :type om_fid: float
     :param z: Redshift of the power spectrum. Fiducial value: 0.0
     :type z: float
-    :param ls: The multipoles to be computed [0, 2, 4]. List or int.
-    :type ls: Union[List[int], int]
-    :param pk_mult: Multipoles of the power spectrum (don't need CLASS-PT). Fiducial value: None
+    :param ls: The multipoles to be computed [0, 2, 4]. list or int.
+    :type ls: Union[list[int], int]
+    :param pk_mult: Multipoles of the power spectrum (don't need CLASS-PT).
+                    Fiducial value: None
     :type pk_mult: Optional[numpy.ndarray]
     :param fz: Growth rate at redshift z. Fiducial value: None
     :type fz: Optional[float]
-    :param OUT_MULT: Whether output multipoles. Fiducial value: False
-    :type OUT_MULT: bool
+    :param out_mult: Whether output multipoles. Fiducial value: False
+    :type out_mult: bool
     :param h_units: Whether to use h-units. Fiducial value: True
     :type h_units: bool
-    :param vectorized: Whether to use vectorized operations. Fiducial value: False
+    :param vectorized: Whether to use vectorized operations.
+                       Fiducial value: False
     :type vectorized: bool
 
-    :return: Dictionary with the computed power spectra and additional information.
+    :return: dictionary with the computed power spectra.
     :rtype: dict
     """
-    #Compute the power spectra using classPT
-    if(pk_mult == None):
+    pk_multipoles: dict[str, NDArray[np.floating]]
+    _f_z: float
+    h: float  # Hubble constant in units of 100 km/s/Mpc
+
+    if parameters is None:
+        parameters = {}
+
+    # Compute the power spectra using classPT
+    if pk_mult is None:
         try:
-	        from classy import Class
-        except:
-            raise ImportError("classy module is not installed. Please install it using pip: pip install classy")
+            from classy import (  # pyright: ignore[reportMissingImports]
+                Class,  # pyright: ignore[reportUnknownVariableType]
+            )
+        except ImportError:  # Use specific exception type
+            raise ImportError(
+                "classy module is not installed. "
+                "Please install it using pip: pip install classy"
+            ) from ImportError
 
-        #Set the parameters
-        M = Class()
-        params = {'A_s':2.089e-9, 'n_s':0.9649, 'tau_reio':0.052, 'omega_b':0.02237, 'omega_cdm':0.12, 'h':0.6736, 'YHe':0.2425, 'N_ur':2.0328, 'N_ncdm':1, 'm_ncdm':0.06}
-        for key in parameters.keys():
-            params[key] = parameters[key]
-        params['z_pk'] = z
-        M.set(params)
-        if(cb == True):
-            cb = "Yes"
-        else:
-            cb = "No"
-        if(AP == True):
-            AP = "Yes"
-        else:
-            AP = "No"
-        if(IR_resummation == True):
-            IR_resummation = "Yes"
-        else:
-            IR_resummation = "No"
-        if(RSD == True):
-            M.set({'output':'mPk', 'non linear':'PT', 'IR resummation':IR_resummation, 'Bias tracers':'Yes', 'cb':cb, 'RSD':'Yes', 'AP':AP, 'Omfid':Om_fid})
-        else:
-            M.set({'output':'mPk', 'non linear':'PT', 'IR resummation':IR_resummation, 'Bias tracers':'Yes', 'cb':cb, 'RSD':'No'})
-        M.compute()
+        # Set the parameters
+        model = cast(
+            Any, Class()
+        )  # Cast M to Any as classy.Class type is unknown without stubs
+        params: dict[str, float | int] = {  # params can hold floats or ints
+            "A_s": 2.089e-9,
+            "n_s": 0.9649,
+            "tau_reio": 0.052,
+            "omega_b": 0.02237,
+            "omega_cdm": 0.12,
+            "h": 0.6736,
+            "YHe": 0.2425,
+            "N_ur": 2.0328,
+            "N_ncdm": 1,
+            "m_ncdm": 0.06,
+        }
+        for key, value in parameters.items():
+            params[key] = value
+        params["z_pk"] = z
+        model.set(params)
 
-        #Compute the spectra of the basis
-        if(k is None):
-            raise TypeError("You have to give an array of k where to compute the power spectrum")
-        h = M.h()
-        kh = k*h
-        fz = M.scale_independent_growth_factor_f(z)
-        M_mult = M.get_pk_mult(kh, z, len(kh))
-       
-        #Save a dictionary with the spectra
-        pk_mult = {}
-        spectra_label = ["Id2d2", "Id2", "IG2", "Id2G2", "IG2G2", "FG2", "ctr", "lin", "1loop"]
+        _cb_str: str = "Yes" if cb else "No"
+        _ap_str: str = "Yes" if ap else "No"
+        _ir_resummation_str: str = "Yes" if ir_resummation else "No"
+        _rsd_str: str = "Yes" if rsd else "No"
+
+        if rsd:
+            model.set({
+                "output": "mPk",
+                "non linear": "PT",
+                "IR resummation": _ir_resummation_str,
+                "Bias tracers": "Yes",
+                "cb": _cb_str,
+                "RSD": _rsd_str,
+                "AP": _ap_str,
+                "Omfid": om_fid,
+            })
+        else:
+            model.set({
+                "output": "mPk",
+                "non linear": "PT",
+                "IR resummation": _ir_resummation_str,
+                "Bias tracers": "Yes",
+                "cb": _cb_str,
+                "RSD": _rsd_str,
+            })
+        model.compute()
+
+        # Compute the spectra of the basis
+        if k is None:
+            raise TypeError(
+                "You have to give an array of k "
+                "where to compute the power spectrum"
+            )
+        # k is guaranteed to be NDArray[np.floating] here
+        _k: NDArray[np.floating] = k
+
+        h = cast(float, model.h())
+        _f_z = cast(float, model.scale_independent_growth_factor_f(z))
+        m_mult: NDArray[np.floating] = cast(
+            NDArray[np.floating], model.get_pk_mult(_k * h, z, len(_k))
+        )
+
+        # Save a dictionary with the spectra
+        pk_multipoles = {}
+        spectra_label = [
+            "Id2d2",
+            "Id2",
+            "IG2",
+            "Id2G2",
+            "IG2G2",
+            "FG2",
+            "ctr",
+            "lin",
+            "1loop",
+        ]
         spectra_ind = [1, 2, 3, 4, 5, 6, 10, 14, 0]
         for i in range(len(spectra_label)):
-            pk_mult[spectra_label[i]] = M_mult[spectra_ind[i]]
-        if(RSD == True):
-            spectra_label = ["FG2_0b1", "FG2_0", "FG2_2", "ctr_0", "ctr_2", "ctr_4"]
-            spectra_ind = [7, 8 , 9, 11, 12, 13]
+            pk_multipoles[spectra_label[i]] = m_mult[spectra_ind[i]]
+        if rsd:
+            spectra_label = [
+                "FG2_0b1",
+                "FG2_0",
+                "FG2_2",
+                "ctr_0",
+                "ctr_2",
+                "ctr_4",
+            ]
+            spectra_ind = [7, 8, 9, 11, 12, 13]
             for i in range(len(spectra_label)):
-                pk_mult[spectra_label[i]] = M_mult[spectra_ind[i]]	
-            spectra_label = ["lin_0_vv", "lin_0_vd", "lin_0_dd", "lin_2_vv", "lin_2_vd", "lin_4_vv", "1loop_0_vv", "1loop_0_vd", "1loop_0_dd", "1loop_2_vv", "1loop_2_vd", "1loop_2_dd", "1loop_4_vv", "1loop_4_vd", "1loop_4_dd", "Idd2_0", "Id2_0", "IdG2_0", "IG2_0", "Idd2_2", "Id2_2", "IdG2_2", "IG2_2", "Id2_4", "IG2_4"]
+                pk_multipoles[spectra_label[i]] = m_mult[spectra_ind[i]]
+            spectra_label = [
+                "lin_0_vv",
+                "lin_0_vd",
+                "lin_0_dd",
+                "lin_2_vv",
+                "lin_2_vd",
+                "lin_4_vv",
+                "1loop_0_vv",
+                "1loop_0_vd",
+                "1loop_0_dd",
+                "1loop_2_vv",
+                "1loop_2_vd",
+                "1loop_2_dd",
+                "1loop_4_vv",
+                "1loop_4_vd",
+                "1loop_4_dd",
+                "Idd2_0",
+                "Id2_0",
+                "IdG2_0",
+                "IG2_0",
+                "Idd2_2",
+                "Id2_2",
+                "IdG2_2",
+                "IG2_2",
+                "Id2_4",
+                "IG2_4",
+            ]
             for i in range(len(spectra_label)):
-                pk_mult[spectra_label[i]] = M_mult[15+i]	
+                pk_multipoles[spectra_label[i]] = m_mult[15 + i]
 
     else:
-        h = 1
-        if(fz == None):
-            fz = pow((Om_fid*pow(1+z, 3.0))/(Om_fid*pow(1+z, 3.0) + 1.0 - Om_fid), 0.5454)
-        if(RSD == True and len(pk_mult.keys()) < 10):
-            raise ValueError("There are not all spectra needed for the computations in redshift space")
-
-	#Get the number of tracers
-    if(b is None):
-	    raise TypeError("You have to give an array with the values of the bias parameters")
-	
-    if((len(b.shape) == 1 and vectorized == False) or (len(b.shape) == 2 and vectorized == True)):
-        Ntracers = 1
-        if(vectorized == False):
-            b = b.reshape([1, 1, b.shape[0]])
-            cs = cs.reshape([1, 1])
-            if(RSD == True):
-                c = np.array(c).reshape([1, 1, c.shape[0], c.shape[1]])
-            else:
-                c = np.array(c).reshape([1, 1, c.shape[0]])
+        pk_multipoles = pk_mult  # Assign the provided dictionary
+        h = 1.0  # Default h when Class is not run
+        if fz is None:
+            _f_z = np.power(
+                (om_fid * np.power(1.0 + z, 3.0))
+                / (om_fid * np.power(1.0 + z, 3.0) + 1.0 - om_fid),
+                0.5454,
+            )
         else:
-            b = b.reshape([b.shape[0], 1, b.shape[1]])
-            cs = cs.reshape([cs.shape[0], 1])
-            if(RSD == True):
-                c = np.array(c).reshape([c.shape[0], 1, c.shape[1], c.shape[2]])
-            else:
-                c = np.array(c).reshape([c.shape[0], 1, c.shape[1]])
-    else: 
-        if(vectorized == False):
-            Ntracers = b.shape[0]
-            b = b.reshape([1, b.shape[0], b.shape[1]])
-            cs = cs.reshape([1, cs.shape[0]])
-            if(RSD == True):
-                c = np.array(c).reshape([1, c.shape[0], c.shape[1], c.shape[2]])
-            else:
-                c = np.array(c).reshape([1, c.shape[0], c.shape[1]])
-        else:
-            Ntracers = b.shape[1]
+            _f_z = fz
+        if rsd and len(pk_multipoles.keys()) < 10:
+            raise ValueError(
+                "There are not all spectra needed "
+                "for the computations in redshift space"
+            )
 
-	#Set all combinations of the bias parameters (b1, b2, bG2, bGamm3, b4)
-	#(b1, b1^2, b2^2, b1*b2, b2, b1*bG2, bG2, b2*bG2, bG2^2, b1*bGamma3, bGamma3, b4, b1*b4, b1^2*b4)
-    if(RSD == True):
-        bias = np.zeros([14, int(Ntracers*(Ntracers+1)/2), b.shape[0]])
-        ctrs = np.zeros([3, int(Ntracers*(Ntracers+1)/2), cs.shape[0]])
+    # Get the number of tracers
+    if b is None:
+        raise TypeError(
+            "You have to give an array with the values of the bias parameters"
+        )
+    _b: NDArray[np.floating] = b  # Cast b to its non-Optional type
+
+    if cs is None:
+        raise TypeError(
+            "You have to give an array with the values "
+            "of the stochastic parameters"
+        )
+    _cs: NDArray[np.floating] = cs  # Cast cs to its non-Optional type
+
+    if c is None:
+        raise TypeError(
+            "You have to give an array with the values of the counterterms"
+        )
+    _c: NDArray[np.floating] = c  # Cast c to its non-Optional type
+
+    n_tracers: int
+    num_vectorizations: int
+
+    # Get initial dimensions for clarity and safety checks
+    b_ndim = _b.ndim
+    cs_ndim = _cs.ndim
+    c_ndim = _c.ndim
+
+    # Step 1: Determine num_vectorizations and n_tracers from _b and reshape _b
+    # The shape of _b (num_vectorizations, n_tracers, N_bias_params).
+    # N_bias_params is implicitly 5 based on subsequent indexing
+    # (e.g., _b[:, i, 0] to _b[:, i, 4]).
+    if vectorized:
+        num_vectorizations = _b.shape[0]
+        if (
+            b_ndim == 2
+        ):  # _b was (num_vectorizations, N_bias_params) for 1 tracer
+            n_tracers = 1
+            # Reshape _b to (num_vectorizations, 1, N_bias_params)
+            _b = _b.reshape((num_vectorizations, 1, _b.shape[1]))
+        elif (
+            b_ndim == 3
+        ):  # _b was already (num_vectorizations, N_tracers, N_bias_params)
+            n_tracers = _b.shape[1]
+            # _b is already in the desired 3D shape, no reshape needed
+        else:
+            raise ValueError(
+                "Invalid shape for bias parameters _b "
+                f"when vectorized={vectorized}: {_b.shape}."
+                "Expected 2D (num_vec, N_bias_params)"
+                "or 3D (num_vec, N_tracers, N_bias_params)."
+            )
+    else:  # not vectorized
+        num_vectorizations = 1
+        if b_ndim == 1:  # _b was (N_bias_params,) for 1 tracer
+            n_tracers = 1
+            # Reshape _b to (1, 1, N_bias_params)
+            _b = _b.reshape((1, 1, _b.shape[0]))
+        elif b_ndim == 2:  # _b was (N_tracers, N_bias_params)
+            n_tracers = _b.shape[0]
+            # Reshape _b to (1, n_tracers, N_bias_params)
+            _b = _b.reshape((1, n_tracers, _b.shape[1]))
+        else:
+            raise ValueError(
+                "Invalid shape for bias parameters _b "
+                f"when vectorized={vectorized}: {_b.shape}. "
+                "Expected 1D (N_bias_params) or 2D (N_tracers, N_bias_params)."
+            )
+
+    # Step 2: Reshape _cs (num_vectorizations, n_tracers, N_stochastic_params)
+    # The number of stochastic parameters (last dimension) depends on RSD.
+    # For RSD, N_stochastic_params is 3 (from l_idx 0,1,2 in ctrs assignment).
+    # In Real space, N_stochastic_params is implicitly 1 (from _cs[:, i]).
+    if rsd:
+        target_stoch_params_count = 3
+        if cs_ndim == 1:  # (N_stoch_params,) for 1 tracer, not vectorized
+            if n_tracers != 1:  # Should be consistent with _b
+                raise ValueError(
+                    f"Inconsistent n_tracers for _cs (shape={_cs.shape}) "
+                    f"with _b's derived n_tracers ({n_tracers}) "
+                    "when not vectorized and RSD."
+                )
+            _cs = _cs.reshape((1, 1, _cs.shape[0]))
+        elif cs_ndim == 2:
+            if vectorized:  # (num_vec, N_stoch_params) for 1 tracer
+                if n_tracers != 1:  # Should be consistent with _b
+                    raise ValueError(
+                        f"Inconsistent n_tracers for _cs (shape={_cs.shape})"
+                        f"with _b's derived n_tracers ({n_tracers})"
+                        " when vectorized and RSD."
+                    )
+                _cs = _cs.reshape((num_vectorizations, 1, _cs.shape[1]))
+            else:  # (N_tracers, N_stoch_params) for not vectorized
+                if _cs.shape[0] != n_tracers:  # Should be consistent with _b
+                    raise ValueError(
+                        f"Inconsistent n_tracers for _cs (shape={_cs.shape})"
+                        f"with _b's derived n_tracers ({n_tracers})"
+                        " when not vectorized and RSD."
+                    )
+                _cs = _cs.reshape((1, n_tracers, _cs.shape[1]))
+        elif (
+            cs_ndim == 3
+        ):  # (num_vec, n_tracers, N_stoch_params) - ideal shape
+            if _cs.shape[0] != num_vectorizations or _cs.shape[1] != n_tracers:
+                raise ValueError(
+                    f"Inconsistent shape for _cs (shape={_cs.shape})"
+                    f"with derived num_vectorizations ({num_vectorizations})"
+                    f"or n_tracers ({n_tracers}) when RSD."
+                )
+            pass
+        else:
+            raise ValueError(
+                f"Invalid shape for stochastic parameters _cs: {_cs.shape}. "
+                "Expected 1D, 2D or 3D for RSD."
+            )
+        # Final check for the number of stochastic parameters
+        if _cs.shape[2] != target_stoch_params_count:
+            raise ValueError(
+                f"Mismatched number of stochastic parameters for RSD:"
+                f" expected {target_stoch_params_count}, got {_cs.shape[2]}"
+                f". Full _cs shape: {_cs.shape}"
+            )
+    else:  # Real space
+        # Target shape for _cs is (num_vectorizations, n_tracers).
+        # Implicitly, there's 1 stochastic parameter per tracer.
+        if cs_ndim == 0:  # Scalar
+            if (
+                n_tracers != 1 or num_vectorizations != 1
+            ):  # Scalar implies 1 tracer, 1 vectorization
+                raise ValueError(
+                    f"Scalar _cs ({_cs.shape}) inconsistent with derived"
+                    f" n_tracers ({n_tracers}) or num_vectorizations"
+                    f" ({num_vectorizations}) when not RSD."
+                )
+            _cs = _cs.reshape((1, 1))
+        elif cs_ndim == 1:  # (n_tracers,) or (num_vec,) or (1,)
+            if (
+                n_tracers == 1 and _cs.shape[0] == num_vectorizations
+            ):  # (num_vec,) for 1 tracer, vectorized
+                _cs = _cs.reshape((num_vectorizations, 1))
+            elif (
+                num_vectorizations == 1 and _cs.shape[0] == n_tracers
+            ):  # (n_tracers,) for not vectorized
+                _cs = _cs.reshape((1, n_tracers))
+            else:
+                raise ValueError(
+                    f"Ambiguous shape for _cs when not RSD, 1D: {_cs.shape}. "
+                    "Please ensure consistency with n_tracers "
+                    "and vectorized flag."
+                )
+        elif (
+            cs_ndim == 2
+        ):  # (num_vec, n_tracers) or (n_tracers, 1) or (num_vec, 1)
+            # If `_cs.shape[1]` is 1, it's (num_vec, 1) or (n_tracers, 1)
+            # If `_cs.shape[1]` is n_tracers, it's (num_vec, n_tracers)
+            # or (n_tracers, n_tracers if square)
+            if vectorized:
+                if _cs.shape[0] != num_vectorizations:
+                    raise ValueError(
+                        f"Inconsistent num_vectorizations for _cs "
+                        f"(shape={_cs.shape}) with _b's derived "
+                        f"num_vectorizations ({num_vectorizations}) "
+                        "when vectorized and not RSD."
+                    )
+                if (
+                    _cs.shape[1] == n_tracers
+                    or _cs.shape[1] == 1
+                    and n_tracers == 1
+                ):  # (num_vec, n_tracers)
+                    pass
+                else:  # (num_vec, X) where X != n_tracers and X != 1
+                    raise ValueError(
+                        f"Invalid shape for _cs when vectorized, not "
+                        f"RSD, 2D: {_cs.shape}. Expected "
+                        f"(num_vec, n_tracers) or (num_vec, 1)."
+                    )
+            else:  # not vectorized: (n_tracers, 1)
+                if _cs.shape[0] != n_tracers or _cs.shape[1] != 1:
+                    raise ValueError(
+                        f"Invalid shape for _cs when not vectorized, "
+                        f"not RSD, 2D: {_cs.shape}. Expected "
+                        f"(n_tracers, 1)."
+                    )
+                _cs = _cs.reshape((1, n_tracers))
+        elif cs_ndim == 3:  # (num_vec, n_tracers, N_stoch_params_real)
+            # N_stoch_params_real must be 1
+            if (
+                _cs.shape[0] != num_vectorizations
+                or _cs.shape[1] != n_tracers
+                or _cs.shape[2] != 1
+            ):
+                raise ValueError(
+                    f"Invalid shape for _cs when not RSD, 3D: {_cs.shape}."
+                    " Expected (num_vec, n_tracers, 1)."
+                )
+            pass
+        else:
+            raise ValueError(
+                f"Invalid shape for stochastic parameters _cs: {_cs.shape}."
+                " Expected 0D, 1D, 2D or 3D for Real space."
+            )
+
+    # Step 3: Reshape _c to (num_vectorizations, n_tracers, N_ct_params,
+    # N_multipoles) or (num_vectorizations, n_tracers, N_ct_params)
+    # The number of multipoles for counterterms (last dimension for RSD)
+    # depends on RSD.
+    # For RSD, N_multipoles is 3 (from pgg_l0, pgg_l2, pgg_l4 using
+    # `_c_asserted[:, ind, i_ct, 1]` etc.).
+    # For Real space, implicitly N_multipoles is 1.
+    if rsd:
+        target_c_multipoles = 3
+        if c_ndim == 2:  # (N_ct_params, N_multipoles) for 1 tracer
+            if n_tracers != 1 or num_vectorizations != 1:
+                raise ValueError(
+                    f"Inconsistent n_tracers/num_vec for _c (shape={_c.shape})"
+                    " when not vectorized, 2D RSD."
+                )
+            _c = _c.reshape((1, 1, _c.shape[0], _c.shape[1]))
+        elif c_ndim == 3:
+            if vectorized:  # (num_vec, N_ct_params, N_multipoles) for 1 tracer
+                if n_tracers != 1 or _c.shape[0] != num_vectorizations:
+                    raise ValueError(
+                        "Inconsistent n_tracers/num_vec for _c "
+                        f"(shape={_c.shape}) when vectorized, 3D RSD."
+                    )
+                _c = _c.reshape((
+                    num_vectorizations,
+                    1,
+                    _c.shape[1],
+                    _c.shape[2],
+                ))
+            else:  # (n_tracers, N_ct_params, N_multipoles) for not vectorized
+                if _c.shape[0] != n_tracers or num_vectorizations != 1:
+                    raise ValueError(
+                        "Inconsistent n_tracers/num_vec for _c "
+                        f"(shape={_c.shape}) when not vectorized, 3D RSD."
+                    )
+                _c = _c.reshape((1, n_tracers, _c.shape[1], _c.shape[2]))
+        elif c_ndim == 4:  # (num_vec, n_tracers, N_ct_params, N_multipoles)
+            if _c.shape[0] != num_vectorizations or _c.shape[1] != n_tracers:
+                raise ValueError(
+                    f"Inconsistent shape for _c (shape={_c.shape}) with"
+                    f" derived num_vectorizations ({num_vectorizations})"
+                    f" or n_tracers ({n_tracers}) when RSD."
+                )
+            pass
+        else:
+            raise ValueError(
+                f"Invalid shape for counterterms _c: {_c.shape}. "
+                "Expected 2D, 3D or 4D for RSD."
+            )
+        # Final check for the number of counterterm multipoles
+        if _c.shape[3] != target_c_multipoles:
+            raise ValueError(
+                f"Mismatched number of counterterm multipoles for RSD:"
+                f" expected {target_c_multipoles}, got {_c.shape[3]}."
+                f" Full _c shape: {_c.shape}"
+            )
+    else:  # Real space
+        # Target shape for _c is (num_vectorizations, n_tracers, N_ct_params).
+        if c_ndim == 1:  # (N_ct_params,) for 1 tracer, not vectorized
+            if n_tracers != 1 or num_vectorizations != 1:
+                raise ValueError(
+                    f"Inconsistent n_tracers/num_vec for _c (shape={_c.shape})"
+                    " when not vectorized, 1D Real."
+                )
+            _c = _c.reshape((1, 1, _c.shape[0]))
+        elif c_ndim == 2:
+            if vectorized:  # (num_vec, N_ct_params) for 1 tracer
+                if n_tracers != 1 or _c.shape[0] != num_vectorizations:
+                    raise ValueError(
+                        f"Inconsistent n_tracers/num_vec for _c "
+                        f"(shape={_c.shape}) when vectorized, 2D Real."
+                    )
+                _c = _c.reshape((num_vectorizations, 1, _c.shape[1]))
+            else:  # (n_tracers, N_ct_params) for not vectorized
+                if _c.shape[0] != n_tracers or num_vectorizations != 1:
+                    raise ValueError(
+                        f"Inconsistent n_tracers/num_vec for _c "
+                        f"(shape={_c.shape}) when not vectorized, 2D Real."
+                    )
+                _c = _c.reshape((1, n_tracers, _c.shape[1]))
+        elif c_ndim == 3:  # (num_vec, n_tracers, N_ct_params) - ideal shape
+            if _c.shape[0] != num_vectorizations or _c.shape[1] != n_tracers:
+                raise ValueError(
+                    f"Inconsistent shape for _c (shape={_c.shape}) "
+                    f"with derived num_vectorizations ({num_vectorizations}) "
+                    f"or n_tracers ({n_tracers}) when Real."
+                )
+            pass
+        else:
+            raise ValueError(
+                f"Invalid shape for counterterms _c: {_c.shape}. "
+                "Expected 1D, 2D or 3D for Real space."
+            )
+    # Set all combinations of the bias parameters (b1, b2, bG2, bGamm3, b4)
+    # The number of combinations is n_tracers * (n_tracers + 1) / 2
+    num_combinations: int = n_tracers * (n_tracers + 1) // 2
+
+    bias: NDArray[np.floating]
+    ctrs: NDArray[np.floating]
+
+    if rsd:
+        bias = np.zeros([14, num_combinations, _b.shape[0]])
+        ctrs = np.zeros([3, num_combinations, _cs.shape[0]])
         count = 0
-        for i in range(Ntracers):
-            for j in range(i):
-                bias[:, count, :] = np.array([(b[:,i,0] + b[:,j,0])/2.0, b[:,i,0]*b[:,j,0], b[:,i,1]*b[:,j,1], (b[:,i,0]*b[:,j,1] + b[:,i,1]*b[:,j,0])/2.0, (b[:,i,1] + b[:,j,1])/2.0, (b[:,i,0]*b[:,j,2] + b[:,i,2]*b[:,j,0])/2.0, (b[:,i,2] + b[:,j,2])/2.0, (b[:,i,1]*b[:,j,2] + b[:,i,2]*b[:,j,1])/2.0, b[:,i,2]*b[:,j,2], (b[:,i,0]*b[:,j,3] + b[:,i,3]*b[:,j,0])/2.0, (b[:,i,3] + b[:,j,3])/2.0, (b[:,i,4] + b[:,j,4])/2.0, (b[:,i,0]*b[:,j,4] + b[:,i,4]*b[:,j,0])/2.0, (b[:,i,0]**2*b[:,j,4] + b[:,i,4]*b[:,j,0]**2)/2.0])
-                for l in range(3):
-                    ctrs[:, count, l] = (cs[:,i, l]*b[:,j,0] + cs[:,j, l]*b[:,i,0])/2.0
+        for i in range(n_tracers):
+            for j in range(i):  # Off-diagonal elements (j < i)
+                bias[:, count, :] = np.array(
+                    [
+                        (_b[:, i, 0] + _b[:, j, 0]) / 2.0,
+                        _b[:, i, 0] * _b[:, j, 0],
+                        _b[:, i, 1] * _b[:, j, 1],
+                        (_b[:, i, 0] * _b[:, j, 1] + _b[:, i, 1] * _b[:, j, 0])
+                        / 2.0,
+                        (_b[:, i, 1] + _b[:, j, 1]) / 2.0,
+                        (_b[:, i, 0] * _b[:, j, 2] + _b[:, i, 2] * _b[:, j, 0])
+                        / 2.0,
+                        (_b[:, i, 2] + _b[:, j, 2]) / 2.0,
+                        (_b[:, i, 1] * _b[:, j, 2] + _b[:, i, 2] * _b[:, j, 1])
+                        / 2.0,
+                        _b[:, i, 2] * _b[:, j, 2],
+                        (_b[:, i, 0] * _b[:, j, 3] + _b[:, i, 3] * _b[:, j, 0])
+                        / 2.0,
+                        (_b[:, i, 3] + _b[:, j, 3]) / 2.0,
+                        (_b[:, i, 4] + _b[:, j, 4]) / 2.0,
+                        (_b[:, i, 0] * _b[:, j, 4] + _b[:, i, 4] * _b[:, j, 0])
+                        / 2.0,
+                        (
+                            _b[:, i, 0] ** 2 * _b[:, j, 4]
+                            + _b[:, i, 4] * _b[:, j, 0] ** 2
+                        )
+                        / 2.0,
+                    ],
+                )
+                for l_idx in range(
+                    3
+                ):  # Using l_idx to avoid conflict with `ls` parameter
+                    ctrs[l_idx, count, :] = (
+                        _cs[:, i, l_idx] * _b[:, j, 0]
+                        + _cs[:, j, l_idx] * _b[:, i, 0]
+                    ) / 2.0
                 count += 1
-            bias[:, count, :] = np.array([b[:,i,0], b[:,i,0]**2, b[:,i,1]**2, b[:,i,0]*b[:,i,1], b[:,i,1], b[:,i,0]*b[:,i,2], b[:,i,2], b[:,i,1]*b[:,i,2], b[:,i,2]**2, b[:,i,0]*b[:,i,3], b[:,i,3], b[:,i,4], b[:,i,0]*b[:,i,4], b[:,i,0]**2*b[:,i,4]])
-            for l in range(3):
-                ctrs[:, count, l] = cs[:,i, l]*b[:,i,0]
-            count += 1		
-    #(b1^2, b1*b2, b1*bG2, b1*bGamma3, b2^2, bG2^2, b2*bG2)
-    else:
-        bias = np.zeros([7, int(Ntracers*(Ntracers+1)/2), b.shape[0]])
-        ctrs = np.zeros([int(Ntracers*(Ntracers+1)/2), cs.shape[0]])
+            # Diagonal elements (j == i)
+            bias[:, count, :] = np.array(
+                [
+                    _b[:, i, 0],
+                    _b[:, i, 0] ** 2,
+                    _b[:, i, 1] ** 2,
+                    _b[:, i, 0] * _b[:, i, 1],
+                    _b[:, i, 1],
+                    _b[:, i, 0] * _b[:, i, 2],
+                    _b[:, i, 2],
+                    _b[:, i, 1] * _b[:, i, 2],
+                    _b[:, i, 2] ** 2,
+                    _b[:, i, 0] * _b[:, i, 3],
+                    _b[:, i, 3],
+                    _b[:, i, 4],
+                    _b[:, i, 0] * _b[:, i, 4],
+                    _b[:, i, 0] ** 2 * _b[:, i, 4],
+                ],
+            )
+            for l_idx in range(3):
+                ctrs[l_idx, count, :] = _cs[:, i, l_idx] * _b[:, i, 0]
+            count += 1
+    # (b1^2, b1*b2, b1*bG2, b1*bGamma3, b2^2, bG2^2, b2*bG2)
+    else:  # Real space
+        bias = np.zeros([7, num_combinations, _b.shape[0]])
+        ctrs = np.zeros([num_combinations, _cs.shape[0]])
         count = 0
-        for i in range(Ntracers):
-            for j in range(i):
-                bias[:,count, :] = np.array([b[:,i,0]*b[:,j,0], (b[:,i,0]*b[:,j,1] + b[:,i,1]*b[:,j,0])/2.0, (b[:,i,0]*b[:,j,2] + b[:,i,2]*b[:,j,0])/2.0, (b[:,i,0]*b[:,j,3] + b[:,i,3]*b[:,j,0])/2.0, b[:,i,1]*b[:,j,1], b[:,i,2]*b[:,j,2], (b[:,i,1]*b[:,j,2] + b[:,i,2]*b[:,j,1])/2.0])
-                ctrs[count,:] = (cs[:,i]*b[:,j,0] + cs[:,j]*b[:,i,0])/2.0
+        for i in range(n_tracers):
+            for j in range(i):  # Off-diagonal elements (j < i)
+                bias[:, count, :] = np.array(
+                    [
+                        _b[:, i, 0] * _b[:, j, 0],
+                        (_b[:, i, 0] * _b[:, j, 1] + _b[:, i, 1] * _b[:, j, 0])
+                        / 2.0,
+                        (_b[:, i, 0] * _b[:, j, 2] + _b[:, i, 2] * _b[:, j, 0])
+                        / 2.0,
+                        (_b[:, i, 0] * _b[:, j, 3] + _b[:, i, 3] * _b[:, j, 0])
+                        / 2.0,
+                        _b[:, i, 1] * _b[:, j, 1],
+                        _b[:, i, 2] * _b[:, j, 2],
+                        (_b[:, i, 1] * _b[:, j, 2] + _b[:, i, 2] * _b[:, j, 1])
+                        / 2.0,
+                    ],
+                )
+                ctrs[count, :] = (
+                    _cs[:, i] * _b[:, j, 0] + _cs[:, j] * _b[:, i, 0]
+                ) / 2.0
                 count += 1
-            bias[:,count, :] = np.array([b[:,i,0]**2, b[:,i,0]*b[:,i,1], b[:,i,0]*b[:,i,2], b[:,i,0]*b[:,i,3], b[:,i,1]**2, b[:,i,2]**2, b[:,i,1]*b[:,i,2]])
-            ctrs[count, :] = cs[:,i]*b[:,i,0]
+            # Diagonal elements (j == i)
+            bias[:, count, :] = np.array(
+                [
+                    _b[:, i, 0] ** 2,
+                    _b[:, i, 0] * _b[:, i, 1],
+                    _b[:, i, 0] * _b[:, i, 2],
+                    _b[:, i, 0] * _b[:, i, 3],
+                    _b[:, i, 1] ** 2,
+                    _b[:, i, 2] ** 2,
+                    _b[:, i, 1] * _b[:, i, 2],
+                ],
+            )
+            ctrs[count, :] = _cs[:, i] * _b[:, i, 0]
             count += 1
 
-				
-    #Define the functions to compute each power spectra
-    #Compute Pgg in real space
-    def Pgg(ind):
-        resp = (bias[0,ind,:]*(pk_mult["lin"] + pk_mult["1loop"]) + bias[1,ind,:]*pk_mult["Id2"] + 2.0*bias[2,ind,:]*pk_mult["IG2"] + 2.0*bias[2,ind,:]*pk_mult["FG2"] + 0.8*bias[3,ind,:]*pk_mult["FG2"] + 0.25*bias[4,ind,:]*pk_mult["Id2d2"] + bias[5,ind,:]*pk_mult["IG2G2"] + bias[6,ind,:]*pk_mult["Id2G2"])*pow(h, 3.0*h_units) + 2.0*ctrs[ind,:]*pk_mult["ctr"]*pow(h, h_units)
-        for i in range(len(c[0,ind,:])):
-            resp += c[:,ind,i]*np.power(k, 2*i)
+    # Define the functions to compute each power spectra
+    def pgg(ind: int) -> NDArray[np.floating]:
+        _k_asserted: NDArray[np.floating] = cast(
+            NDArray[np.floating], k
+        )  # k is guaranteed non-None here
+        _c_asserted: NDArray[np.floating] = _c  # _c is already NDArray
+        resp: NDArray[np.floating] = (
+            bias[0, ind, :] * (pk_multipoles["lin"] + pk_multipoles["1loop"])
+            + bias[1, ind, :] * pk_multipoles["Id2"]
+            + 2.0 * bias[2, ind, :] * pk_multipoles["IG2"]
+            + 2.0 * bias[2, ind, :] * pk_multipoles["FG2"]
+            + 0.8 * bias[3, ind, :] * pk_multipoles["FG2"]
+            + 0.25 * bias[4, ind, :] * pk_multipoles["Id2d2"]
+            + bias[5, ind, :] * pk_multipoles["IG2G2"]
+            + bias[6, ind, :] * pk_multipoles["Id2G2"]
+        ) * np.power(h, 3.0 * h_units) + 2.0 * ctrs[ind, :] * pk_multipoles[
+            "ctr"
+        ] * np.power(h, h_units)
+        for i_ct in range(
+            len(_c_asserted[0, ind, :])
+        ):  # Use i_ct to avoid shadowing outer 'i'
+            resp += _c_asserted[:, ind, i_ct] * np.power(_k_asserted, 2 * i_ct)
+        return resp
+
+    def pgg_l0(ind: int) -> NDArray[np.floating]:
+        _k_asserted: NDArray[np.floating] = cast(NDArray[np.floating], k)
+        _c_asserted: NDArray[np.floating] = _c
+        resp: NDArray[np.floating] = (
+            (
+                pk_multipoles["lin_0_vv"]
+                + pk_multipoles["1loop_0_vv"]
+                + bias[0, ind, :]
+                * (pk_multipoles["lin_0_vd"] + pk_multipoles["1loop_0_vd"])
+                + bias[1, ind, :]
+                * (pk_multipoles["lin_0_dd"] + pk_multipoles["1loop_0_dd"])
+                + 0.25 * bias[2, ind, :] * pk_multipoles["Id2d2"]
+                + bias[3, ind, :] * pk_multipoles["Idd2_0"]
+                + bias[4, ind, :] * pk_multipoles["Id2_0"]
+                + bias[5, ind, :] * pk_multipoles["IdG2_0"]
+                + bias[6, ind, :] * pk_multipoles["IG2_0"]
+                + bias[7, ind, :] * pk_multipoles["Id2G2"]
+                + bias[8, ind, :] * pk_multipoles["IG2G2"]
+                + 2.0 * bias[5, ind, :] * pk_multipoles["FG2_0b1"]
+                + 2.0 * bias[6, ind, :] * pk_multipoles["FG2_0"]
+                + 0.8 * bias[9, ind, :] * pk_multipoles["FG2_0b1"]
+                + 0.8 * bias[10, ind, :] * pk_multipoles["FG2_0"]
+            )
+            * np.power(h, 3.0 * h_units)
+            + 2.0
+            * ctrs[0, ind, :]
+            * pk_multipoles["ctr_0"]
+            * np.power(h, h_units)
+            + _f_z**2
+            * np.power(_k_asserted, 2.0)
+            * 35
+            / 8.0
+            * pk_multipoles["ctr_4"]
+            * (
+                1.0 / 9.0 * bias[11, ind, :] * _f_z**2
+                + 2.0 / 7.0 * _f_z * bias[12, ind, :]
+                + 1.0 / 5.0 * bias[13, ind, :]
+            )
+            * np.power(h, h_units)
+        )
+        for i_ct in range(len(_c_asserted[0, ind, :, 1])):
+            resp += _c_asserted[:, ind, i_ct, 1] * np.power(
+                _k_asserted, 2 * i_ct
+            )
 
         return resp
 
-    #Compute the monopole of the power spectrum
-    def Pgg_l0(ind):
-        resp =  (pk_mult["lin_0_vv"] + pk_mult["1loop_0_vv"] + bias[0,ind,:]*(pk_mult["lin_0_vd"] + pk_mult["1loop_0_vd"]) + bias[1,ind,:]*(pk_mult["lin_0_dd"] + pk_mult["1loop_0_dd"]) + 0.25*bias[2,ind,:]*pk_mult["Id2d2"] + bias[3,ind,:]*pk_mult["Idd2_0"] + bias[4,ind,:]*pk_mult["Id2_0"] + bias[5,ind,:]*pk_mult["IdG2_0"] + bias[6,ind,:]*pk_mult["IG2_0"] + bias[7,ind,:]*pk_mult["Id2G2"] + bias[8,ind,:]*pk_mult["IG2G2"] + 2.0*bias[5,ind,:]*pk_mult["FG2_0b1"] + 2.0*bias[6,ind,:]*pk_mult["FG2_0"] + 0.8*bias[9,ind,:]*pk_mult["FG2_0b1"] + 0.8*bias[10,ind,:]*pk_mult["FG2_0"])*pow(h, 3.0*h_units) + 2.0*ctrs[0,ind,:]*pk_mult["ctr_0"]*pow(h, h_units) + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(1.0/9.0*bias[11,ind,:]*fz**2 + 2.0/7.0*fz*bias[12,ind,:] + 1.0/5.0*bias[13,ind,:])*pow(h, h_units)
-        for i in range(len(c[0,ind,:,1])):
-            resp += c[:,ind,i,1]*np.power(k, 2*i)
+    def pgg_l2(ind: int) -> NDArray[np.floating]:
+        _k_asserted: NDArray[np.floating] = cast(NDArray[np.floating], k)
+        _c_asserted: NDArray[np.floating] = _c
+        resp: NDArray[np.floating] = (
+            (
+                pk_multipoles["lin_2_vv"]
+                + pk_multipoles["1loop_2_vv"]
+                + bias[0, ind, :]
+                * (pk_multipoles["lin_2_vd"] + pk_multipoles["1loop_2_vd"])
+                + bias[1, ind, :] * pk_multipoles["1loop_2_dd"]
+                + bias[3, ind, :] * pk_multipoles["Idd2_2"]
+                + bias[4, ind, :] * pk_multipoles["Id2_2"]
+                + bias[5, ind, :] * pk_multipoles["IdG2_2"]
+                + bias[6, ind, :] * pk_multipoles["IG2_2"]
+                + (2.0 * bias[6, ind, :] + 0.8 * bias[10, ind, :])
+                * pk_multipoles["FG2_2"]
+            )
+            * np.power(h, 3.0 * h_units)
+            + 2.0
+            * ctrs[1, ind, :]
+            * pk_multipoles["ctr_2"]
+            * np.power(h, h_units)
+            + _f_z**2
+            * np.power(_k_asserted, 2.0)
+            * 35
+            / 8.0
+            * pk_multipoles["ctr_4"]
+            * (
+                70.0 * bias[11, ind, :] * _f_z**2
+                + 165.0 * _f_z * bias[12, ind, :]
+                + 99.0 * bias[13, ind, :]
+            )
+            * (4.0 / 693.0)
+            * np.power(h, h_units)
+        )
+        for i_ct in range(len(_c_asserted[0, ind, :, 1])):
+            resp += _c_asserted[:, ind, i_ct, 1] * np.power(
+                _k_asserted, 2 * i_ct
+            )
 
         return resp
 
-    #Compute the quadrupole of the power spectrum
-    def Pgg_l2(ind):
-        resp = (pk_mult["lin_2_vv"] + pk_mult["1loop_2_vv"] + bias[0,ind,:]*(pk_mult["lin_2_vd"] + pk_mult["1loop_2_vd"]) + bias[1,ind,:]*pk_mult["1loop_2_dd"] + bias[3,ind,:]*pk_mult["Idd2_2"] + bias[4,ind,:]*pk_mult["Id2_2"] + bias[5,ind,:]*pk_mult["IdG2_2"] + bias[6,ind,:]*pk_mult["IG2_2"] + (2.0*bias[6,ind,:] + 0.8*bias[10,ind,:])*pk_mult["FG2_2"])*pow(h, 3.0*h_units) + 2.0*ctrs[1,ind,:]*pk_mult["ctr_2"]*pow(h, h_units) + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(70.0*bias[11,ind,:]*fz**2 + 165.0*fz*bias[12,ind,:] + 99.0*bias[13,ind,:])*(4.0/693.0)*pow(h, h_units)
-        for i in range(len(c[0,ind,:,1])):
-            resp += c[:,ind,i,1]*np.power(k, 2*i)
+    def pgg_l4(ind: int) -> NDArray[np.floating]:
+        _k_asserted: NDArray[np.floating] = cast(NDArray[np.floating], k)
+        _c_asserted: NDArray[np.floating] = _c
+        resp: NDArray[np.floating] = (
+            (
+                pk_multipoles["lin_4_vv"]
+                + pk_multipoles["1loop_4_vv"]
+                + bias[0, ind, :] * pk_multipoles["1loop_4_vd"]
+                + bias[1, ind, :] * pk_multipoles["1loop_4_dd"]
+                + bias[4, ind, :] * pk_multipoles["Id2_4"]
+                + bias[6, ind, :] * pk_multipoles["IG2_4"]
+            )
+            * np.power(h, 3.0 * h_units)
+            + 2.0
+            * ctrs[2, ind, :]
+            * pk_multipoles["ctr_4"]
+            * np.power(h, h_units)
+            + _f_z**2
+            * np.power(_k_asserted, 2.0)
+            * 35
+            / 8.0
+            * pk_multipoles["ctr_4"]
+            * (
+                210.0 * bias[11, ind, :] * _f_z**2
+                + 390.0 * _f_z * bias[12, ind, :]
+                + 143.0 * bias[13, ind, :]
+            )
+            * (8.0 / 5005.0)
+            * np.power(h, h_units)
+        )
+        for i_ct in range(len(_c_asserted[0, ind, :, 2])):
+            resp += _c_asserted[:, ind, i_ct, 2] * np.power(
+                _k_asserted, 2 * i_ct
+            )
 
         return resp
 
-    #Compute the hexadecapole of the power spectrum
-    def Pgg_l4(ind):
-        resp = (pk_mult["lin_4_vv"] + pk_mult["1loop_4_vv"] + bias[0,ind,:]*pk_mult["1loop_4_vd"] + bias[1,ind,:]*pk_mult["1loop_4_dd"] + bias[4,ind,:]*pk_mult["Id2_4"] + bias[6,ind,:]*pk_mult["IG2_4"])*pow(h, 3.0*h_units) + 2.0*ctrs[2,ind,:]*pk_mult["ctr_4"]*pow(h, h_units) + fz**2*np.power(k, 2.0)*35/8.0*pk_mult["ctr_4"]*(210.0*bias[11,ind,:]*fz**2 + 390.0*fz*bias[12,ind,:] + 143.0*bias[13,ind,:])*(8.0/5005.0)*pow(h, h_units)
-        for i in range(len(c[0,ind,:,2])):
-            resp += c[:,ind,i,2]*np.power(k, 2*i)
+    # Compute the spectra and save in the dictionary
+    x: dict[str, NDArray[np.floating]] = {}
 
-        return resp
+    # Handle ls being an int or list for iteration
+    _ls_list: list[int] = [ls] if isinstance(ls, int) else ls
 
-    #Compute the spectra and save in the dictionary
-    x = {}
-    if(RSD == True):
-        if(0 in ls):
-            P = np.zeros([b.shape[0], int(Ntracers*(Ntracers+1)/2), len(k)])
+    # k is guaranteed non-None here from previous checks or the pk_mult branch
+    _k_len: int = len(cast(NDArray[np.floating], k))
+
+    if rsd:
+        if 0 in _ls_list:
+            p_l0: NDArray[np.floating] = np.zeros(
+                [
+                    _b.shape[0],
+                    num_combinations,
+                    _k_len,
+                ],
+            )
             ind = 0
-            for i in range(Ntracers):
-                for j in range(i+1):
-                    P[:,ind,:] = Pgg_l0(ind)
+            for i in range(n_tracers):
+                for _ in range(i + 1):
+                    p_l0[:, ind, :] = pgg_l0(ind)
                     ind += 1
-            x["Pgg_l0"] = P	
-        if(2 in ls):
-            P = np.zeros([b.shape[0], int(Ntracers*(Ntracers+1)/2), len(k)])
+            x["Pgg_l0"] = p_l0
+        if 2 in _ls_list:
+            p_l2: NDArray[np.floating] = np.zeros(
+                [
+                    _b.shape[0],
+                    num_combinations,
+                    _k_len,
+                ],
+            )
             ind = 0
-            for i in range(Ntracers):
-                for j in range(i+1):
-                    P[:,ind,:] = Pgg_l2(ind)
+            for i in range(n_tracers):
+                for _ in range(i + 1):
+                    p_l2[:, ind, :] = pgg_l2(ind)
                     ind += 1
-            x["Pgg_l2"] = P	
-        if(4 in ls):
-            P = np.zeros([b.shape[0], int(Ntracers*(Ntracers+1)/2), len(k)])
+            x["Pgg_l2"] = p_l2
+        if 4 in _ls_list:
+            p_l4: NDArray[np.floating] = np.zeros(
+                [
+                    _b.shape[0],
+                    num_combinations,
+                    _k_len,
+                ],
+            )
             ind = 0
-            for i in range(Ntracers):
-                for j in range(i+1):
-                    P[:,ind,:] = Pgg_l4(ind)
+            for i in range(n_tracers):
+                for _ in range(i + 1):
+                    p_l4[:, ind, :] = pgg_l4(ind)
                     ind += 1
-            x["Pgg_l4"] = P	
+            x["Pgg_l4"] = p_l4
     else:
-        P = np.zeros([b.shape[0], int(Ntracers*(Ntracers+1)/2), len(k)])
+        p_real: NDArray[np.floating] = np.zeros([
+            _b.shape[0],
+            num_combinations,
+            _k_len,
+        ])
         ind = 0
-        for i in range(Ntracers):
-            for j in range(i+1):
-                P[:,ind,:] = Pgg(ind)
+        for i in range(n_tracers):
+            for _ in range(i + 1):
+                p_real[:, ind, :] = pgg(ind)
                 ind += 1
-        x["Pgg"] = P
+        x["Pgg"] = p_real
 
-    #Output the spectra
-    if(OUT_MULT == True):
-        for key in pk_mult.keys():
-            if(key == "ctr" or key == "ctr_0" or key == "ctr_2" or key == "ctr_4"):
-                x[key] = pk_mult[key]*pow(h, h_units)
+    # Output the spectra
+    if out_mult:
+        # pk_multipoles is guaranteed to be dict[str, NDArray[np.floating]]
+        for key in pk_multipoles:
+            if (
+                key == "ctr"
+                or key == "ctr_0"
+                or key == "ctr_2"
+                or key == "ctr_4"
+            ):
+                x[key] = pk_multipoles[key] * np.power(h, h_units)
             else:
-                x[key] = pk_mult[key]*pow(h, 3.0*h_units)
+                x[key] = pk_multipoles[key] * np.power(h, 3.0 * h_units)
 
     return x

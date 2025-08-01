@@ -1,5 +1,2 @@
 # python modules
-from . import simulation 
-from . import mock
-from . import theory
-from . import utils
+from . import mock, simulation, theory, utils
