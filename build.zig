@@ -11,6 +11,15 @@ const std = @import("std");
 
 // ─── Per-module configuration ────────────────────────────────────────────
 
+// Structute with the information about a vendored dependency
+// It should be used when uting small dependencies
+const SourceDep = struct {
+    name: []const u8, // key in build.zig.zon
+    files: []const []const u8, // paths relative to the dependency root
+    includes: []const []const u8 = &.{}, // include subfolders within the dependency
+    flags: []const []const u8 = &.{},
+};
+
 // Structure for the C/C++ modules
 const ExtModule = struct {
     name: []const u8,
@@ -19,7 +28,7 @@ const ExtModule = struct {
     include_subdir: []const u8,
     libs: []const []const u8,
     cpp: bool = false,
-    voro: bool = false,
+    deps: []const SourceDep = &.{},
 };
 
 // List of the C/C++ modules
@@ -62,11 +71,28 @@ const modules = [_]ExtModule{
     .{
         .name = "halovoid",
         .src_dir = "src/halovoid",
-        .files = &.{ "finder.cpp", "halovoid_h.cpp", "halovoid.cpp" },
+        .files = &.{ "finder.cpp",  "halovoid.cpp" },
         .include_subdir = "halovoid",
         .libs = &.{"m"},
         .cpp = true,
-        .voro = true,
+        .deps = &.{
+            .{
+                .name = "voro",
+                .files = &.{
+                    "src/cell.cc",       "src/common.cc",
+                    "2d/src/cell_2d.cc",
+                },
+                .includes = &.{ "src", "2d/src" },
+                .flags = &.{ "-std=c++23", "-O2", "-funroll-loops", "-fopenmp" }
+            },
+            .{
+                .name = "pdqsort",
+                .files = &.{},
+                .includes = &.{"./"},
+                .flags = &.{ "-std=c++23", "-O2", "-funroll-loops", "-fopenmp" }
+
+            },
+        },
     },
 };
 
@@ -188,31 +214,6 @@ pub fn build(b: *std.Build) void {
     const c_flags: []const []const u8 = &.{ "-O2", "-funroll-loops", "-fopenmp" };
     const cpp_flags: []const []const u8 = &.{ "-O2", "-funroll-loops", "-fopenmp", "-std=c++23" };
 
-    // ─── Voro++ static libraries (compiled from fetched dependency source) ────
-    const voro_dep = b.dependency("voro", .{ .target = target, .optimize = optimize });
-    const voro_3d = blk: {
-        const m = b.createModule(.{ .target = target, .optimize = optimize, .link_libcpp = true, .pic = true });
-        m.addCSourceFiles(.{
-            .root = voro_dep.path("src"),
-            .files = &.{ "cell.cc", "common.cc" },
-            .flags = &.{ "-O3", "-fopenmp" },
-            .language = .cpp,
-        });
-        m.addIncludePath(voro_dep.path("src"));
-        break :blk b.addLibrary(.{ .name = "voro++", .root_module = m, .linkage = .static });
-    };
-    const voro_2d = blk: {
-        const m = b.createModule(.{ .target = target, .optimize = optimize, .link_libcpp = true, .pic = true });
-        m.addCSourceFiles(.{
-            .root = voro_dep.path("2d/src"),
-            .files = &.{ "common.cc", "cell_2d.cc" },
-            .flags = &.{ "-O3", "-fopenmp" },
-            .language = .cpp,
-        });
-        m.addIncludePath(voro_dep.path("2d/src"));
-        break :blk b.addLibrary(.{ .name = "voro++_2d", .root_module = m, .linkage = .static });
-    };
-
     for (&modules) |ext| {
         // 1 — Create module
         const mod = b.createModule(.{
@@ -247,9 +248,16 @@ pub fn build(b: *std.Build) void {
 
         const inc_path = b.fmt("include/{s}", .{ext.include_subdir});
         mod.addIncludePath(b.path(inc_path));
-        if (ext.voro) {
-            mod.addIncludePath(voro_dep.path("src"));
-            mod.addIncludePath(voro_dep.path("2d/src"));
+
+        // Add the external dependencies
+        for (ext.deps) |dep| {
+            const d = b.dependency(dep.name, .{ .target = target, .optimize = optimize });
+            for (dep.includes) |inc| mod.addIncludePath(d.path(inc));
+            mod.addCSourceFiles(.{
+                .root = d.path(""),
+                .files = dep.files,
+                .flags = dep.flags,
+            });
         }
 
         // 4 — Library search paths (from $LIBRARY_PATH + gcc libgomp dir)
@@ -260,10 +268,6 @@ pub fn build(b: *std.Build) void {
 
         // 5 — Libraries (.needed = true forces DT_NEEDED even if only an
         //     indirect dep needs it — e.g. libgsl needs cblas_* from gslcblas)
-        if (ext.voro) {
-            mod.linkLibrary(voro_3d);
-            mod.linkLibrary(voro_2d);
-        }
         for (ext.libs) |lib| {
             mod.linkSystemLibrary(lib, .{ .needed = true });
         }

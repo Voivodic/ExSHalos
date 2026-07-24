@@ -8,6 +8,10 @@
             .url = "https://github.com/chr1shr/voro/archive/b0dac575a47af0f90b5b100e6dc199a493c7cb83.tar.gz",
             .hash = "N-V-__8AALBeFwCOB7Oxt5GXtXehnncmzTf1_ji2-9BlAZQ9",
         },
+        .pdqsort = .{
+            .url = "https://github.com/orlp/pdqsort/archive/b1ef26a55cdb60d236a5cb199c4234c704f46726.tar.gz",
+            .hash = "N-V-__8AAJ7xAABXU9I52yQSQ-zeeJEohtrHKj9ekUVZdlOR",
+        },
     },
     .paths = .{
         "build.zig",
