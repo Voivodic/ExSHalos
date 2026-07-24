@@ -1,4 +1,9 @@
 #include "finder.hpp"
+#include "halovoid_h.hpp"
+#include <cmath>
+//#include <pdqsort.h>
+#include <array>
+#include <print>
 
 // Generates the lookup table at compile-time using standard C++23 features
 constexpr std::array<std::array<std::array<int, 3>, 27>, 8>
@@ -50,40 +55,42 @@ compute_neighbor_order() {
 constexpr auto NEIGHBOR_ORDER = compute_neighbor_order();
 
 // Compute the total volume of all cells
-double total_volume(const fft_real *p, const size_t *offset, size_t Np,
-                    size_t Nd, fft_real L) {
+double total_volume(const Container &con) {
     // Compute some constants
-    const float Lcell = L / (float)Nd;
-    const float scale = 1.0 / Lcell;
-    const float shift_cell = 0.5 * Lcell;
+    const fft_real L = con.get_L();
+    const std::size_t np = con.get_np();
+    const std::size_t nd = con.get_nd();
+    const fft_real Lcell = con.get_Lcell();
+    const fft_real scale = con.get_scale();
+    const fft_real shift_cell = 0.5 * Lcell;
 
     // Run over all particles
     voro::voronoicell cell;
     double total_volume = 0.0;
-    for (size_t index = 0; index < Np; index++) {
+    for (std::size_t index = 0; index < np; index++) {
         // Initialize the Voronoi cell
         cell.init(-L / 2.0, L / 2.0, -L / 2.0, L / 2.0, -L / 2.0, L / 2.0);
 
         // Get the position of the particle
-        float px = p[3 * index];
-        float py = p[3 * index + 1];
-        float pz = p[3 * index + 2];
+        fft_real px = con[index, 0];
+        fft_real py = con[index, 1];
+        fft_real pz = con[index, 2];
 
         // Get the cell index
-        size_t idx = (size_t)(px * scale);
-        if (idx >= Nd)
-            idx = Nd - 1;
-        size_t idy = (size_t)(py * scale);
-        if (idy >= Nd)
-            idy = Nd - 1;
-        size_t idz = (size_t)(pz * scale);
-        if (idz >= Nd)
-            idz = Nd - 1;
+        std::size_t idx = (std::size_t)(px * scale);
+        if (idx >= nd)
+            idx = nd - 1;
+        std::size_t idy = (std::size_t)(py * scale);
+        if (idy >= nd)
+            idy = nd - 1;
+        std::size_t idz = (std::size_t)(pz * scale);
+        if (idz >= nd)
+            idz = nd - 1;
 
         // Compute the local coordinates
-        float dx_local = px - idx * Lcell;
-        float dy_local = py - idy * Lcell;
-        float dz_local = pz - idz * Lcell;
+        fft_real dx_local = px - idx * Lcell;
+        fft_real dy_local = py - idy * Lcell;
+        fft_real dz_local = pz - idz * Lcell;
 
         // Get the offsets table
         const int octant = (dx_local - shift_cell > 0 ? 1 : 0) |
@@ -102,64 +109,62 @@ double total_volume(const fft_real *p, const size_t *offset, size_t Np,
             int d_idx = idx + i;
             int wrap_x = 0;
             if (d_idx < 0) {
-                d_idx += Nd;
+                d_idx += nd;
                 wrap_x = -1;
-            } else if (d_idx >= (int)Nd) {
-                d_idx -= Nd;
+            } else if (d_idx >= (int)nd) {
+                d_idx -= nd;
                 wrap_x = 1;
             }
-            float dist_x =
+            fft_real dist_x =
                 (i == -1) ? dx_local : ((i == 1) ? Lcell - dx_local : 0.0);
 
             // y-direction
             int d_idy = idy + j;
             int wrap_y = 0;
             if (d_idy < 0) {
-                d_idy += Nd;
+                d_idy += nd;
                 wrap_y = -1;
-            } else if (d_idy >= (int)Nd) {
-                d_idy -= Nd;
+            } else if (d_idy >= (int)nd) {
+                d_idy -= nd;
                 wrap_y = 1;
             }
-            float dist_y =
+            fft_real dist_y =
                 (j == -1) ? dy_local : ((j == 1) ? Lcell - dy_local : 0.0);
 
             // z-direction
             int d_idz = idz + k;
             int wrap_z = 0;
             if (d_idz < 0) {
-                d_idz += Nd;
+                d_idz += nd;
                 wrap_z = -1;
-            } else if (d_idz >= (int)Nd) {
-                d_idz -= Nd;
+            } else if (d_idz >= (int)nd) {
+                d_idz -= nd;
                 wrap_z = 1;
             }
-            float dist_z =
+            fft_real dist_z =
                 (k == -1) ? dz_local : ((k == 1) ? Lcell - dz_local : 0.0);
 
             // If the block is too far away, skip all particles inside
-            float block_dist2 =
+            fft_real block_dist2 =
                 dist_x * dist_x + dist_y * dist_y + dist_z * dist_z;
             if (block_dist2 > 4.0 * r2_max) {
                 continue;
             }
 
-            // Compute the index of the block
-            size_t c_index = d_idx * Nd * Nd + d_idy * Nd + d_idz;
-
             // Run over all particles in this block
             bool cell_cut = false;
-            size_t np_in_block = offset[c_index + 1] - offset[c_index];
-            for (size_t part = 0; part < np_in_block; part++) {
-                float dx = p[3 * (offset[c_index] + part)] - px + wrap_x * L;
-                float dy =
-                    p[3 * (offset[c_index] + part) + 1] - py + wrap_y * L;
-                float dz =
-                    p[3 * (offset[c_index] + part) + 2] - pz + wrap_z * L;
+            std::size_t np_in_block = con.get_n_in_cell(d_idx, d_idy, d_idz);
+            for (std::size_t part = 0; part < np_in_block; part++) {
+                fft_real dx =
+                    con[d_idx, d_idy, d_idz, part, 0] - px + wrap_x * L;
+                fft_real dy =
+                    con[d_idx, d_idy, d_idz, part, 1] - py + wrap_y * L;
+                fft_real dz =
+                    con[d_idx, d_idy, d_idz, part, 2] - pz + wrap_z * L;
 
                 // Avoid self-particles and particles too far away
-                float d2 = dx * dx + dy * dy + dz * dz;
-                if (d2 < 1e-12 || d2 > 4.0 * r2_max)
+                fft_real d2 = dx * dx + dy * dy + dz * dz;
+                if (d2 < 1e-12 || d2 > r2_max)
                     continue;
 
                 // Compute the plane
@@ -181,40 +186,51 @@ double total_volume(const fft_real *p, const size_t *offset, size_t Np,
 }
 
 // Find the halos and voids in 3D
-void find_halos_and_voids(const fft_real *p, const size_t *offset, size_t Np,
-                    size_t Nd, fft_real L) {
+void compute_voronoi_3d(const Container &con, HaloVoid &halos,
+                        fft_real rho_halos, HaloVoid &voids, fft_real rho_voids,
+                        bool save_volume, fft_real *volume) {
     // Compute some constants
-    const float Lcell = L / (float)Nd;
-    const float scale = 1.0 / Lcell;
-    const float shift_cell = 0.5 * Lcell;
+    const fft_real L = con.get_L();
+    const std::size_t np = con.get_np();
+    const std::size_t nd = con.get_nd();
+    const fft_real Lcell = con.get_Lcell();
+    const fft_real scale = con.get_scale();
+    const fft_real shift_cell = 0.5 * Lcell;
+    const double three_over_pi = 3.0 / M_PI;
+
+    // Create the vector for the vertices of the Vornoi cells
+    std::vector<double> verts;
+
+    // Get the number of halos and voids (for the output)
+    std::size_t n_halos = halos.n;
+    std::size_t n_voids = voids.n;
 
     // Run over all particles
     voro::voronoicell cell;
-    double total_volume = 0.0;
-    for (size_t index = 0; index < Np; index++) {
+    for (std::size_t index = 0; index < np; index++) {
         // Initialize the Voronoi cell
         cell.init(-L / 2.0, L / 2.0, -L / 2.0, L / 2.0, -L / 2.0, L / 2.0);
 
         // Get the position of the particle
-        float px = p[3 * index];
-        float py = p[3 * index + 1];
-        float pz = p[3 * index + 2];
+        fft_real px = con[index, 0];
+        fft_real py = con[index, 1];
+        fft_real pz = con[index, 2];
 
         // Get the cell index
-        size_t idx = (size_t)(px * scale);
-        if (idx >= Nd)
-            idx = Nd - 1;
-        size_t idy = (size_t)(py * scale);
-        if (idy >= Nd)
-            idy = Nd - 1;
-        size_t idz = (size_t)(pz * scale);
-        if (idz >= Nd)
-            idz = Nd - 1;
+        std::size_t idx = (std::size_t)(px * scale);
+        if (idx >= nd)
+            idx = nd - 1;
+        std::size_t idy = (std::size_t)(py * scale);
+        if (idy >= nd)
+            idy = nd - 1;
+        std::size_t idz = (std::size_t)(pz * scale);
+        if (idz >= nd)
+            idz = nd - 1;
 
         // Compute the local coordinates
-        float dx_local = px - idx * Lcell;
-        float dy_local = py - idy * Lcell;
-        float dz_local = pz - idz * Lcell;
+        fft_real dx_local = px - idx * Lcell;
+        fft_real dy_local = py - idy * Lcell;
+        fft_real dz_local = pz - idz * Lcell;
 
         // Get the offsets table
         const int octant = (dx_local - shift_cell > 0 ? 1 : 0) |
@@ -233,64 +249,63 @@ void find_halos_and_voids(const fft_real *p, const size_t *offset, size_t Np,
             int d_idx = idx + i;
             int wrap_x = 0;
             if (d_idx < 0) {
-                d_idx += Nd;
+                d_idx += nd;
                 wrap_x = -1;
-            } else if (d_idx >= (int)Nd) {
-                d_idx -= Nd;
+            } else if (d_idx >= (int)nd) {
+                d_idx -= nd;
                 wrap_x = 1;
             }
-            float dist_x =
+            fft_real dist_x =
                 (i == -1) ? dx_local : ((i == 1) ? Lcell - dx_local : 0.0);
 
             // y-direction
             int d_idy = idy + j;
             int wrap_y = 0;
             if (d_idy < 0) {
-                d_idy += Nd;
+                d_idy += nd;
                 wrap_y = -1;
-            } else if (d_idy >= (int)Nd) {
-                d_idy -= Nd;
+            } else if (d_idy >= (int)nd) {
+                d_idy -= nd;
                 wrap_y = 1;
             }
-            float dist_y =
+            fft_real dist_y =
                 (j == -1) ? dy_local : ((j == 1) ? Lcell - dy_local : 0.0);
 
             // z-direction
             int d_idz = idz + k;
             int wrap_z = 0;
             if (d_idz < 0) {
-                d_idz += Nd;
+                d_idz += nd;
                 wrap_z = -1;
-            } else if (d_idz >= (int)Nd) {
-                d_idz -= Nd;
+            } else if (d_idz >= (int)nd) {
+                d_idz -= nd;
                 wrap_z = 1;
             }
-            float dist_z =
+            fft_real dist_z =
                 (k == -1) ? dz_local : ((k == 1) ? Lcell - dz_local : 0.0);
 
             // If the block is too far away, skip all particles inside
-            float block_dist2 =
+            fft_real block_dist2 =
                 dist_x * dist_x + dist_y * dist_y + dist_z * dist_z;
             if (block_dist2 > 4.0 * r2_max) {
                 continue;
             }
 
-            // Compute the index of the block
-            size_t c_index = d_idx * Nd * Nd + d_idy * Nd + d_idz;
-
             // Run over all particles in this block
             bool cell_cut = false;
-            size_t np_in_block = offset[c_index + 1] - offset[c_index];
-            for (size_t part = 0; part < np_in_block; part++) {
-                float dx = p[3 * (offset[c_index] + part)] - px + wrap_x * L;
-                float dy =
-                    p[3 * (offset[c_index] + part) + 1] - py + wrap_y * L;
-                float dz =
-                    p[3 * (offset[c_index] + part) + 2] - pz + wrap_z * L;
+            const std::size_t np_in_block =
+                con.get_n_in_cell(d_idx, d_idy, d_idz);
+            for (std::size_t part = 0; part < np_in_block; part++) {
+                fft_real dx =
+                    con[d_idx, d_idy, d_idz, part, 0] - px + wrap_x * L;
+                fft_real dy =
+                    con[d_idx, d_idy, d_idz, part, 1] - py + wrap_y * L;
+                fft_real dz =
+                    con[d_idx, d_idy, d_idz, part, 2] - pz + wrap_z * L;
 
                 // Avoid self-particles and particles too far away
-                float d2 = dx * dx + dy * dy + dz * dz;
-                if (d2 < 1e-12 || d2 > 4.0 * r2_max)
+                fft_real d2 = dx * dx + dy * dy + dz * dz;
+                if (d2 < 1e-12 || d2 > r2_max)
                     continue;
 
                 // Compute the plane
@@ -304,7 +319,93 @@ void find_halos_and_voids(const fft_real *p, const size_t *offset, size_t Np,
                 r2_max = cell.max_radius_squared();
             }
         }
-        // Add the cell volume to the total volume
-        total_volume += cell.volume();
+
+        // Check if the particle is a possible halo
+        if (rho_halos > 0.0) {
+            double den = 1.0 / cell.volume();
+            // std::println("den: {} / {} / {}", den, rho_halos, np / (L * L * L));
+            if (den > rho_halos) {
+                halos.pos[3 * n_halos] = px;
+                halos.pos[3 * n_halos + 1] = py;
+                halos.pos[3 * n_halos + 2] = pz;
+                halos.den[n_halos] = static_cast<fft_real>(den);
+
+                n_halos++;
+            }
+        }
+
+        // Check if a vertex is a possible void
+        if (rho_voids > 0.0) {
+            double radius2 = 0.0;
+            double den = 10.0 * rho_voids;
+            cell.vertices(verts);
+            for (int v = 0; v < cell.p; v++) {
+                double dx = verts[3 * v];
+                double dy = verts[3 * v + 1];
+                double dz = verts[3 * v + 2];
+                double r2 = dx * dx + dy * dy + dz * dz;
+
+                if (r2 > radius2) {
+                    radius2 = r2;
+                    den = static_cast<fft_real>(three_over_pi /
+                                                std::pow(radius2, 1.5));
+
+                    if (den < rho_voids) {
+                        voids.pos[3 * n_voids] = px + static_cast<fft_real>(dx);
+                        voids.pos[3 * n_voids + 1] =
+                            py + static_cast<fft_real>(dy);
+                        voids.pos[3 * n_voids + 2] =
+                            pz + static_cast<fft_real>(dz);
+                        voids.den[n_voids] = static_cast<fft_real>(den);
+                    }
+                }
+            }
+            if (den < rho_voids) {
+                n_voids++;
+            }
+        }
+
+        // Check if the arrays for halos and voids must be resized
+        if (index % (np / 10) == 0 && index > 0) {
+            double frac = static_cast<double>(index) / static_cast<double>(np);
+            halos.resize(static_cast<std::size_t>(
+                5.0f * static_cast<double>(n_halos) / frac));
+            voids.resize(static_cast<std::size_t>(
+                5.0f * static_cast<double>(n_voids) / frac));
+        }
+
+        // Save the volume if requested
+        if (save_volume) {
+            volume[index] = (fft_real)cell.volume();
+        }
     }
+
+    // Remove the duplicated void centter
+    // if (n_voids > 0) {
+    //     // Sort the voids by x
+    //     std::size_t *v_idx = new std::size_t[n_voids];
+    //     for (std::size_t i = 0; i < n_voids; i++) {
+    //         v_idx[i] = i;
+    //     }
+    //     pdqsort(v_idx, v_idx + n_voids, [&voids](std::size_t a, std::size_t b) {
+    //         return voids.pos[3 * a] < voids.pos[3 * b];
+    //     });
+
+    //     // Remove the duplicated voids
+    //     std::size_t n_unique = 1;
+    //     for (std::size_t i = 1; i < n_voids; i++) {
+    //         double dx = voids.pos[3 * v_idx[i]] - voids.pos[3 * v_idx[i - 1]];
+    //         double dy = voids.pos[3 * v_idx[i] + 1] - voids.pos[3 * v_idx[i - 1] + 1];
+    //         double dz = voids.pos[3 * v_idx[i] + 2] - voids.pos[3 * v_idx[i - 1] + 2];
+    //         if (dx * dx + dy * dy + dz * dz > 1e-3) {
+    //             v_idx[n_unique++] = v_idx[i];
+    //         }
+    //     }
+
+    //     // Filter the voids
+    //     voids.filter(v_idx, n_unique);
+
+    //     //Free the memory
+    //     delete[] v_idx;
+    // }
 }

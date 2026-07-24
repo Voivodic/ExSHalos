@@ -1027,8 +1027,6 @@ def halo_void_finder(
             nd = particles.shape[0] // 512
 
     # Normalise the thresholds: None or <= 0 means "do not find"
-    find_halos = 0 if (delta_h is None or delta_h <= 0.0) else 1
-    find_voids = 0 if (delta_v is None or delta_v <= 0.0) else 1
     delta_h = 0.0 if (delta_h is None or delta_h <= 0.0) else delta_h
     delta_v = 0.0 if (delta_v is None or delta_v <= 0.0) else delta_v
 
@@ -1045,12 +1043,10 @@ def halo_void_finder(
         r_max = np.float64(r_max)
 
     # Call the C/C++ function of the corresponding dimension
-    from .lib.finder import find
+    from .lib.halovoid import find
 
     out = find(
         particles,
-        np.int32(find_halos),
-        np.int32(find_voids),
         delta_h,
         delta_v,
         L,
@@ -1059,6 +1055,4 @@ def halo_void_finder(
     )
 
     # Reshape to (M, dim+1): columns x(,y(,z)) + radius
-    out["halos"] = out["halos"].reshape([-1, dim + 1])
-    out["voids"] = out["voids"].reshape([-1, dim + 1])
-    return {"halos": out["halos"], "voids": out["voids"]}
+    return out
