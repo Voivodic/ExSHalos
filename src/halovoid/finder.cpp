@@ -1,8 +1,8 @@
 #include "finder.hpp"
 #include "halovoid_h.hpp"
-#include <cmath>
-//#include <pdqsort.h>
 #include <array>
+#include <cmath>
+#include <pdqsort.h>
 #include <print>
 
 // Generates the lookup table at compile-time using standard C++23 features
@@ -188,22 +188,22 @@ double total_volume(const Container &con) {
 // Find the halos and voids in 3D
 void compute_voronoi_3d(const Container &con, HaloVoid &halos,
                         fft_real rho_halos, HaloVoid &voids, fft_real rho_voids,
-                        bool save_volume, fft_real *volume) {
+                        bool save_volume, fft_real *volume, double dist_tol) {
     // Compute some constants
-    const fft_real L = con.get_L();
+    const double L = con.get_L();
     const std::size_t np = con.get_np();
     const std::size_t nd = con.get_nd();
     const fft_real Lcell = con.get_Lcell();
     const fft_real scale = con.get_scale();
     const fft_real shift_cell = 0.5 * Lcell;
-    const double three_over_pi = 3.0 / M_PI;
+    const fft_real three_over_pi = 3.0 / M_PI;
 
     // Create the vector for the vertices of the Vornoi cells
     std::vector<double> verts;
 
     // Get the number of halos and voids (for the output)
-    std::size_t n_halos = halos.n;
-    std::size_t n_voids = voids.n;
+    std::size_t &n_halos = halos.n;
+    std::size_t &n_voids = voids.n;
 
     // Run over all particles
     voro::voronoicell cell;
@@ -217,13 +217,13 @@ void compute_voronoi_3d(const Container &con, HaloVoid &halos,
         fft_real pz = con[index, 2];
 
         // Get the cell index
-        std::size_t idx = (std::size_t)(px * scale);
+        std::size_t idx = static_cast<std::size_t>(px * scale);
         if (idx >= nd)
             idx = nd - 1;
-        std::size_t idy = (std::size_t)(py * scale);
+        std::size_t idy = static_cast<std::size_t>(py * scale);
         if (idy >= nd)
             idy = nd - 1;
-        std::size_t idz = (std::size_t)(pz * scale);
+        std::size_t idz = static_cast<std::size_t>(pz * scale);
         if (idz >= nd)
             idz = nd - 1;
 
@@ -323,7 +323,6 @@ void compute_voronoi_3d(const Container &con, HaloVoid &halos,
         // Check if the particle is a possible halo
         if (rho_halos > 0.0) {
             double den = 1.0 / cell.volume();
-            // std::println("den: {} / {} / {}", den, rho_halos, np / (L * L * L));
             if (den > rho_halos) {
                 halos.pos[3 * n_halos] = px;
                 halos.pos[3 * n_halos + 1] = py;
@@ -381,31 +380,74 @@ void compute_voronoi_3d(const Container &con, HaloVoid &halos,
     }
 
     // Remove the duplicated void centter
-    // if (n_voids > 0) {
-    //     // Sort the voids by x
-    //     std::size_t *v_idx = new std::size_t[n_voids];
-    //     for (std::size_t i = 0; i < n_voids; i++) {
-    //         v_idx[i] = i;
-    //     }
-    //     pdqsort(v_idx, v_idx + n_voids, [&voids](std::size_t a, std::size_t b) {
-    //         return voids.pos[3 * a] < voids.pos[3 * b];
-    //     });
+    if (n_voids > 0) {
+        // Sort the voids by x
+        std::size_t *v_idx = new std::size_t[n_voids];
+        for (std::size_t i = 0; i < n_voids; i++) {
+            v_idx[i] = i;
+        }
+        pdqsort(v_idx, v_idx + n_voids, [&voids](std::size_t a, std::size_t b) {
+            return (voids.pos[3 * a] != voids.pos[3 * b])
+                       ? voids.pos[3 * a] < voids.pos[3 * b]
+                   : (voids.pos[3 * a + 1] != voids.pos[3 * b + 1])
+                       ? voids.pos[3 * a + 1] < voids.pos[3 * b + 1]
+                       : voids.pos[3 * a + 2] < voids.pos[3 * b + 2];
+        });
 
-    //     // Remove the duplicated voids
-    //     std::size_t n_unique = 1;
-    //     for (std::size_t i = 1; i < n_voids; i++) {
-    //         double dx = voids.pos[3 * v_idx[i]] - voids.pos[3 * v_idx[i - 1]];
-    //         double dy = voids.pos[3 * v_idx[i] + 1] - voids.pos[3 * v_idx[i - 1] + 1];
-    //         double dz = voids.pos[3 * v_idx[i] + 2] - voids.pos[3 * v_idx[i - 1] + 2];
-    //         if (dx * dx + dy * dy + dz * dz > 1e-3) {
-    //             v_idx[n_unique++] = v_idx[i];
-    //         }
-    //     }
+        // Remove the duplicated voids
+        std::size_t n_unique = 1;
+        for (std::size_t i = 1; i < n_voids; i++) {
+            double dx = voids.pos[3 * v_idx[i]] - voids.pos[3 * v_idx[i - 1]];
+            double dy =
+                voids.pos[3 * v_idx[i] + 1] - voids.pos[3 * v_idx[i - 1] + 1];
+            double dz =
+                voids.pos[3 * v_idx[i] + 2] - voids.pos[3 * v_idx[i - 1] + 2];
+            if (dx * dx + dy * dy + dz * dz > dist_tol) {
+                v_idx[n_unique++] = v_idx[i];
+            }
+        }
 
-    //     // Filter the voids
-    //     voids.filter(v_idx, n_unique);
+        // Filter the voids
+        voids.filter(v_idx, n_unique);
 
-    //     //Free the memory
-    //     delete[] v_idx;
-    // }
+        // Free the memory
+        delete[] v_idx;
+    }
+}
+
+// Grow the spheres around the candidates
+void grow_spheres(const Container &con, const HaloVoid &hv, fft_real rho_hv, fft_real r_max) {
+    // Get some constants
+    const std::size_t np = con.get_np();
+    const std::size_t nd = con.get_nd();
+    const fft_real L_cell = con.get_Lcell();
+    const fft_real scale = con.get_scale();
+
+    // Compute the number of cells needed to cover r_max
+    int n_cells = static_cast<int>(r_max / L_cell - 0.5) + 1;
+
+    // Create the array for the particles of the structure
+
+    // Run of all structures
+    for (std::size_t s = 0; s < hv.n; s++) {
+        const fft_real hv_pos[3] = {hv.pos[3 * s], hv.pos[3 * s + 1], hv.pos[3 * s + 2]};
+
+        // Get the cell index
+        int idx = get_cell_index(hv_pos[0], nd, scale);
+        int idy = get_cell_index(hv_pos[1], nd, scale);
+        int idz = get_cell_index(hv_pos[2], nd, scale);
+
+        // Run over all cells around this one
+        for (int i = -n_cells; i <= n_cells; i++) {
+            for (int j = -n_cells; j <= n_cells; j++) {
+                for (int k = -n_cells; k <= n_cells; k++) {
+                    int cx = cyclic_sum<int>(idx, i, nd);
+                    int cy = cyclic_sum<int>(idy, j, nd);
+                    int cz = cyclic_sum<int>(idz, k, nd);
+
+                }
+            }
+        }
+
+    }
 }

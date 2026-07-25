@@ -197,18 +197,18 @@ static PyObject *find(PyObject *self, PyObject *args, PyObject *kwargs) {
     Container con = Container(pos, np, nd, L);
 
     // Compute the densities
-    const fft_real rho_m = (fft_real)np / (L * L * L);
+    const fft_real rho_m = static_cast<fft_real>(np) / (L * L * L);
     const fft_real rho_halos = delta_h * rho_m;
     const fft_real rho_voids = delta_v * rho_m;
+    const double dist_tol =
+        1e-6 * static_cast<double>(L) / std::pow(static_cast<double>(np), 1.0 / 3.0);
 
     // Compute the voronoit tessellation of the particles
     HaloVoid halos = HaloVoid(np / 100);
     HaloVoid voids = HaloVoid(np / 100);
-    compute_voronoi_3d(con, halos, rho_halos, voids, rho_voids, false, NULL);
+    compute_voronoi_3d(con, halos, rho_halos, voids, rho_voids, false, NULL, dist_tol);
     const std::size_t n_halos = halos.n;
     const std::size_t n_voids = voids.n;
-    std::println("n_halos: {}", n_halos);
-    std::println("n_voids: {}", n_voids);
 
     // Create the PyObjects for the output
     PyObject *dict = PyDict_New();

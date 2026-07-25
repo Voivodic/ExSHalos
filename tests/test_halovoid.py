@@ -16,8 +16,8 @@ def params() -> dict:
         "L": 100.0,
         "Nd": 20,
         "Np": 1_00_000,
-        "delta_h": 5.0,
-        "delta_v": 0.3,
+        "delta_h": 4.0,
+        "delta_v": 0.4,
         "r_max": 20.0,
     }
 
@@ -48,7 +48,10 @@ def test_voronoi_computation(params: dict) -> None:
 
     rho_voids = params["delta_v"] * params["Np"] / pow(params["L"], 3)
     rho_halos = params["delta_h"] * params["Nd"] / pow(params["L"], 3)
-    print(resp["voids_den"])
-    print(resp["voids_den"].shape, np.unique(resp["voids_den"]).shape)
+    print(resp["halos_den"].shape, resp["voids_den"].shape)
+    print(resp["voids_pos"][:,0].shape , np.unique(resp["voids_pos"][:,0]).shape)
+    print(resp["voids_pos"][:,1].shape , np.unique(resp["voids_pos"][:,1]).shape)
+    print(resp["voids_pos"][:,2].shape , np.unique(resp["voids_pos"][:,2]).shape)
+    print(resp["voids_den"].shape , np.unique(resp["voids_den"]).shape)
 
     assert False#np.all(resp["voids_den"] <= rho_voids) and np.all(resp["halos_den"] >= rho_halos)
