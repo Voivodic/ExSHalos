@@ -96,6 +96,15 @@ struct HaloVoid {
     }
 };
 
+// Get the 1D cell index of a particle
+inline int get_cell_index(const fft_real p, std::size_t Nd, fft_real scale) {
+    int idx = static_cast<int>(p * scale);
+    if (idx >= Nd)
+        idx = Nd - 1;
+
+    return idx;
+}
+
 // Get the cell index of a particle
 inline std::size_t get_cell_index(const fft_real p[3], std::size_t Nd,
                                   fft_real scale) {
@@ -220,5 +229,12 @@ class Container {
         return offset[idx + 1] - offset[idx];
     }
 };
+
+// Compute the cyclic sum of two integers
+template <typename T> inline T cyclic_sum(T a, T b, T n) {
+    T c = a + b;
+    c = (c >= n) ? c - n : (c < 0) ? c + n : c;
+    return c;
+}
 
 #endif
