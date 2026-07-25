@@ -10,7 +10,7 @@
 
       # ponytail: C extensions don't compile against python 3.14 yet; pin 3.13.
       # Revisit when upstream supports 3.14 / numpy 3.14 headers.
-      py = pkgs.python313;
+      py = pkgs.python314;
       pypkgs = py.pkgs;
 
       # shared: env vars so the native `zig build` finds GSL/FFTW/OpenMP.
