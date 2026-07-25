@@ -11,7 +11,7 @@ authors = [{ name = "Rodrigo Voivodic", email = "rodrigo.voivodic@gmail.com" }]
 dependencies = ["numpy", "scipy"]
 
 [tool.hatch.build.targets.wheel]
-artifacts = ["pyexshalos/lib/*"]
+artifacts = ["src/pyexshalos/lib/*"]
 
 [tool.hatch.build.targets.wheel.hooks.custom]
 path = "build_backend.py"

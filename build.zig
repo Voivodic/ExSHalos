@@ -25,7 +25,6 @@ const ExtModule = struct {
     name: []const u8,
     src_dir: []const u8,
     files: []const []const u8,
-    include_subdir: []const u8,
     libs: []const []const u8,
     cpp: bool = false,
     deps: []const SourceDep = &.{},
@@ -40,7 +39,6 @@ const modules = [_]ExtModule{
             "spectrum_h.c", "abundance.c", "gridmodule.c", "powermodule.c",
             "bimodule.c",   "trimodule.c", "bias.c",       "spectrum.c",
         },
-        .include_subdir = "spectrum",
         .libs = &.{ "m", "gsl", "gslcblas" },
     },
     .{
@@ -51,28 +49,24 @@ const modules = [_]ExtModule{
             "find_halos.c", "cells_in_spheres.c", "lpt.c",
             "box.c",        "exshalos.c",
         },
-        .include_subdir = "exshalos",
         .libs = &.{ "m", "fftw3", "gsl", "gslcblas" },
     },
     .{
         .name = "hod",
         .src_dir = "src/hod",
         .files = &.{ "hod_h.c", "populate_halos.c", "split_galaxies.c", "hod.c" },
-        .include_subdir = "hod",
         .libs = &.{ "m", "gsl", "gslcblas" },
     },
     .{
         .name = "analytical",
         .src_dir = "src/analytical",
         .files = &.{ "fftlog.c", "analytical_h.c", "clpt.c", "analytical.c" },
-        .include_subdir = "analytical",
         .libs = &.{ "m", "fftw3", "gsl", "gslcblas" },
     },
     .{
         .name = "halovoid",
         .src_dir = "src/halovoid",
         .files = &.{ "finder.cpp",  "halovoid.cpp" },
-        .include_subdir = "halovoid",
         .libs = &.{"m"},
         .cpp = true,
         .deps = &.{
@@ -245,9 +239,6 @@ pub fn build(b: *std.Build) void {
         }
 
         // ----------------------------------------------------
-
-        const inc_path = b.fmt("include/{s}", .{ext.include_subdir});
-        mod.addIncludePath(b.path(inc_path));
 
         // Add the external dependencies
         for (ext.deps) |dep| {

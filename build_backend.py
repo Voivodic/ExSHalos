@@ -19,7 +19,7 @@ class CustomBuildHook(BuildHookInterface):
 
         # Copy the artifact into your package directory
         zig_out = os.path.join("zig-out", "lib")
-        pkg_dir = "pyexshalos/lib"
+        pkg_dir = "src/pyexshalos/lib"
         os.makedirs(pkg_dir, exist_ok=True)
 
         for file in os.listdir(zig_out):
